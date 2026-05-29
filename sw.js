@@ -1,5 +1,13 @@
-const CACHE = 'vetdose-v12';
-const FILES = ['/', '/index.html', '/app.js', '/manifest.json'];
+const CACHE = 'vetdose-v13';
+const FILES = [
+  './',
+  './index.html',
+  './app.js',
+  './manifest.json',
+  './icon-192.png',
+  './icon-512.png',
+  './icon-logo.png',
+];
 
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(FILES)));
@@ -15,6 +23,6 @@ self.addEventListener('activate', e => {
 
 self.addEventListener('fetch', e => {
   e.respondWith(
-    caches.match(e.request).then(cached => cached || fetch(e.request).catch(() => caches.match('/index.html')))
+    caches.match(e.request).then(cached => cached || fetch(e.request))
   );
 });
