@@ -46,8 +46,13 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--s
 
 /* TABS */
 .tab-bar{display:flex;background:var(--surface);border-bottom:1px solid var(--border);flex-shrink:0}
-.tab{flex:1;padding:12px 4px;text-align:center;font-size:11px;font-weight:600;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;transition:all .15s;letter-spacing:.3px;text-transform:uppercase}
-.tab.active{color:var(--accent);border-bottom-color:var(--accent);font-weight:700}
+.tab{flex:1;padding:8px 2px;text-align:center;cursor:pointer;border-bottom:3px solid transparent;transition:all .15s;display:flex;flex-direction:column;align-items:center;gap:2px}
+.tab.active{border-bottom-color:var(--accent)}
+.tab-icon{font-size:16px;line-height:1}
+.tab-label{font-size:10px;font-weight:600;color:var(--muted);letter-spacing:.2px;text-transform:uppercase;transition:color .15s}
+.tab.active .tab-label{color:var(--accent);font-weight:700}
+.protocol-card{display:flex;align-items:center;gap:12px;padding:13px 14px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r-md);margin-bottom:8px;cursor:pointer;box-shadow:var(--shadow-sm);transition:all .15s}
+.protocol-card:active{transform:scale(.98)}
 
 .content{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}
 .screen{display:none;padding:16px 16px calc(var(--safe-bottom) + 72px)}
@@ -182,13 +187,24 @@ input:focus{border-color:var(--accent-md);box-shadow:0 0 0 3px rgba(26,92,56,.1)
   <div class="header">
     <img src="icon-logo.png" alt="VetDose">
     <div class="header-pill" id="header-patient-info"></div>
+    <button onclick="openSettings()" style="background:var(--accent);border:none;border-radius:50%;width:34px;height:34px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;flex-shrink:0">⚙️</button>
   </div>
   <div class="tab-bar">
-    <div class="tab active" onclick="showTab('calc')">Calcular</div>
-    <div class="tab" onclick="showTab('cri')">CRI</div>
-    <div class="tab" onclick="showTab('fluidos')">Fluidos</div>
-    <div class="tab" onclick="showTab('nutricion')">Nutrición</div>
-    <div class="tab" onclick="showTab('drugs')">Drogas</div>
+    <div class="tab active" onclick="showTab('calc')">
+      <div class="tab-icon">💊</div><div class="tab-label">Calcular</div>
+    </div>
+    <div class="tab" onclick="showTab('cri')">
+      <div class="tab-icon">💉</div><div class="tab-label">CRI</div>
+    </div>
+    <div class="tab" onclick="showTab('fluidos')">
+      <div class="tab-icon">💧</div><div class="tab-label">Fluidos</div>
+    </div>
+    <div class="tab" onclick="showTab('nutricion')">
+      <div class="tab-icon">🥗</div><div class="tab-label">Nutrición</div>
+    </div>
+    <div class="tab" onclick="showTab('protocolos')">
+      <div class="tab-icon">📋</div><div class="tab-label">Protocolos</div>
+    </div>
   </div>
   <div class="content" id="content-scroll">
 
@@ -211,6 +227,10 @@ input:focus{border-color:var(--accent-md);box-shadow:0 0 0 3px rgba(26,92,56,.1)
             </div>
           </div>
         </div>
+      </div>
+      <div id="protocol-banner" style="display:none;background:var(--accent);color:#fff;border-radius:10px;padding:10px 14px;margin-bottom:8px;align-items:center;justify-content:space-between;gap:8px">
+        <div style="font-size:14px;font-weight:700" id="protocol-banner-name"></div>
+        <button onclick="clearProtocol()" style="background:rgba(255,255,255,.2);border:none;border-radius:6px;color:#fff;padding:4px 10px;font-size:12px;cursor:pointer;font-family:var(--sans)">✕ Salir</button>
       </div>
       <div class="section-label">Medicamentos</div>
       <div class="search-box">
@@ -437,19 +457,10 @@ input:focus{border-color:var(--accent-md);box-shadow:0 0 0 3px rgba(26,92,56,.1)
       <div id="nut-result" style="display:none;padding-bottom:16px"></div>
     </div>
 
-    <!-- DRUGS -->
-    <div class="screen" id="screen-drugs">
-      <input type="text" class="db-search" placeholder="Buscar droga..." oninput="filterDrugs(this.value)">
-      <div id="drugs-db-list"></div>
-      <div style="margin-top:8px;padding-bottom:16px;display:flex;flex-direction:column;gap:8px">
-        <button class="btn btn-primary" onclick="openAddDrug()">+ Agregar droga</button>
-        <div style="display:flex;gap:8px">
-          <button class="btn btn-share" style="margin-top:0;flex:1" onclick="exportDrugs()">Exportar drogas</button>
-          <button class="btn btn-share" style="margin-top:0;flex:1;color:var(--accent)" onclick="document.getElementById('import-input').click()">Importar</button>
-        </div>
-        <input type="file" id="import-input" accept=".json" style="display:none" onchange="importDrugs(event)">
-        <button class="btn btn-version" onclick="showChangelog()">VetDose 2.0 &mdash; Ver novedades</button>
-      </div>
+    <!-- PROTOCOLOS -->
+    <div class="screen" id="screen-protocolos">
+      <div class="section-label">Mis protocolos clínicos</div>
+      <div id="protocols-list" style="padding-bottom:80px"></div>
     </div>
 
   </div>
@@ -545,6 +556,66 @@ input:focus{border-color:var(--accent-md);box-shadow:0 0 0 3px rgba(26,92,56,.1)
       <button class="close-btn" onclick="closeChangelog()">&#10005;</button>
     </div>
     <div id="changelog-body"></div>
+  </div>
+</div>
+
+
+<!-- SETTINGS MODAL -->
+<div class="overlay hidden" id="settings-modal" onclick="if(event.target===this)closeSettings()">
+  <div class="modal">
+    <div class="modal-hdr">
+      <div class="modal-title">⚙️ Ajustes</div>
+      <button class="close-btn" onclick="closeSettings()">&#10005;</button>
+    </div>
+
+    <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">Información de la clínica</div>
+    <div class="mfield"><label>Nombre del veterinario</label>
+      <input type="text" id="set-doctor" placeholder="Ej: Dr. Yenen Villasmil-Ontiveros"></div>
+    <div class="mfield"><label>Nombre de la clínica</label>
+      <input type="text" id="set-clinic" placeholder="Ej: Pembroke Pines Animal Clinic"></div>
+    <div class="mfield"><label>Teléfono</label>
+      <input type="text" id="set-phone" placeholder="Ej: (305) 555-1234"></div>
+    <button id="set-save-btn" class="btn btn-primary" onclick="saveSettings()" style="margin-bottom:16px">Guardar</button>
+
+    <div style="border-top:1px solid var(--border);padding-top:14px;margin-top:4px">
+      <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px">Base de datos de drogas</div>
+      <button class="btn btn-primary" onclick="closeSettings();openAddDrug()">+ Agregar droga</button>
+      <div style="display:flex;gap:8px;margin-top:8px">
+        <button class="btn btn-share" style="margin-top:0;flex:1" onclick="exportDrugs()">📤 Exportar</button>
+        <button class="btn btn-share" style="margin-top:0;flex:1;color:var(--accent)" onclick="document.getElementById('import-input').click()">📥 Importar</button>
+      </div>
+      <input type="file" id="import-input" accept=".json" style="display:none" onchange="importDrugs(event)">
+    </div>
+
+    <div style="border-top:1px solid var(--border);padding-top:14px;margin-top:12px">
+      <button class="btn btn-version" onclick="closeSettings();showChangelog()">VetDose 2.0 &mdash; Ver novedades</button>
+    </div>
+  </div>
+</div>
+
+<!-- PROTOCOL EDIT MODAL -->
+<div class="overlay hidden" id="protocol-edit-modal" onclick="if(event.target===this)closeProtocolEdit()">
+  <div class="modal">
+    <div class="modal-hdr">
+      <div class="modal-title">📋 Protocolo clínico</div>
+      <button class="close-btn" onclick="closeProtocolEdit()">&#10005;</button>
+    </div>
+    <div style="display:flex;gap:8px;margin-bottom:12px">
+      <div class="mfield" style="width:70px;margin-bottom:0">
+        <label>Ícono</label>
+        <input type="text" id="proto-edit-icon" value="📋" maxlength="2" style="font-size:22px;text-align:center;padding:8px">
+      </div>
+      <div class="mfield" style="flex:1;margin-bottom:0">
+        <label>Nombre del protocolo</label>
+        <input type="text" id="proto-edit-name" placeholder="Ej: Pancreatitis aguda">
+      </div>
+    </div>
+    <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">Medicamentos del protocolo</div>
+    <div id="proto-drug-selector" style="max-height:350px;overflow-y:auto;border:1px solid var(--border);border-radius:var(--r-sm);padding:8px 12px;background:var(--surface2)"></div>
+    <div style="display:flex;gap:8px;margin-top:12px">
+      <button class="btn btn-secondary" onclick="closeProtocolEdit()" style="flex:1">Cancelar</button>
+      <button class="btn btn-primary" onclick="saveProtocolEdit()" style="flex:2">Guardar protocolo</button>
+    </div>
   </div>
 </div>
 

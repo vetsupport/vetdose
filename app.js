@@ -127,6 +127,56 @@ const SEED_DRUGS = [
   { id: 'capromorelin_cat', generic: 'Capromorelin (gatos)', trade: 'Elura', conc: 20, doseMin: 2.0, doseMax: 2.0, dosePref: 2.0, unit: 'mg/kg', route: 'PO', category: 'GI', formType: 'liquid_oral', calcMode: 'standard', species: 'cat', notes: 'Solo gatos. Estimulante del apetito. 20 mg/mL. Con o sin comida. Concentración DIFERENTE a Entyce (20 vs 30 mg/mL). No intercambiar entre especies.', source: 'Plumb 2024; FDA label', frequency: 'SID', frequencies: ['SID'], validationStatus: 'Revisión preliminar; validar por usuario' },
   { id: 'mirtazapina_oral', generic: 'Mirtazapina oral', trade: 'Remeron', conc: 7.5, doseMin: 1.0, doseMax: 3.75, dosePref: 1.88, unit: 'mg/kg', route: 'PO', category: 'GI', formType: 'tablet', calcMode: 'standard', tabSizes: [7.5, 15, 30], notes: 'Estimulante del apetito y antiemético. Perros: 1.88–3.75 mg/perro c/24h. Gatos: 1.88 mg/gato c/48-72h — muy sensibles al síndrome serotoninérgico. Usar dosis mínima en felinos.', source: 'Plumb 2024; Papich 2020', frequency: 'q72h', frequencies: ['q48h', 'q72h'], validationStatus: 'Revisión preliminar; validar por usuario' },
   { id: 'mirataz', generic: 'Mirtazapina tópica', trade: 'Mirataz', conc: 1.88, doseMin: 1.88, doseMax: 1.88, dosePref: 1.88, unit: 'mg/gato', route: 'Tópico auricular', category: 'GI', formType: 'injection', calcMode: 'fixed', species: 'cat', notes: 'Solo gatos. Ungüento 2% — aplicar 1.5 cm en pabellón auricular interno c/24h. Rotar oreja cada aplicación. Usar guantes. Lavar manos. Alternativa cuando la vía oral no es posible.', source: 'Plumb 2024; FDA label', frequency: 'SID', frequencies: ['SID'], validationStatus: 'Revisión preliminar; validar por usuario' },
+  // ── MOD-027 new drugs ──────────────────────────────────────────────────────
+  { id: 'naloxona', generic: 'Naloxona', trade: 'Narcan', conc: 0.4,
+    doseMin: 0.01, doseMax: 0.04, dosePref: 0.01, unit: 'mg/kg',
+    route: 'IV, IM, SQ', category: 'emergency/reversal', formType: 'injection',
+    calcMode: 'standard', species: 'both',
+    frequency: 'PRN', frequencies: ['PRN','q20-40min'],
+    notes: 'Reversor de opioides. Duración corta (20-40 min) — puede necesitar dosis repetidas. Reversión parcial si se quiere preservar analgesia residual. Buprenorfina requiere dosis más altas (0.04 mg/kg). Metadona puede necesitar infusión.',
+    source: 'Papich 5th Ed. p.644', validationStatus: 'Revisión preliminar; validar por usuario' },
+
+  { id: 'flumazenil', generic: 'Flumazenil', trade: 'Romazicon', conc: 0.1,
+    doseMin: 0.01, doseMax: 0.02, dosePref: 0.01, unit: 'mg/kg',
+    route: 'IV lento', category: 'emergency/reversal', formType: 'injection',
+    calcMode: 'standard', species: 'both',
+    frequency: 'PRN', frequencies: ['PRN'],
+    notes: 'Reversor de benzodiacepinas (midazolam, diazepam). IV lento. Duración muy corta (30-60 min) — paciente puede re-sedarse. Puede repetir PRN. No hay reversor para propofol o ketamina.',
+    source: 'Papich 5th Ed. p.401', validationStatus: 'Revisión preliminar; validar por usuario' },
+
+  { id: 'colchicina', generic: 'Colchicina', trade: 'Colcrys/genérico', conc: 0.5,
+    doseMin: 0.01, doseMax: 0.03, dosePref: 0.01, unit: 'mg/kg',
+    route: 'PO', category: 'other', formType: 'tablet',
+    calcMode: 'standard', tabSizes: [0.5, 0.6], species: 'dog',
+    frequency: 'SID', frequencies: ['SID'],
+    notes: 'Solo perros. Pericarditis recurrente, amiloidosis hepática, fibrosis hepática crónica. Dar con comida. Puede causar vómitos y diarrea. Monitorear función hepática.',
+    source: 'Papich 5th Ed. p.221', validationStatus: 'Revisión preliminar; validar por usuario' },
+
+  { id: 'guaifenesina', generic: 'Guaifenesina', trade: 'Mucinex/genérico', conc: 100,
+    doseMin: 3.0, doseMax: 5.0, dosePref: 3.0, unit: 'mg/kg',
+    route: 'PO', category: 'respiratory', formType: 'tablet',
+    calcMode: 'standard', tabSizes: [200, 400], species: 'dog',
+    frequency: 'TID', frequencies: ['BID','TID'],
+    notes: 'Solo perros — NO usar en gatos (puede causar anemia por cuerpos de Heinz). Expectorante para tos productiva. Syrup 100 mg/5 mL disponible. Dar con abundante agua.',
+    source: 'Papich 5th Ed. p.435', validationStatus: 'Revisión preliminar; validar por usuario' },
+
+  { id: 'paracetamol', generic: 'Paracetamol (Acetaminofén)', trade: 'Tylenol/genérico', conc: 325,
+    doseMin: 10.0, doseMax: 15.0, dosePref: 10.0, unit: 'mg/kg',
+    route: 'PO', category: 'analgesic', formType: 'tablet',
+    calcMode: 'standard', tabSizes: [325, 500], species: 'dog',
+    frequency: 'BID', frequencies: ['BID','TID'],
+    notes: '⚠⚠⚠ SOLO PERROS — NUNCA EN GATOS (causa methemoglobinemia fatal). Uso extra-label. Analgesia leve. Máx 15 mg/kg. No exceder 3 dosis/día. Hepatotóxico en sobredosis. No combinar con AINEs.',
+    source: 'Papich 5th Ed. p.695', validationStatus: 'Revisión preliminar; validar por usuario' },
+
+  { id: 'welactin', generic: 'Ácidos Omega-3 (EPA/DHA)', trade: 'Welactin/Nordic Naturals', conc: 1000,
+    doseMin: 20.0, doseMax: 55.0, dosePref: 30.0, unit: 'mg/kg',
+    route: 'PO', category: 'dermatology', formType: 'capsule',
+    calcMode: 'standard', tabSizes: [1000], species: 'both',
+    frequency: 'SID', frequencies: ['SID'],
+    notes: 'Suplemento nutricional (EPA+DHA). Dermatitis atópica, articulaciones, cardiopatía, hipertrigliceridemia. Dosis varía según indicación. Puede causar heces blandas en dosis altas. Dar con comida.',
+    source: 'Plumb 2024; WSAVA guidelines', validationStatus: 'Revisión preliminar; validar por usuario' },
+
+
   // ── MOD-025 new drugs from Papich 5th Ed + FDA labels ──────────────────────
 
   // Ondansetron
@@ -265,6 +315,10 @@ const TABLET_SIZES = {
   ciclosporina_oral:           [10, 25, 50, 100],
 
   cardalis_benazepril_espironolactona:[2.5, 5, 10],
+
+  colchicina:          [0.5, 0.6],
+  guaifenesina:        [200, 400],
+  paracetamol:         [325, 500],
 
 };
 
@@ -567,6 +621,7 @@ let state = {
   selectedTableDrugs: new Set(),
   selectedPresentation: {},
   selectedFrequency: {},
+  activeProtocol: null,
   dilVolume: 5,
   editingId: null,
   lastResults: [],
@@ -588,6 +643,7 @@ document.addEventListener('DOMContentLoaded', () => {
     saveDrugs(JSON.parse(JSON.stringify(SEED_DRUGS)));
   }
   loadFreqPrefs();
+  loadSettings();
   renderDrugList();
   renderDrugsDB();
   populateCRISelect();
@@ -600,12 +656,12 @@ document.addEventListener('DOMContentLoaded', () => {
 function showTab(tab) {
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-  const tabs = ['calc','cri','fluidos','nutricion','drugs'];
+  const tabs = ['calc','cri','fluidos','nutricion','protocolos'];
   const tabIdx = tabs.indexOf(tab);
   if (tabIdx >= 0) document.querySelectorAll('.tab')[tabIdx].classList.add('active');
   const screen = document.getElementById('screen-' + tab);
   if (screen) screen.classList.add('active');
-  if (tab === 'drugs') renderDrugsDB();
+  if (tab === 'protocolos') renderProtocols();
   if (tab === 'cri') populateCRISelect();
   if (tab === 'nutricion') populateNutFactors();
 }
@@ -1090,7 +1146,8 @@ function calculate() {
     ` : ''}
   `;
 
-  document.getElementById('header-patient-info').textContent = `${speciesIcon} ${name} · ${weightDisplay}`;
+  const unitDisplay = state.unit === 'lb' ? `${weightRaw} lb` : `${weightRaw} kg`;
+  document.getElementById('header-patient-info').textContent = `${speciesIcon} ${name} · ${unitDisplay}`;
 
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
@@ -1528,6 +1585,7 @@ function saveDrug() {
 
   saveDrugs(drugs);
   loadFreqPrefs();
+  loadSettings();
   renderDrugList();
   renderDrugsDB();
   populateCRISelect();
@@ -1541,6 +1599,7 @@ function deleteDrug() {
   saveDrugs(drugs);
   state.selectedDrugs.delete(state.editingId);
   loadFreqPrefs();
+  loadSettings();
   renderDrugList();
   renderDrugsDB();
   populateCRISelect();
@@ -1907,6 +1966,199 @@ function calcNutricion() {
   `;
   document.getElementById('nut-result').style.display = 'block';
 }
+
+
+// ─── SETTINGS ─────────────────────────────────────────────────────────────────
+function loadSettings() {
+  try {
+    const s = JSON.parse(localStorage.getItem('vetdose_settings') || '{}');
+    if (s.doctorName) document.getElementById('set-doctor').value = s.doctorName;
+    if (s.clinicName) document.getElementById('set-clinic').value = s.clinicName;
+    if (s.phone) document.getElementById('set-phone').value = s.phone;
+  } catch(e) {}
+}
+
+function saveSettings() {
+  const s = {
+    doctorName: document.getElementById('set-doctor').value.trim(),
+    clinicName: document.getElementById('set-clinic').value.trim(),
+    phone: document.getElementById('set-phone').value.trim(),
+  };
+  localStorage.setItem('vetdose_settings', JSON.stringify(s));
+  const btn = document.getElementById('set-save-btn');
+  btn.textContent = '✓ Guardado';
+  btn.style.background = 'var(--accent)';
+  setTimeout(() => { btn.textContent = 'Guardar'; btn.style.background = ''; }, 1500);
+}
+
+function getSettings() {
+  try { return JSON.parse(localStorage.getItem('vetdose_settings') || '{}'); }
+  catch(e) { return {}; }
+}
+
+function openSettings() {
+  loadSettings();
+  document.getElementById('settings-modal').classList.remove('hidden');
+}
+function closeSettings() { document.getElementById('settings-modal').classList.add('hidden'); }
+
+// ─── PROTOCOLS ────────────────────────────────────────────────────────────────
+const DEFAULT_PROTOCOLS = [
+  { id: 'pancreatitis', name: 'Pancreatitis aguda', icon: '🔥',
+    drugIds: ['fuzapladib','maropitant','ondansetron','pantoprazol','famotidina','gabapentina','buprenorfina','metronidazol','sucralfato'] },
+  { id: 'preanest_dog', name: 'Pre-anestésico canino', icon: '💉',
+    drugIds: ['acepromazina','butorfanol','midazolam','dexmedetomidina','ketamina','propofol'] },
+  { id: 'preanest_cat', name: 'Pre-anestésico felino', icon: '💉',
+    drugIds: ['dexmedetomidina','butorfanol','midazolam','ketamina','propofol','alfaxalona'] },
+  { id: 'epilepsia', name: 'Crisis epiléptica', icon: '⚡',
+    drugIds: ['diazepam','midazolam','fenobarbital','levetiracetam','propofol','ketamina'] },
+  { id: 'shock', name: 'Shock hipovolémico', icon: '🚨',
+    drugIds: ['epinefrina','dopamina','norepinefrina','vasopresina','hidrocortisona','naloxona'] },
+  { id: 'bloqueo_urinario', name: 'Bloqueo urinario felino', icon: '🐈',
+    drugIds: ['buprenorfina','dexmedetomidina','ketamina','midazolam','gluconato_de_calcio','furosemida'] },
+];
+
+function loadProtocols() {
+  try {
+    const saved = localStorage.getItem('vetdose_protocols');
+    return saved ? JSON.parse(saved) : JSON.parse(JSON.stringify(DEFAULT_PROTOCOLS));
+  } catch(e) { return JSON.parse(JSON.stringify(DEFAULT_PROTOCOLS)); }
+}
+
+function saveProtocols(protocols) {
+  localStorage.setItem('vetdose_protocols', JSON.stringify(protocols));
+}
+
+function renderProtocols() {
+  const protocols = loadProtocols();
+  const container = document.getElementById('protocols-list');
+  if (!container) return;
+  container.innerHTML = protocols.map((p,i) => `
+    <div class="protocol-card" onclick="openProtocol('${p.id}')">
+      <div style="font-size:22px">${p.icon}</div>
+      <div style="flex:1">
+        <div style="font-size:15px;font-weight:700;color:var(--text)">${p.name}</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px">${p.drugIds.length} medicamentos</div>
+      </div>
+      <div style="display:flex;gap:6px">
+        <button onclick="event.stopPropagation();editProtocol(${i})" style="background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:5px 8px;font-size:12px;color:var(--muted);cursor:pointer">✏</button>
+        <button onclick="event.stopPropagation();deleteProtocol(${i})" style="background:#fff0f0;border:1px solid #fca5a5;border-radius:6px;padding:5px 8px;font-size:12px;color:#991b1b;cursor:pointer">✕</button>
+      </div>
+    </div>`).join('') +
+    `<button class="btn btn-secondary" style="margin-top:8px" onclick="newProtocol()">+ Nuevo protocolo</button>`;
+}
+
+function openProtocol(protocolId) {
+  const protocols = loadProtocols();
+  const protocol = protocols.find(p => p.id === protocolId);
+  if (!protocol) return;
+  const drugs = getDrugs();
+  // Filter drug list to protocol drugs
+  state.activeProtocol = protocol;
+  state.selectedDrugs.clear();
+  state.selectedTableDrugs.clear();
+  // Switch to calc tab with protocol filter
+  showTab('calc');
+  // Set protocol mode
+  document.getElementById('protocol-banner').style.display = 'flex';
+  document.getElementById('protocol-banner-name').textContent = protocol.icon + ' ' + protocol.name;
+  renderDrugListProtocol(protocol.drugIds);
+}
+
+function clearProtocol() {
+  state.activeProtocol = null;
+  document.getElementById('protocol-banner').style.display = 'none';
+  renderDrugList();
+}
+
+function renderDrugListProtocol(drugIds) {
+  const drugs = getDrugs().filter(d => drugIds.includes(d.id));
+  const container = document.getElementById('drug-list-container');
+  if (drugs.length === 0) {
+    container.innerHTML = '<div style="text-align:center;padding:24px;color:var(--muted)">No se encontraron medicamentos del protocolo.</div>';
+    return;
+  }
+  container.innerHTML = drugs.sort((a,b) => a.generic.localeCompare(b.generic,'es'))
+    .map(d => {
+      const needsVal = d.validationStatus && d.validationStatus.toLowerCase().includes('validar');
+      return `
+      <div class="drug-item" onclick="toggleDrug('${d.id}')">
+        <div class="drug-check ${state.selectedDrugs.has(d.id)?'checked':''}" id="check-${d.id}"></div>
+        <div class="drug-info">
+          <div class="drug-generic">${d.generic}${needsVal?' <span style="font-size:10px;color:#b45309">⚠</span>':''}</div>
+          <div class="drug-trade">${d.trade}</div>
+          <div class="drug-meta">${doseUnitLabel(d)}</div>
+        </div>
+        <div class="cat-badge ${CAT_CLASS(d.category)}">${CAT_LABELS[d.category]||d.category}</div>
+      </div>
+      ${state.selectedDrugs.has(d.id) && (d.tabSizes?.length>0||(d.frequencies&&d.frequencies.length>1)) ? `
+        <div id="panel-${d.id}" onclick="event.stopPropagation()">${buildDrugPanel(d)}</div>` : ''}`;
+    }).join('');
+}
+
+let editingProtocolIdx = -1;
+
+function newProtocol() {
+  editingProtocolIdx = -1;
+  document.getElementById('proto-edit-name').value = '';
+  document.getElementById('proto-edit-icon').value = '📋';
+  renderProtocolDrugSelector([]);
+  document.getElementById('protocol-edit-modal').classList.remove('hidden');
+}
+
+function editProtocol(idx) {
+  const protocols = loadProtocols();
+  const p = protocols[idx];
+  editingProtocolIdx = idx;
+  document.getElementById('proto-edit-name').value = p.name;
+  document.getElementById('proto-edit-icon').value = p.icon;
+  renderProtocolDrugSelector(p.drugIds);
+  document.getElementById('protocol-edit-modal').classList.remove('hidden');
+}
+
+function renderProtocolDrugSelector(selectedIds) {
+  const drugs = getDrugs().sort((a,b) => a.generic.localeCompare(b.generic,'es'));
+  const container = document.getElementById('proto-drug-selector');
+  container.innerHTML = drugs.map(d => `
+    <label style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--border);cursor:pointer">
+      <input type="checkbox" value="${d.id}" ${selectedIds.includes(d.id)?'checked':''} style="width:16px;height:16px;accent-color:var(--accent)">
+      <div>
+        <div style="font-size:13px;font-weight:600">${d.generic}</div>
+        <div style="font-size:11px;color:var(--muted)">${d.trade}</div>
+      </div>
+    </label>`).join('');
+}
+
+function saveProtocolEdit() {
+  const name = document.getElementById('proto-edit-name').value.trim();
+  const icon = document.getElementById('proto-edit-icon').value.trim() || '📋';
+  if (!name) { alert('Ingresa un nombre para el protocolo.'); return; }
+  const checkboxes = document.querySelectorAll('#proto-drug-selector input[type=checkbox]:checked');
+  const drugIds = Array.from(checkboxes).map(cb => cb.value);
+  if (drugIds.length === 0) { alert('Selecciona al menos un medicamento.'); return; }
+  const protocols = loadProtocols();
+  const proto = { id: 'proto_' + Date.now(), name, icon, drugIds };
+  if (editingProtocolIdx >= 0) {
+    proto.id = protocols[editingProtocolIdx].id;
+    protocols[editingProtocolIdx] = proto;
+  } else {
+    protocols.push(proto);
+  }
+  saveProtocols(protocols);
+  renderProtocols();
+  document.getElementById('protocol-edit-modal').classList.add('hidden');
+}
+
+function deleteProtocol(idx) {
+  if (!confirm('¿Eliminar este protocolo?')) return;
+  const protocols = loadProtocols();
+  protocols.splice(idx, 1);
+  saveProtocols(protocols);
+  renderProtocols();
+}
+
+function closeProtocolEdit() { document.getElementById('protocol-edit-modal').classList.add('hidden'); }
+
 
 // ─── EXPORT / IMPORT ─────────────────────────────────────────────────────────
 function exportDrugs() {
