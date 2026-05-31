@@ -866,25 +866,25 @@ function toggleDrug(id) {
     delete state.selectedFrequency[id];
   } else {
     state.selectedDrugs.add(id);
-    // Pre-select best presentation and default frequency
     const drugs = getDrugs();
     const d = drugs.find(x => x.id === id);
     if (d) {
       if (d.frequency) state.selectedFrequency[id] = d.frequency;
+      // Load saved freq preference
+      try {
+        const saved = JSON.parse(localStorage.getItem('vetdose_freq_prefs') || '{}');
+        if (saved[id]) state.selectedFrequency[id] = saved[id];
+      } catch(e) {}
       if (d.tabSizes && d.tabSizes.length > 0) {
-        // Pre-select: find tabSize closest to ideal (1 whole tablet)
         const wkg = getWeightKg();
         if (wkg > 0) {
           const activeDose = state.species==='cat'&&d.doseCat ? d.doseCat
                            : state.species==='dog'&&d.doseDog ? d.doseDog : d.dosePref;
           const totalMg = activeDose * wkg;
           const sizes = d.tabSizes;
-          // Find size that gives closest to 1 unit
-          let bestSize = sizes[0];
-          let bestScore = 999;
+          let bestSize = sizes[0], bestScore = 999;
           for (const s of sizes) {
             const units = totalMg / s;
-            // Prefer 1 unit, then 0.5, then 2
             const score = Math.abs(units - 1) < Math.abs(units - 0.5) ?
               Math.abs(units - 1) : Math.abs(units - 0.5) + 0.5;
             if (score < bestScore) { bestScore = score; bestSize = s; }
@@ -898,8 +898,12 @@ function toggleDrug(id) {
   }
   const check = document.getElementById('check-' + id);
   if (check) check.classList.toggle('checked', state.selectedDrugs.has(id));
-  // Re-render just the drug item to show/hide selector
-  renderDrugList();
+  // If protocol is active, re-render protocol list; otherwise normal list
+  if (state.activeProtocol) {
+    renderDrugListProtocol(state.activeProtocol.drugIds);
+  } else {
+    renderDrugList();
+  }
 }
 
 function setPresentation(drugId, size) {
@@ -909,7 +913,6 @@ function setPresentation(drugId, size) {
 
 function setFrequency(drugId, freq) {
   state.selectedFrequency[drugId] = freq;
-  // Persist preference for next patient
   try {
     const saved = JSON.parse(localStorage.getItem('vetdose_freq_prefs') || '{}');
     saved[drugId] = freq;
