@@ -276,45 +276,112 @@ input:focus{border-color:var(--accent-md);box-shadow:0 0 0 3px rgba(26,92,56,.1)
 
     <!-- CRI -->
     <div class="screen" id="screen-cri">
-      <div class="section-label">Droga para CRI</div>
-      <div class="card">
-        <div class="mfield" style="margin-bottom:12px">
-          <label>Seleccionar droga</label>
-          <select id="cri-drug-select" onchange="updateCRI()"><option value="">-- seleccionar --</option></select>
-        </div>
-        <div style="display:flex;gap:8px">
-          <div class="mfield" style="flex:1;margin-bottom:0"><label>Tasa deseada</label><input type="number" id="cri-rate" placeholder="Ej: 5" step="0.01" min="0" oninput="updateCRI()"></div>
-          <div class="mfield" style="width:142px;margin-bottom:0"><label>Unidad</label>
-            <select id="cri-rate-unit" onchange="updateCRI()">
-              <option value="mcg/kg/min">mcg/kg/min</option>
-              <option value="mg/kg/h">mg/kg/h</option>
-              <option value="mg/kg/min">mg/kg/min</option>
-            </select>
+
+      <!-- Mode selector -->
+      <div style="display:flex;gap:8px;margin-bottom:14px">
+        <button id="cri-mode-single" onclick="setCRIMode('single')"
+          style="flex:1;padding:10px;border-radius:10px;font-size:13px;font-weight:700;border:2px solid var(--accent);background:var(--accent);color:#fff;cursor:pointer;font-family:var(--sans)">
+          💉 Droga única
+        </button>
+        <button id="cri-mode-protocol" onclick="setCRIMode('protocol')"
+          style="flex:1;padding:10px;border-radius:10px;font-size:13px;font-weight:700;border:2px solid var(--border);background:var(--surface);color:var(--muted);cursor:pointer;font-family:var(--sans)">
+          📋 Protocolo CRI
+        </button>
+      </div>
+
+      <!-- SINGLE DRUG MODE -->
+      <div id="cri-single-mode">
+        <div class="section-label">Droga para CRI</div>
+        <div class="card">
+          <div class="mfield" style="margin-bottom:12px">
+            <label>Seleccionar droga</label>
+            <select id="cri-drug-select" onchange="updateCRI()"><option value="">-- seleccionar --</option></select>
+          </div>
+          <div style="display:flex;gap:8px">
+            <div class="mfield" style="flex:1;margin-bottom:0"><label>Tasa deseada</label><input type="number" id="cri-rate" placeholder="Ej: 5" step="0.01" min="0" oninput="updateCRI()"></div>
+            <div class="mfield" style="width:142px;margin-bottom:0"><label>Unidad</label>
+              <select id="cri-rate-unit" onchange="updateCRI()">
+                <option value="mcg/kg/min">mcg/kg/min</option>
+                <option value="mg/kg/h">mg/kg/h</option>
+                <option value="mg/kg/min">mg/kg/min</option>
+              </select>
+            </div>
           </div>
         </div>
-      </div>
-      <div class="section-label">Preparación de jeringa</div>
-      <div class="card">
-        <div style="display:flex;gap:8px">
-          <div class="mfield" style="flex:1;margin-bottom:0"><label>Stock a tomar (cc)</label><input type="number" id="cri-stock-vol" placeholder="Ej: 1" step="0.1" min="0" oninput="updateCRI()"></div>
-          <div class="mfield" style="flex:1;margin-bottom:0"><label>Volumen final (cc)</label><input type="number" id="cri-dil-vol" value="50" step="1" min="1" oninput="updateCRI()"></div>
+        <div class="section-label">Preparación de jeringa</div>
+        <div class="card">
+          <div style="display:flex;gap:8px">
+            <div class="mfield" style="flex:1;margin-bottom:0"><label>Stock a tomar (cc)</label><input type="number" id="cri-stock-vol" placeholder="Ej: 1" step="0.1" min="0" oninput="updateCRI()"></div>
+            <div class="mfield" style="flex:1;margin-bottom:0"><label>Volumen final (cc)</label><input type="number" id="cri-dil-vol" value="50" step="1" min="1" oninput="updateCRI()"></div>
+          </div>
+          <div style="font-size:11px;color:var(--muted);margin-top:8px">Peso del paciente se toma de la pantalla Calcular</div>
         </div>
-        <div style="font-size:11px;color:var(--muted);margin-top:8px">Peso del paciente se toma de la pantalla Calcular</div>
-      </div>
-      <div id="cri-result" style="display:none">
-        <div class="section-label">Resultado CRI &mdash; <span id="cri-drug-name" style="color:var(--accent)"></span></div>
-        <div class="cri-result-box">
-          <div class="cri-lbl">Velocidad de bomba</div>
-          <div class="cri-big" id="cri-ml-per-hour">&#8212;</div>
+        <div id="cri-result" style="display:none">
+          <div class="section-label">Resultado CRI &mdash; <span id="cri-drug-name" style="color:var(--accent)"></span></div>
+          <div class="cri-result-box">
+            <div class="cri-lbl">Velocidad de bomba</div>
+            <div class="cri-big" id="cri-ml-per-hour">&#8212;</div>
+          </div>
+          <div class="cri-grid">
+            <div class="cri-cell"><div class="cri-lbl">Conc. preparada</div><div style="font-family:var(--mono);font-size:17px;font-weight:500;margin-top:4px" id="cri-conc-prep">&#8212;</div></div>
+            <div class="cri-cell" id="cri-duration-row"><div class="cri-lbl">Duración aprox.</div><div style="font-family:var(--mono);font-size:17px;font-weight:500;color:var(--accent);margin-top:4px" id="cri-duration">&#8212;</div></div>
+          </div>
+          <div class="instr-box" id="cri-instruction"></div>
         </div>
-        <div class="cri-grid">
-          <div class="cri-cell"><div class="cri-lbl">Conc. preparada</div><div style="font-family:var(--mono);font-size:17px;font-weight:500;margin-top:4px" id="cri-conc-prep">&#8212;</div></div>
-          <div class="cri-cell" id="cri-duration-row"><div class="cri-lbl">Duración aprox.</div><div style="font-family:var(--mono);font-size:17px;font-weight:500;color:var(--accent);margin-top:4px" id="cri-duration">&#8212;</div></div>
-        </div>
-        <div class="instr-box" id="cri-instruction"></div>
       </div>
-    </div>
 
+      <!-- PROTOCOL MODE -->
+      <div id="cri-protocol-mode" style="display:none">
+        <div class="section-label">Protocolo analgésico</div>
+        <div style="display:flex;gap:8px;margin-bottom:12px">
+          <button onclick="selectCRIProtocol('blk')" id="proto-blk"
+            style="flex:1;padding:12px 8px;border-radius:12px;border:2px solid var(--accent);background:var(--accent);color:#fff;font-size:13px;font-weight:700;cursor:pointer;font-family:var(--sans);line-height:1.3">
+            🐾 BLK<br><span style="font-size:10px;font-weight:500">Bupre · Lido · Keta</span>
+          </button>
+          <button onclick="selectCRIProtocol('fentlido')" id="proto-fentlido"
+            style="flex:1;padding:12px 8px;border-radius:12px;border:2px solid var(--border);background:var(--surface);color:var(--muted);font-size:13px;font-weight:700;cursor:pointer;font-family:var(--sans);line-height:1.3">
+            💉 Fent/Lido<br><span style="font-size:10px;font-weight:500">Fentanilo · Lido</span>
+          </button>
+        </div>
+
+        <div class="section-label">Datos del paciente y bolsa</div>
+        <div class="card">
+          <div style="display:flex;gap:8px;margin-bottom:10px">
+            <div style="flex:1"><div class="field-label">Peso (kg)</div>
+              <input type="number" id="blk-weight" placeholder="Ej: 8" step="0.1" min="0" oninput="calcBLK()">
+            </div>
+            <div style="flex:1"><div class="field-label">Especie</div>
+              <select id="blk-species" onchange="calcBLK()" style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-sm);padding:10px 12px;font-size:14px;font-family:var(--sans);outline:none">
+                <option value="dog">🐕 Perro</option>
+                <option value="cat">🐈 Gato</option>
+              </select>
+            </div>
+          </div>
+          <div style="display:flex;gap:8px">
+            <div style="flex:1"><div class="field-label">Bolsa IV (mL)</div>
+              <select id="blk-bag" onchange="calcBLK()" style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-sm);padding:10px 12px;font-size:14px;font-family:var(--sans);outline:none">
+                <option value="50">50 mL</option>
+                <option value="100" selected>100 mL</option>
+                <option value="250">250 mL</option>
+                <option value="500">500 mL</option>
+              </select>
+            </div>
+            <div style="flex:1"><div class="field-label">Tasa fluido (mL/kg/h)</div>
+              <input type="number" id="blk-rate" value="3" step="0.5" min="0.5" oninput="calcBLK()"
+                style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-sm);padding:10px 12px;font-size:16px;font-family:var(--mono);outline:none">
+            </div>
+          </div>
+        </div>
+
+        <div class="section-label">Dosis CRI <span style="font-size:10px;color:var(--muted);font-weight:400">(ajustable dentro del rango)</span></div>
+        <div class="card" id="blk-dose-inputs">
+          <!-- Populated by JS -->
+        </div>
+
+        <div id="blk-result" style="display:none;padding-bottom:16px"></div>
+      </div>
+
+    </div>
 
     <!-- FLUIDOS -->
     <div class="screen" id="screen-fluidos">

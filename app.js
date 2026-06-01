@@ -1388,7 +1388,240 @@ function shareResults() {
   }
 }
 
-// ─── CRI SCREEN ──────────────────────────────────────────────────────────────
+// ─── CRI PROTOCOL MODE ───────────────────────────────────────────────────────
+
+let activeCRIProtocol = 'blk';
+
+const CRI_PROTOCOLS = {
+  blk: {
+    name: 'BLK — Buprenorfina / Lidocaína / Ketamina',
+    source: '© Robert M. Stein, DVM, PC',
+    drugs: [
+      {
+        id: 'buprenorfina', name: 'Buprenorfina', conc: 0.3, unit: 'mg/kg/h',
+        defaultDose: 0.003, minDose: 0.0025, maxDose: 0.0075,
+        step: 0.0005,
+        loadingDoses: [
+          { dose: 0.010, label: '0.010 mg/kg IM/IV' },
+          { dose: 0.020, label: '0.020 mg/kg IM/IV' },
+        ],
+        note: 'Inicio lento incluso IV — esperar 20-30 min para efecto completo.',
+        color: '#1a5c38',
+      },
+      {
+        id: 'lidocaina', name: 'Lidocaína', conc: 20, unit: 'mg/kg/h',
+        defaultDose: 1.5, minDose: 0.6, maxDose: 3.0,
+        minDoseCat: 0.6, maxDoseCat: 1.5,
+        step: 0.1,
+        loadingDoses: [
+          { dose: 0.25, label: '0.25 mg/kg IV (gatos/cautela)' },
+          { dose: 1.0,  label: '1.0 mg/kg IV (perros)' },
+        ],
+        note: 'Gatos: máx 1.5 mg/kg/h. Perros: hasta 3.0 mg/kg/h.',
+        color: '#1d4ed8',
+      },
+      {
+        id: 'ketamina', name: 'Ketamina', conc: 100, unit: 'mg/kg/h',
+        defaultDose: 0.6, minDose: 0.12, maxDose: 1.2,
+        step: 0.05,
+        loadingDoses: [
+          { dose: 0.25, label: '0.25 mg/kg IV' },
+          { dose: 0.5,  label: '0.5 mg/kg IV' },
+        ],
+        note: 'Gatos: usar con precaución, mismas dosis CRI.',
+        color: '#7c2d12',
+      },
+    ]
+  },
+  fentlido: {
+    name: 'Fentanilo / Lidocaína',
+    source: 'Plumb 2024',
+    drugs: [
+      {
+        id: 'fentanilo', name: 'Fentanilo', conc: 0.05, unit: 'mcg/kg/min',
+        defaultDose: 0.003, minDose: 0.001, maxDose: 0.010,
+        step: 0.001,
+        loadingDoses: [
+          { dose: 0.002, label: '2 mcg/kg IV' },
+          { dose: 0.005, label: '5 mcg/kg IV' },
+        ],
+        note: 'CRI: 1-10 mcg/kg/h. Unidad en mg/kg/h.',
+        color: '#7c3aed',
+        isMcg: true,
+      },
+      {
+        id: 'lidocaina', name: 'Lidocaína', conc: 20, unit: 'mg/kg/h',
+        defaultDose: 1.5, minDose: 0.6, maxDose: 3.0,
+        minDoseCat: 0.6, maxDoseCat: 1.5,
+        step: 0.1,
+        loadingDoses: [
+          { dose: 1.0, label: '1.0 mg/kg IV (perros)' },
+        ],
+        note: 'Gatos: máx 1.5 mg/kg/h.',
+        color: '#1d4ed8',
+      },
+    ]
+  }
+};
+
+function setCRIMode(mode) {
+  const isSingle = mode === 'single';
+  document.getElementById('cri-single-mode').style.display = isSingle ? 'block' : 'none';
+  document.getElementById('cri-protocol-mode').style.display = isSingle ? 'none' : 'block';
+  document.getElementById('cri-mode-single').style.background = isSingle ? 'var(--accent)' : 'var(--surface)';
+  document.getElementById('cri-mode-single').style.color = isSingle ? '#fff' : 'var(--muted)';
+  document.getElementById('cri-mode-single').style.borderColor = isSingle ? 'var(--accent)' : 'var(--border)';
+  document.getElementById('cri-mode-protocol').style.background = !isSingle ? 'var(--accent)' : 'var(--surface)';
+  document.getElementById('cri-mode-protocol').style.color = !isSingle ? '#fff' : 'var(--muted)';
+  document.getElementById('cri-mode-protocol').style.borderColor = !isSingle ? 'var(--accent)' : 'var(--border)';
+  if (!isSingle) { selectCRIProtocol(activeCRIProtocol); calcBLK(); }
+}
+
+function selectCRIProtocol(id) {
+  activeCRIProtocol = id;
+  ['blk','fentlido'].forEach(p => {
+    const btn = document.getElementById('proto-' + p);
+    if (!btn) return;
+    const active = p === id;
+    btn.style.background = active ? 'var(--accent)' : 'var(--surface)';
+    btn.style.color = active ? '#fff' : 'var(--muted)';
+    btn.style.borderColor = active ? 'var(--accent)' : 'var(--border)';
+  });
+  renderBLKInputs();
+  calcBLK();
+}
+
+function renderBLKInputs() {
+  const protocol = CRI_PROTOCOLS[activeCRIProtocol];
+  const species = document.getElementById('blk-species')?.value || 'dog';
+  const container = document.getElementById('blk-dose-inputs');
+  if (!container) return;
+
+  container.innerHTML = protocol.drugs.map(d => {
+    const maxD = species === 'cat' && d.maxDoseCat ? d.maxDoseCat : d.maxDose;
+    const rangeLabel = `${d.minDose}–${maxD} ${d.unit}`;
+    return `
+    <div style="margin-bottom:12px;padding-bottom:12px;border-bottom:1px solid var(--border)">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+        <div style="font-size:14px;font-weight:700;color:${d.color}">${d.name}</div>
+        <div style="font-size:11px;color:var(--muted);font-family:var(--mono)">${rangeLabel}</div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <input type="number" id="blk-dose-${d.id}" value="${d.defaultDose}"
+          min="${d.minDose}" max="${maxD}" step="${d.step}"
+          style="width:110px;background:var(--surface2);border:1.5px solid ${d.color}33;border-radius:8px;padding:8px 10px;font-size:15px;font-family:var(--mono);color:var(--text);outline:none"
+          oninput="calcBLK()">
+        <span style="font-size:12px;color:var(--muted)">${d.unit}</span>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function calcBLK() {
+  const protocol = CRI_PROTOCOLS[activeCRIProtocol];
+  if (!protocol) return;
+  const wkg = parseFloat(document.getElementById('blk-weight')?.value) || 0;
+  const bagMl = parseFloat(document.getElementById('blk-bag')?.value) || 100;
+  const ratePerKg = parseFloat(document.getElementById('blk-rate')?.value) || 3;
+  const species = document.getElementById('blk-species')?.value || 'dog';
+  const fluidRateMlH = wkg > 0 ? ratePerKg * wkg : ratePerKg * 10; // fallback 10kg
+
+  const resultDiv = document.getElementById('blk-result');
+  if (!resultDiv) return;
+
+  let html = `
+    <div style="background:#1a5c38;border-radius:12px;padding:13px 16px;margin-bottom:12px;color:#fff">
+      <div style="font-size:16px;font-weight:800">${protocol.name}</div>
+      <div style="font-size:11px;color:#a7f3d0;margin-top:2px">
+        ${wkg > 0 ? wkg + ' kg' : 'Peso no ingresado'} · Bolsa ${bagMl} mL · ${fluidRateMlH.toFixed(1)} mL/h
+      </div>
+    </div>`;
+
+  // Duration of bag
+  const durationH = bagMl / fluidRateMlH;
+
+  let tableRows = '';
+  let instrLines = [];
+
+  protocol.drugs.forEach(d => {
+    const doseInput = document.getElementById(`blk-dose-${d.id}`);
+    const dose = parseFloat(doseInput?.value) || d.defaultDose;
+
+    // mL to add to bag = (dose × weight × bag) / (conc × fluidRate)
+    const totalDrugMg = dose * wkg * durationH; // mg needed for full bag duration
+    const mlToAdd = wkg > 0 ? (dose * wkg * bagMl) / (d.conc * fluidRateMlH) : 0;
+    const concInBag = wkg > 0 ? (mlToAdd * d.conc) / bagMl : 0;
+
+    // Loading doses
+    const loadHTML = d.loadingDoses.map(l => {
+      const loadMl = wkg > 0 ? (l.dose * wkg) / d.conc : 0;
+      return `<div style="font-size:12px;color:var(--muted)">Loading ${l.label}: <b style="color:${d.color}">${loadMl.toFixed(2)} mL</b></div>`;
+    }).join('');
+
+    tableRows += `
+      <div class="result-card" style="border-color:${d.color}44">
+        <div class="result-header" style="background:${d.color}11;border-bottom:2px solid ${d.color}33">
+          <div class="result-names">
+            <div class="result-generic" style="color:${d.color}">${d.name}</div>
+            <div class="result-trade" style="color:var(--muted)">${dose} ${d.unit}</div>
+          </div>
+          <div style="text-align:right">
+            <div style="font-size:11px;color:var(--muted)">Agregar a bolsa</div>
+            <div style="font-size:22px;font-weight:700;font-family:var(--mono);color:${d.color}">
+              ${wkg > 0 ? mlToAdd.toFixed(2) + ' mL' : '—'}
+            </div>
+          </div>
+        </div>
+        <div class="result-body">
+          <div class="result-row"><div class="result-lbl">Conc. en bolsa</div><div class="result-val">${wkg > 0 ? concInBag.toFixed(4) + ' mg/mL' : '—'}</div></div>
+          <div class="result-row"><div class="result-lbl">Conc. vial</div><div class="result-val">${d.conc} mg/mL</div></div>
+          ${loadHTML}
+          ${d.note ? `<div class="warn-note" style="margin-top:6px"><span>ℹ</span><span>${d.note}</span></div>` : ''}
+        </div>
+      </div>`;
+
+    if (wkg > 0) {
+      instrLines.push(`${d.name}: agregar ${mlToAdd.toFixed(2)} mL → ${concInBag.toFixed(4)} mg/mL en bolsa`);
+    }
+  });
+
+  html += tableRows;
+
+  // Summary box
+  if (wkg > 0) {
+    const totalAdded = protocol.drugs.reduce((sum, d) => {
+      const doseInput = document.getElementById(`blk-dose-${d.id}`);
+      const dose = parseFloat(doseInput?.value) || d.defaultDose;
+      return sum + (dose * wkg * bagMl) / (d.conc * fluidRateMlH);
+    }, 0);
+
+    html += `
+      <div class="result-card" style="border-color:#6ee7b7">
+        <div class="result-header" style="background:#1a5c38">
+          <div class="result-names">
+            <div class="result-generic" style="color:#fff">Resumen preparación</div>
+            <div class="result-trade" style="color:#a7f3d0">Bolsa de ${bagMl} mL · ${durationH.toFixed(1)}h duración</div>
+          </div>
+          <div style="text-align:right">
+            <div style="font-size:11px;color:#a7f3d0">Total a agregar</div>
+            <div style="font-size:20px;font-weight:700;font-family:var(--mono);color:#a7f3d0">${totalAdded.toFixed(2)} mL</div>
+          </div>
+        </div>
+        <div class="result-body">
+          <div class="instr-box" style="margin-top:0">
+            ${instrLines.map(l => `<div>${l}</div>`).join('')}
+            <div style="margin-top:6px;font-weight:700">Fluido: ${fluidRateMlH.toFixed(1)} mL/h — Bolsa dura ~${durationH.toFixed(1)}h</div>
+          </div>
+          <div style="font-size:11px;color:var(--muted);margin-top:8px">${protocol.source}</div>
+        </div>
+      </div>`;
+  }
+
+  resultDiv.innerHTML = html;
+  resultDiv.style.display = 'block';
+}
+
+// ─── CRI SINGLE DRUG ─────────────────────────────────────────────────────────
 function populateCRISelect() {
   const sel = document.getElementById('cri-drug-select');
   const drugs = getDrugs();
