@@ -375,16 +375,18 @@ const TABLE_DRUGS = [
   {
     id: 'apoquel_table', generic: 'Oclacitinib (tabla)', trade: 'Apoquel',
     species: ['dog'], category: 'dermatology/JAK inhibitor',
-    notes: 'Solo perros ≥ 12 meses y ≥ 6.6 lb. Fase aguda: c/12h x 14 días, luego c/24h. Con o sin comida.',
+    notes: 'Solo perros ≥ 12 meses y ≥ 6.6 lb. Presentaciones: 3.6 mg, 5.4 mg, 16 mg. Fase aguda: c/12h x 14 días, luego c/24h mantenimiento. Con o sin comida. Fuente: Zoetis label.',
     rows: [
-      { minLb: 6.6,  maxLb: 9.9,  result: '3.6 mg — 1 tab. 3.6 mg' },
-      { minLb: 10.0, maxLb: 14.9, result: '5.4 mg — 1 tab. 5.4 mg' },
-      { minLb: 15.0, maxLb: 19.9, result: '5.4 mg — 1 tab. 5.4 mg' },
-      { minLb: 20.0, maxLb: 29.9, result: '16 mg — 1 tab. 16 mg' },
-      { minLb: 30.0, maxLb: 44.9, result: '16 mg — 1 tab. 16 mg' },
-      { minLb: 45.0, maxLb: 59.9, result: '16 mg — 1.5 comprimidos 16 mg' },
-      { minLb: 60.0, maxLb: 89.9, result: '16 mg — 2 tab. 16 mg' },
-      { minLb: 90.0, maxLb: 130,  result: '16 mg — 3 tab. 16 mg' },
+      { minLb: 6.6,  maxLb: 9.9,  result: '½ tab. 3.6 mg' },
+      { minLb: 10.0, maxLb: 14.9, result: '½ tab. 5.4 mg' },
+      { minLb: 15.0, maxLb: 19.9, result: '1 tab. 3.6 mg' },
+      { minLb: 20.0, maxLb: 29.9, result: '1 tab. 5.4 mg' },
+      { minLb: 30.0, maxLb: 44.9, result: '½ tab. 16 mg' },
+      { minLb: 45.0, maxLb: 53.9, result: '½ tab. 3.6 mg + ½ tab. 16 mg' },
+      { minLb: 54.0, maxLb: 59.9, result: '½ tab. 5.4 mg + ½ tab. 16 mg' },
+      { minLb: 60.0, maxLb: 89.9, result: '1 tab. 16 mg' },
+      { minLb: 90.0, maxLb: 129.9,result: '1½ tab. 16 mg' },
+      { minLb: 130,  maxLb: 175.9,result: '2 tab. 16 mg' },
     ]
   },
 
@@ -1267,26 +1269,24 @@ function recalcDose(idx, newDose) {
 }
 
 function renderTableResult(r) {
-  // Parse result to separate dose from range prefix
   const raw = r.tableResult || '';
-  // Remove range prefix like "44.1–66 lb → " or "< 10 lb → "
   const dose = raw.replace(/^[^→]*→\s*/, '').trim();
 
   return `
     <div class="result-card">
-      <div class="result-header" style="background:linear-gradient(135deg,#eff6ff 0%,var(--surface) 100%)">
-        <div class="result-names">
+      <div class="result-header" style="background:linear-gradient(135deg,#eff6ff 0%,var(--surface) 100%);flex-wrap:wrap;gap:6px">
+        <div class="result-names" style="min-width:120px;flex:1">
           <div class="result-generic">${r.trade}</div>
           <div class="result-trade">${r.generic.replace(' (tabla)','')}</div>
         </div>
-        <div class="result-dose" style="font-size:16px;color:#1d4ed8;text-align:right;max-width:160px;line-height:1.3">${dose}</div>
+        <div style="font-size:15px;font-weight:800;color:#1d4ed8;text-align:right;line-height:1.4;word-break:break-word;max-width:100%">${dose}</div>
       </div>
       <div class="result-body">
         <div class="result-row"><div class="result-lbl">Vía</div><div class="route-badge" style="color:#1d4ed8;background:#eff6ff;border-color:#bfdbfe">Tabla fabricante</div></div>
         ${r.notes ? `<div class="warn-note"><span>ℹ</span><span>${r.notes}</span></div>` : ''}
       </div>
-    </div>`;
-}
+    </div>`;}
+
 
 function renderAntagonist(a) {
   let doseText = '';
@@ -1320,12 +1320,164 @@ function backToCalc() {
   document.getElementById('screen-calc').classList.add('active');
 }
 
-function shareResults() {
+function printResults() {
   const name = document.getElementById('patient-name').value.trim() || 'Paciente';
   const weightKg = getWeightKg();
   const weightRaw = parseFloat(document.getElementById('patient-weight').value) || 0;
-  const weightDisplay = state.unit === 'lb' ? `${weightRaw} lb (${weightKg.toFixed(1)} kg)` : `${weightRaw} kg`;
-  const speciesIcon = state.species === 'dog' ? 'PERRO' : 'GATO';
+  const weightLb = (weightKg * 2.20462).toFixed(1);
+  const speciesIcon = state.species === 'dog' ? '🐕' : '🐈';
+  const today = new Date().toLocaleDateString('es-US', {year:'numeric',month:'long',day:'numeric'});
+  const settings = getSettings();
+  const bsa = weightKg > 0 ? parseFloat((0.101 * Math.pow(weightKg, 0.667)).toFixed(3)) : 0;
+
+  const drugs = getDrugs();
+  const selected = drugs.filter(d => state.selectedDrugs.has(d.id));
+  const tableResults = TABLE_DRUGS.filter(td => state.selectedTableDrugs.has(td.id));
+
+  if (selected.length === 0 && tableResults.length === 0) {
+    alert('No hay medicamentos calculados para imprimir.');
+    return;
+  }
+
+  let rows = '';
+
+  selected.forEach(d => {
+    const ft = d.formType || 'injection';
+    const isSolid = ft === 'tablet' || ft === 'capsule';
+    const activeDose = state.species==='cat'&&d.doseCat ? d.doseCat
+                     : state.species==='dog'&&d.doseDog ? d.doseDog : d.dosePref;
+    const selectedSize = state.selectedPresentation[d.id];
+    const selectedFreq = state.selectedFrequency[d.id] || d.frequency || '';
+
+    let mainDose = '';
+    if (d.calcMode === 'fixed') {
+      mainDose = `${activeDose} ${d.unit}`;
+    } else if (isSolid) {
+      const totalMg = activeDose * weightKg;
+      const opts = smartTabletOptions(totalMg, d.id, ft, d.tabSizes || null);
+      mainDose = opts[0];
+    } else if (d.unit === 'mcg/kg') {
+      mainDose = `${((activeDose/1000*weightKg)/d.conc).toFixed(2)} cc`;
+    } else if (ft === 'liquid_oral' || d.unit === 'mL/kg') {
+      mainDose = `${(activeDose * weightKg).toFixed(2)} cc`;
+    } else {
+      mainDose = `${((activeDose*weightKg)/d.conc).toFixed(2)} cc`;
+    }
+
+    const details = [
+      d.route,
+      selectedFreq,
+      isSolid ? '' : `${d.conc} mg/mL`,
+      `${activeDose} ${d.unit}`
+    ].filter(Boolean).join(' · ');
+
+    // Short note (first sentence only, max 80 chars)
+    const shortNote = d.notes ? d.notes.split('.')[0].slice(0, 90) + (d.notes.length > 90 ? '...' : '') : '';
+
+    rows += `
+      <tr>
+        <td class="drug-name">${d.generic}<br><span class="drug-trade">${d.trade}</span></td>
+        <td class="drug-dose">${mainDose}</td>
+        <td class="drug-detail">${details}</td>
+        <td class="drug-note">${shortNote}</td>
+      </tr>`;
+  });
+
+  tableResults.forEach(td => {
+    const weightLbNum = getWeightLb();
+    const row = td.rows.find(r => weightLbNum >= r.minLb && weightLbNum <= r.maxLb);
+    const dose = row ? row.result.replace(/^[^→]*→\s*/, '') : 'Fuera de rango';
+    rows += `
+      <tr>
+        <td class="drug-name">${td.trade}<br><span class="drug-trade">${td.generic.replace(' (tabla)','')}</span></td>
+        <td class="drug-dose">${dose}</td>
+        <td class="drug-detail">Tabla fabricante</td>
+        <td class="drug-note"></td>
+      </tr>`;
+  });
+
+  const printHTML = `<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>VetDose — ${name}</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: Arial, sans-serif; font-size: 9pt; color: #111; background: #fff; }
+  .header-box {
+    background: #1a5c38; color: #fff; padding: 8px 12px;
+    margin-bottom: 8px; border-radius: 4px;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .patient-name { font-size: 18pt; font-weight: 900; }
+  .patient-info { font-size: 8pt; color: #a7f3d0; margin-top: 2px; }
+  .clinic-info { text-align: right; font-size: 8pt; color: #a7f3d0; }
+  table { width: 100%; border-collapse: collapse; margin-bottom: 8px; }
+  th {
+    background: #2a8a50; color: #fff; font-size: 7.5pt;
+    padding: 4px 6px; text-align: left; font-weight: 700;
+  }
+  tr:nth-child(even) { background: #f2f7f2; }
+  td { padding: 4px 6px; vertical-align: top; border-bottom: 1px solid #ddd; }
+  .drug-name { width: 22%; font-weight: 700; font-size: 9pt; }
+  .drug-trade { font-weight: 400; font-size: 7.5pt; color: #555; }
+  .drug-dose { width: 18%; font-size: 16pt; font-weight: 900; color: #1a5c38; vertical-align: middle; }
+  .drug-detail { width: 30%; font-size: 7.5pt; color: #333; }
+  .drug-note { width: 30%; font-size: 7pt; color: #555; font-style: italic; }
+  .footer {
+    border-top: 1px solid #ccc; padding-top: 6px; margin-top: 6px;
+    font-size: 7pt; color: #666; display: flex; justify-content: space-between;
+  }
+  .warning-box {
+    border: 1px solid #fca5a5; background: #fff5f5;
+    border-radius: 4px; padding: 5px 8px; margin-bottom: 8px;
+    font-size: 7.5pt; color: #7f1d1d;
+  }
+  @page { margin: 10mm; size: letter portrait; }
+</style>
+</head>
+<body>
+<div class="header-box">
+  <div>
+    <div class="patient-name">${speciesIcon} ${name}</div>
+    <div class="patient-info">${weightRaw} ${state.unit} · ${state.unit==='lb' ? weightKg.toFixed(1)+' kg' : weightLb+' lb'} · BSA ${bsa} m² · ${today}</div>
+  </div>
+  <div class="clinic-info">
+    ${settings.doctorName ? settings.doctorName + '<br>' : ''}
+    ${settings.clinicName ? settings.clinicName + '<br>' : ''}
+    ${settings.phone || ''}
+  </div>
+</div>
+
+<table>
+  <thead>
+    <tr>
+      <th>Medicamento</th>
+      <th>Dosis / Cantidad</th>
+      <th>Vía · Frecuencia · Concentración</th>
+      <th>Observaciones</th>
+    </tr>
+  </thead>
+  <tbody>${rows}</tbody>
+</table>
+
+<div class="footer">
+  <span>VetDose 2.0 — Calculadora de dosis veterinaria</span>
+  <span>⚠ Verificar dosis antes de administrar</span>
+</div>
+</body>
+</html>`;
+
+  const win = window.open('', '_blank', 'width=850,height=1100');
+  win.document.write(printHTML);
+  win.document.close();
+  win.focus();
+  setTimeout(() => win.print(), 400);
+}
+
+
+function shareResults() {
+  const name = document.getElementById('patient-name').value.trim() || 'Paciente';
   const drugs = getDrugs();
   const selected = drugs.filter(d => state.selectedDrugs.has(d.id));
   const today = new Date().toLocaleDateString('es-US', {year:'numeric',month:'long',day:'numeric'});
