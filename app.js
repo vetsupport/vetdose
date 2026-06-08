@@ -2088,6 +2088,155 @@ function showChangelog() {
 }
 function closeChangelog() { document.getElementById('changelog-modal').classList.add('hidden'); }
 
+
+// ─── NUTRICIÓN — MODO SELECTOR ───────────────────────────────────────────────
+function setNutMode(mode) {
+  const isRer = mode === 'rer';
+  document.getElementById('nut-rer-mode').style.display = isRer ? 'block' : 'none';
+  document.getElementById('nut-bcs-mode').style.display = isRer ? 'none' : 'block';
+  document.getElementById('nut-mode-rer').style.background = isRer ? 'var(--accent)' : 'var(--surface)';
+  document.getElementById('nut-mode-rer').style.color = isRer ? '#fff' : 'var(--muted)';
+  document.getElementById('nut-mode-rer').style.borderColor = isRer ? 'var(--accent)' : 'var(--border)';
+  document.getElementById('nut-mode-bcs').style.background = !isRer ? 'var(--accent)' : 'var(--surface)';
+  document.getElementById('nut-mode-bcs').style.color = !isRer ? '#fff' : 'var(--muted)';
+  document.getElementById('nut-mode-bcs').style.borderColor = !isRer ? 'var(--accent)' : 'var(--border)';
+  if (!isRer) renderBCSSelector();
+}
+
+// ─── BCS WEIGHT MANAGEMENT ───────────────────────────────────────────────────
+const BCS_DATA = {
+  1: { label: '1 — Caquéctico',     factor: null, color: '#dc2626', desc: 'Costillas, vértebras y huesos pélvicos visibles. Sin grasa palpable. Pérdida severa de masa muscular.' },
+  2: { label: '2 — Muy delgado',    factor: null, color: '#ea580c', desc: 'Costillas muy visibles. Sin grasa palpable. Cintura y abdomen marcados.' },
+  3: { label: '3 — Delgado',        factor: null, color: '#d97706', desc: 'Costillas fácilmente palpables. Mínima cobertura grasa. Cintura visible.' },
+  4: { label: '4 — Bajo ideal',     factor: null, color: '#ca8a04', desc: 'Costillas palpables con leve cobertura. Cintura visible. Abdomen levemente tucked.' },
+  5: { label: '5 — Ideal',          factor: 1.00, color: '#16a34a', desc: 'Costillas palpables sin exceso de grasa. Cintura visible desde arriba. Abdomen tucked.' },
+  6: { label: '6 — Sobrepeso leve', factor: 0.91, color: '#65a30d', desc: 'Costillas palpables con leve exceso de grasa. Cintura visible pero no marcada.' },
+  7: { label: '7 — Sobrepeso',      factor: 0.83, color: '#ca8a04', desc: 'Costillas difíciles de palpar. Cintura apenas visible. Depósitos de grasa evidentes.' },
+  8: { label: '8 — Obeso',          factor: 0.77, color: '#dc2626', desc: 'Costillas muy difíciles de palpar. Sin cintura visible. Depósitos de grasa marcados.' },
+  9: { label: '9 — Obeso severo',   factor: 0.71, color: '#991b1b', desc: 'Costillas no palpables. Abdomen distendido. Depósitos de grasa masivos.' },
+};
+
+let selectedBCS = 5;
+
+function renderBCSSelector() {
+  const container = document.getElementById('bcs-selector');
+  if (!container) return;
+  container.innerHTML = Array.from({length:9},(_,i)=>i+1).map(n => `
+    <button onclick="selectBCS(${n})" id="bcs-btn-${n}"
+      style="padding:8px 0;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;font-family:var(--sans);
+             border:2px solid ${n===selectedBCS ? BCS_DATA[n].color : 'var(--border)'};
+             background:${n===selectedBCS ? BCS_DATA[n].color : 'var(--surface2)'};
+             color:${n===selectedBCS ? '#fff' : 'var(--text2)'}">${n}</button>`).join('');
+  const desc = document.getElementById('bcs-desc');
+  if (desc) desc.textContent = BCS_DATA[selectedBCS]?.desc || '';
+}
+
+function selectBCS(n) {
+  selectedBCS = n;
+  renderBCSSelector();
+  calcBCS();
+}
+
+function calcBCS() {
+  const wActual = parseFloat(document.getElementById('bcs-weight')?.value) || 0;
+  const species = document.getElementById('bcs-species')?.value || 'dog';
+  const lossPct = parseFloat(document.getElementById('bcs-loss-pct')?.value) || 80;
+  const bcsData = BCS_DATA[selectedBCS];
+  const foodSel = document.getElementById('bcs-food')?.value || '';
+  const isCustom = foodSel === 'custom|taza';
+  const customDiv = document.getElementById('bcs-food-custom');
+  if (customDiv) customDiv.style.display = isCustom ? 'flex' : 'none';
+
+  let kcalFood = 0, foodUnit = 'taza', foodName = '';
+  if (foodSel && !isCustom && foodSel !== '') {
+    const parts = foodSel.split('|'); kcalFood = parseFloat(parts[0]); foodUnit = parts[1];
+    const sel = document.getElementById('bcs-food');
+    if (sel) foodName = sel.options[sel.selectedIndex]?.text.replace(/\(.*\)/,'').trim() || '';
+  } else if (isCustom) {
+    kcalFood = parseFloat(document.getElementById('bcs-kcal-custom')?.value) || 0;
+    foodUnit = document.getElementById('bcs-unit-custom')?.value || 'taza';
+    foodName = 'Alimento personalizado';
+  }
+
+  if (wActual <= 0 || !bcsData) return;
+  const resultDiv = document.getElementById('bcs-result');
+  if (!resultDiv) return;
+
+  const isUnderweight = selectedBCS <= 4;
+  const isIdeal = selectedBCS === 5;
+  const wIdeal = bcsData.factor ? wActual * bcsData.factor : wActual;
+  const excess = wActual - wIdeal;
+  const pctOver = wIdeal > 0 ? ((wActual - wIdeal) / wIdeal) * 100 : 0;
+  const rerPrecise = 70 * Math.pow(wIdeal, 0.75);
+  const rerLinear = (30 * wIdeal) + 70;
+  const wlCals = rerPrecise * (lossPct / 100);
+  const foodQty = (kcalFood > 0 && !isUnderweight) ? wlCals / kcalFood : 0;
+  const weeksMin = excess > 0 ? Math.ceil(excess / (wActual * 0.01)) : 0;
+  const weeksMax = excess > 0 ? Math.ceil(excess / (wActual * 0.005)) : 0;
+  const bcsColor = bcsData.color;
+  const speciesIcon = species === 'dog' ? '🐕' : '🐈';
+
+  let html = `<div style="background:#1a5c38;border-radius:12px;padding:13px 16px;margin-bottom:12px;color:#fff">
+    <div style="font-size:17px;font-weight:800">${speciesIcon} Plan de Manejo de Peso</div>
+    <div style="font-size:12px;color:#a7f3d0;margin-top:2px">${wActual} kg · BCS ${selectedBCS}/9</div>
+  </div>`;
+
+  if (isUnderweight) {
+    html += `<div class="warn-note" style="background:#fff7ed;border-color:#fb923c"><span>⚠</span><span>BCS ${selectedBCS}/9 indica <b>bajo peso</b>. No se recomienda restricción calórica. Evaluar causa subyacente y considerar dieta de alta densidad calórica.</span></div>`;
+    resultDiv.innerHTML = html; resultDiv.style.display = 'block'; return;
+  }
+
+  html += `<div class="result-card">
+    <div class="result-header" style="background:${bcsColor}15;border-bottom:2px solid ${bcsColor}44">
+      <div class="result-names"><div class="result-generic" style="color:${bcsColor}">BCS ${selectedBCS}/9 — ${bcsData.label.split('—')[1]?.trim()}</div>
+      <div class="result-trade">${bcsData.desc}</div></div>
+    </div>
+    <div class="result-body">
+      <div class="result-row"><div class="result-lbl">Peso actual</div><div class="result-val">${wActual} kg</div></div>
+      ${!isIdeal ? `
+      <div class="result-row"><div class="result-lbl">Peso ideal est.</div><div class="result-val" style="font-weight:700;color:var(--accent)">${wIdeal.toFixed(1)} kg</div></div>
+      <div class="result-row"><div class="result-lbl">Exceso</div><div class="result-val" style="color:${bcsColor};font-weight:700">${excess.toFixed(1)} kg · ${pctOver.toFixed(1)}% sobrepeso</div></div>
+      ` : '<div class="result-row"><div class="result-lbl">Estado</div><div class="result-val" style="color:#16a34a;font-weight:700">✓ Peso ideal</div></div>'}
+    </div>
+  </div>
+  <div class="result-card" style="border-color:#6ee7b7">
+    <div class="result-header" style="background:#1a5c38">
+      <div class="result-names"><div class="result-generic" style="color:#fff">Plan Calórico</div>
+      <div class="result-trade" style="color:#a7f3d0">Peso ideal ${wIdeal.toFixed(1)} kg</div></div>
+      <div class="result-dose" style="color:#a7f3d0;font-size:20px">${isIdeal ? rerPrecise.toFixed(0) : wlCals.toFixed(0)} kcal/día</div>
+    </div>
+    <div class="result-body">
+      <div class="result-row"><div class="result-lbl">RER</div><div class="result-val">${rerPrecise.toFixed(0)} kcal/día &nbsp;<span style="font-size:10px;color:var(--muted)">(${rerLinear.toFixed(0)} fórmula lineal)</span></div></div>
+      ${!isIdeal ? `<div class="result-row"><div class="result-lbl">Meta pérdida</div><div class="result-val" style="font-weight:700;color:var(--accent)">${wlCals.toFixed(0)} kcal/día (${lossPct}% RER)</div></div>` : ''}
+      ${foodQty > 0 ? `<div style="border-top:1px solid var(--border);margin-top:8px;padding-top:8px">
+        <div class="result-row"><div class="result-lbl">Alimento</div><div class="result-val" style="font-size:11px">${foodName}</div></div>
+        <div class="result-row"><div class="result-lbl">Cantidad diaria</div>
+          <div class="result-val" style="font-size:18px;font-weight:800;color:var(--accent)">${(Math.round(foodQty*4)/4).toFixed(2)} ${foodUnit}/día</div></div>
+        <div class="result-row"><div class="result-lbl">Frecuencia</div><div class="result-val">2 veces al día</div></div>
+      </div>` : ''}
+    </div>
+  </div>`;
+
+  if (!isIdeal && excess > 0) html += `<div class="result-card">
+    <div class="result-header" style="background:linear-gradient(135deg,#eff6ff,var(--surface));border-bottom:2px solid #93c5fd">
+      <div class="result-names"><div class="result-generic">Proyección</div><div class="result-trade">0.5–1% del peso/semana</div></div>
+    </div>
+    <div class="result-body">
+      <div class="result-row"><div class="result-lbl">Meta estimada</div><div class="result-val" style="font-weight:700">${weeksMin}–${weeksMax} semanas</div></div>
+      <div class="result-row"><div class="result-lbl">Pérdida/semana</div><div class="result-val">${(wActual*0.005).toFixed(2)}–${(wActual*0.01).toFixed(2)} kg</div></div>
+      <div class="result-row"><div class="result-lbl">Recheck</div><div class="result-val">Cada 2–4 semanas</div></div>
+    </div>
+  </div>`;
+
+  const notes = ['Resultado es punto de partida. Ajustar según respuesta clínica.'];
+  if (selectedBCS >= 8) notes.push('Obesidad significativa — descartar hipotiroidismo y Cushing.');
+  if (species === 'cat' && !isIdeal) notes.push('Gatos: NUNCA restricción severa — riesgo de lipidosis hepática. No bajar de 60-70% RER.');
+  html += notes.map(n => `<div class="warn-note"><span>ℹ</span><span>${n}</span></div>`).join('');
+
+  resultDiv.innerHTML = html;
+  resultDiv.style.display = 'block';
+}
+
 // ─── MÓDULO FLUIDOS ──────────────────────────────────────────────────────────
 
 const FLUID_DATA = {

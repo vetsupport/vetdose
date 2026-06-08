@@ -521,65 +521,138 @@ input:focus{border-color:var(--accent-md);box-shadow:0 0 0 3px rgba(26,92,56,.1)
 
     <!-- NUTRICIÓN -->
     <div class="screen" id="screen-nutricion">
-      <div class="section-label">Paciente</div>
-      <div class="card">
-        <div style="display:flex;gap:8px;align-items:flex-end;margin-bottom:10px">
-          <div style="flex:1">
-            <div class="field-label">Especie</div>
-            <select id="nut-species" onchange="populateNutFactors()" style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-sm);padding:10px 12px;font-size:15px;font-family:var(--sans);outline:none">
-              <option value="dog">&#128021; Canino</option>
-              <option value="cat">&#128008; Felino</option>
-            </select>
-          </div>
-          <div style="flex:1">
-            <div class="field-label">¿Paciente obeso?</div>
-            <select id="nut-obese" style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-sm);padding:10px 12px;font-size:15px;font-family:var(--sans);outline:none">
-              <option value="no">No</option>
-              <option value="yes">Sí — usar peso ideal</option>
-            </select>
-          </div>
-        </div>
-        <div style="display:flex;gap:8px">
-          <div style="flex:1">
-            <div class="field-label">Peso actual (kg)</div>
-            <input type="number" id="nut-weight-actual" placeholder="0.0" step="0.1" min="0">
-          </div>
-          <div style="flex:1">
-            <div class="field-label">Peso ideal (kg)</div>
-            <input type="number" id="nut-weight-ideal" placeholder="Si obeso..." step="0.1" min="0">
-          </div>
-        </div>
+
+      <!-- Mode selector -->
+      <div style="display:flex;gap:8px;margin-bottom:14px">
+        <button id="nut-mode-rer" onclick="setNutMode('rer')"
+          style="flex:1;padding:10px;border-radius:10px;font-size:13px;font-weight:700;border:2px solid var(--accent);background:var(--accent);color:#fff;cursor:pointer;font-family:var(--sans)">
+          🔢 RER / MER
+        </button>
+        <button id="nut-mode-bcs" onclick="setNutMode('bcs')"
+          style="flex:1;padding:10px;border-radius:10px;font-size:13px;font-weight:700;border:2px solid var(--border);background:var(--surface);color:var(--muted);cursor:pointer;font-family:var(--sans)">
+          ⚖️ Manejo de Peso BCS
+        </button>
       </div>
 
-      <div class="section-label">Estado fisiológico</div>
-      <div class="card">
-        <select id="nut-factor" style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-sm);padding:11px 12px;font-size:14px;font-family:var(--sans);outline:none">
-        </select>
-      </div>
-
-      <div class="section-label">Alimento — opcional</div>
-      <div class="card">
-        <div style="display:flex;gap:8px;align-items:flex-end">
-          <div style="flex:2">
-            <div class="field-label">kcal del alimento</div>
-            <input type="number" id="nut-kcal-food" placeholder="Ej: 328" step="1" min="0">
+      <!-- RER/MER MODE -->
+      <div id="nut-rer-mode">
+        <div class="section-label">Paciente</div>
+        <div class="card">
+          <div style="display:flex;gap:8px;align-items:flex-end;margin-bottom:10px">
+            <div style="flex:1"><div class="field-label">Especie</div>
+              <select id="nut-species" onchange="populateNutFactors()" style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-sm);padding:10px 12px;font-size:15px;font-family:var(--sans);outline:none">
+                <option value="dog">🐕 Canino</option>
+                <option value="cat">🐈 Felino</option>
+              </select>
+            </div>
+            <div style="flex:1"><div class="field-label">¿Paciente obeso?</div>
+              <select id="nut-obese" style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-sm);padding:10px 12px;font-size:15px;font-family:var(--sans);outline:none">
+                <option value="no">No</option>
+                <option value="yes">Sí — usar peso ideal</option>
+              </select>
+            </div>
           </div>
-          <div style="flex:1">
-            <div class="field-label">Por unidad</div>
-            <select id="nut-food-unit" style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-sm);padding:10px 12px;font-size:14px;font-family:var(--sans);outline:none">
-              <option value="lata">lata</option>
-              <option value="taza">taza</option>
-              <option value="100g">100 g</option>
-              <option value="porción">porción</option>
-            </select>
+          <div style="display:flex;gap:8px">
+            <div style="flex:1"><div class="field-label">Peso actual (kg)</div>
+              <input type="number" id="nut-weight-actual" placeholder="0.0" step="0.1" min="0"></div>
+            <div style="flex:1"><div class="field-label">Peso ideal (kg)</div>
+              <input type="number" id="nut-weight-ideal" placeholder="Si obeso..." step="0.1" min="0"></div>
           </div>
         </div>
-        <div style="font-size:11px;color:var(--muted);margin-top:8px">Busca las kcal en la etiqueta del alimento o en la web del fabricante</div>
+        <div class="section-label">Estado fisiológico</div>
+        <div class="card">
+          <select id="nut-factor" style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-sm);padding:11px 12px;font-size:14px;font-family:var(--sans);outline:none"></select>
+        </div>
+        <div class="section-label">Alimento — opcional</div>
+        <div class="card">
+          <div style="display:flex;gap:8px;align-items:flex-end">
+            <div style="flex:2"><div class="field-label">kcal del alimento</div>
+              <input type="number" id="nut-kcal-food" placeholder="Ej: 328" step="1" min="0"></div>
+            <div style="flex:1"><div class="field-label">Por unidad</div>
+              <select id="nut-food-unit" style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-sm);padding:10px 12px;font-size:14px;font-family:var(--sans);outline:none">
+                <option value="lata">lata</option>
+                <option value="taza">taza</option>
+                <option value="100g">100 g</option>
+                <option value="porción">porción</option>
+              </select>
+            </div>
+          </div>
+          <div style="font-size:11px;color:var(--muted);margin-top:8px">Busca las kcal en la etiqueta del alimento o en la web del fabricante</div>
+        </div>
+        <div class="sticky-btn"><button class="btn btn-primary" onclick="calcNutricion()">Calcular energía</button></div>
+        <div id="nut-result" style="display:none;padding-bottom:16px"></div>
       </div>
 
-      <div class="sticky-btn"><button class="btn btn-primary" onclick="calcNutricion()">Calcular energía</button></div>
-      <div id="nut-result" style="display:none;padding-bottom:16px"></div>
+      <!-- WEIGHT MANAGEMENT BCS MODE -->
+      <div id="nut-bcs-mode" style="display:none">
+        <div class="section-label">Datos del paciente</div>
+        <div class="card">
+          <div style="display:flex;gap:8px;margin-bottom:10px">
+            <div style="flex:1"><div class="field-label">Especie</div>
+              <select id="bcs-species" style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-sm);padding:10px 12px;font-size:15px;font-family:var(--sans);outline:none">
+                <option value="dog">🐕 Canino</option>
+                <option value="cat">🐈 Felino</option>
+              </select>
+            </div>
+            <div style="flex:1"><div class="field-label">Peso actual (kg)</div>
+              <input type="number" id="bcs-weight" placeholder="Ej: 40" step="0.1" min="0" oninput="calcBCS()"></div>
+          </div>
+          <div><div class="field-label">BCS — Condición Corporal (1–9)</div>
+            <div style="display:grid;grid-template-columns:repeat(9,1fr);gap:4px;margin-top:6px" id="bcs-selector">
+              <!-- populated by JS -->
+            </div>
+            <div id="bcs-desc" style="font-size:11px;color:var(--muted);margin-top:6px;min-height:16px;font-style:italic"></div>
+          </div>
+        </div>
+
+        <div class="section-label">Dieta terapéutica — opcional</div>
+        <div class="card">
+          <div style="margin-bottom:8px"><div class="field-label">Seleccionar alimento</div>
+            <select id="bcs-food" onchange="calcBCS()" style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-sm);padding:10px 12px;font-size:13px;font-family:var(--sans);outline:none">
+              <option value="">-- Seleccionar o ingresar manualmente --</option>
+              <optgroup label="🐕 Perros">
+                <option value="248|taza">Royal Canin Satiety Support Canine (248 kcal/taza)</option>
+                <option value="259|taza">Hill's Metabolic Canine (259 kcal/taza)</option>
+                <option value="246|taza">Purina Pro Plan OM Canine (246 kcal/taza)</option>
+                <option value="243|taza">Hill's w/d Canine (243 kcal/taza)</option>
+                <option value="266|taza">Royal Canin Weight Control Canine (266 kcal/taza)</option>
+              </optgroup>
+              <optgroup label="🐈 Gatos">
+                <option value="299|taza">Royal Canin Satiety Support Feline (299 kcal/taza)</option>
+                <option value="305|taza">Hill's Metabolic Feline (305 kcal/taza)</option>
+                <option value="312|taza">Purina Pro Plan OM Feline (312 kcal/taza)</option>
+                <option value="249|taza">Hill's r/d Feline (249 kcal/taza)</option>
+                <option value="65|lata">Royal Canin Satiety Feline lata 85g (65 kcal/lata)</option>
+                <option value="137|lata">Hill's Metabolic Feline lata 156g (137 kcal/lata)</option>
+              </optgroup>
+              <option value="custom|taza">Otro alimento (ingresar kcal manualmente)</option>
+            </select>
+          </div>
+          <div id="bcs-food-custom" style="display:none;display:flex;gap:8px">
+            <div style="flex:2"><div class="field-label">kcal del alimento</div>
+              <input type="number" id="bcs-kcal-custom" placeholder="Ej: 280" step="1" min="0" oninput="calcBCS()"></div>
+            <div style="flex:1"><div class="field-label">Por unidad</div>
+              <select id="bcs-unit-custom" onchange="calcBCS()" style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-sm);padding:10px 12px;font-size:13px;font-family:var(--sans);outline:none">
+                <option value="taza">taza</option>
+                <option value="lata">lata</option>
+                <option value="100g">100 g</option>
+              </select>
+            </div>
+          </div>
+          <div id="bcs-loss-pct-row" style="margin-top:10px">
+            <div class="field-label">% del RER para pérdida de peso (default: 80%)</div>
+            <input type="number" id="bcs-loss-pct" value="80" min="60" max="95" step="5" oninput="calcBCS()"
+              style="width:80px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-sm);padding:8px 10px;font-size:16px;font-family:var(--mono);outline:none">
+            <span style="font-size:12px;color:var(--muted);margin-left:6px">% (perros: 80%, gatos: 80–85%)</span>
+          </div>
+        </div>
+
+        <div class="sticky-btn"><button class="btn btn-primary" onclick="calcBCS()">Calcular plan de peso</button></div>
+        <div id="bcs-result" style="display:none;padding-bottom:16px"></div>
+      </div>
+
     </div>
+
 
     <!-- PROTOCOLOS -->
     <div class="screen" id="screen-protocolos">
