@@ -646,6 +646,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
   loadFreqPrefs();
   loadSettings();
+  checkRegistration();
   renderDrugList();
   renderDrugsDB();
   populateCRISelect();
@@ -1774,87 +1775,164 @@ function calcBLK() {
 }
 
 // ─── CRI SINGLE DRUG ─────────────────────────────────────────────────────────
+
+// CRI dose reference — suggested rates, units, loading doses
+const CRI_DOSE_REF = {
+  lidocaina:        { unit: 'mg/kg/h',   min: 0.6,    max: 3.0,    def: 1.5,   defCat: 0.9,  maxCat: 1.5,  loading: [{dose:1.0,    label:'1 mg/kg IV (perros) / 0.25 mg/kg IV (gatos)'}], note:'Antiarrítmico y analgésico. Gatos: máx 1.5 mg/kg/h.' },
+  fentanilo:        { unit: 'mcg/kg/h',  min: 1.0,    max: 10.0,   def: 3.0,   defCat: 1.0,               loading: [{dose:0.002,  label:'2 mcg/kg IV (0.002 mg/kg)'}],                    note:'CRI analgesia. Monitorear FR.' },
+  morfina:          { unit: 'mg/kg/h',   min: 0.1,    max: 0.5,    def: 0.2,                              loading: [{dose:0.1,    label:'0.1–0.5 mg/kg IV lento'}],                        note:'IV rápido causa histaminólisis — dar lento.' },
+  hidromorfona:     { unit: 'mg/kg/h',   min: 0.01,   max: 0.05,   def: 0.02,                             loading: [{dose:0.05,   label:'0.05–0.1 mg/kg IV'}],                             note:'Opioide potente. Monitorear sedación y RR.' },
+  ketamina:         { unit: 'mg/kg/h',   min: 0.12,   max: 1.2,    def: 0.6,                              loading: [{dose:0.25,   label:'0.25–0.5 mg/kg IV'}],                             note:'Analgesia subanestésica. Combinar con benzodiazepina o alfa-2.' },
+  dexmedetomidina:  { unit: 'mcg/kg/h',  min: 0.5,    max: 3.0,    def: 1.0,   defCat: 0.5,  maxCat: 1.0,  loading: [{dose:0.005,  label:'5 mcg/kg IV/IM (0.005 mg/kg)'}],                 note:'Sedación y analgesia. Bradicardia esperada. Revertir con atipamezole.' },
+  buprenorfina:     { unit: 'mg/kg/h',   min: 0.0025, max: 0.0075, def: 0.003,                            loading: [{dose:0.01,   label:'0.01–0.02 mg/kg IV/IM'}],                         note:'Inicio lento incluso IV — esperar 20–30 min para efecto.' },
+  butorfanol:       { unit: 'mg/kg/h',   min: 0.1,    max: 0.4,    def: 0.2,                              loading: [{dose:0.2,    label:'0.2–0.4 mg/kg IV'}],                              note:'Sedación y analgesia leve.' },
+  propofol:         { unit: 'mg/kg/h',   min: 0.5,    max: 8.0,    def: 3.0,                              loading: [{dose:2.0,    label:'2–6 mg/kg IV titulado'}],                         note:'Anestesia TIVA. Titular al efecto. Apnea posible.' },
+  midazolam:        { unit: 'mg/kg/h',   min: 0.1,    max: 0.4,    def: 0.2,                              loading: [{dose:0.2,    label:'0.1–0.3 mg/kg IV'}],                              note:'Sedación y anticonvulsivante. Revertir con flumazenil.' },
+  alfaxalona:       { unit: 'mg/kg/h',   min: 3.0,    max: 8.0,    def: 5.0,                              loading: [{dose:2.0,    label:'2–3 mg/kg IV titulado'}],                         note:'Anestesia TIVA. Buena recuperación.' },
+  dopamina:         { unit: 'mcg/kg/min', min: 2.0,   max: 15.0,   def: 5.0,                              note:'2–5: efecto dopaminérgico/renal. 5–10: inotrópico. >10: vasopresor.' },
+  dobutamina:       { unit: 'mcg/kg/min', min: 2.0,   max: 20.0,   def: 5.0,                              note:'Inotrópico positivo. ICC descompensada. Taquicardia a dosis altas.' },
+  epinefrina:       { unit: 'mcg/kg/min', min: 0.05,  max: 0.5,    def: 0.1,                              loading: [{dose:0.01,   label:'0.01 mg/kg IV en PCR'}],                          note:'PCR: 0.01 mg/kg IV. Vasopresor y broncodilatador.' },
+  norepinefrina:    { unit: 'mcg/kg/min', min: 0.05,  max: 1.0,    def: 0.1,                              note:'Vasopresor. Shock séptico. Monitorear PA invasiva.' },
+  vasopresina:      { unit: 'mU/kg/min',  min: 0.5,   max: 2.0,    def: 1.0,                              note:'PCR refractaria a epinefrina. Vasopresor no adrenérgico.' },
+  maropitant:       { unit: 'mg/kg/h',   min: 0.04,   max: 0.08,   def: 0.042,                            note:'Antiemético. Diluir 1 mg/kg en 15–20 mL y pasar en 15–20 min.' },
+  ondansetron:      { unit: 'mg/kg/h',   min: 0.05,   max: 0.1,    def: 0.05,                             loading: [{dose:0.1,    label:'0.1 mg/kg IV lento'}],                            note:'IV lento 15–20 min. Antiemético serotoninérgico.' },
+  metoclopramida:   { unit: 'mg/kg/h',   min: 0.01,   max: 0.06,   def: 0.02,                             note:'Procinético y antiemético. CRI: 1–2 mg/kg/día.' },
+  insulina_regular: { unit: 'U/kg/h',    min: 0.025,  max: 0.05,   def: 0.025,                            note:'CAD. Ajustar c/1–2h según glucosa. Objetivo: 200–300 mg/dL.' },
+  furosemida:       { unit: 'mg/kg/h',   min: 0.1,    max: 1.0,    def: 0.25,                             loading: [{dose:1.0,    label:'1–2 mg/kg IV'}],                                  note:'Crisis cardiaca. Monitorear electrolitos.' },
+  naloxona:         { unit: 'mcg/kg/h',  min: 1.0,    max: 5.0,    def: 2.0,                              loading: [{dose:0.01,   label:'0.01–0.04 mg/kg IV'}],                            note:'Duración corta — CRI si reversión prolongada necesaria.' },
+};
+
 function populateCRISelect() {
   const sel = document.getElementById('cri-drug-select');
   const drugs = getDrugs();
   const current = sel.value;
-
-  // Only drugs clinically appropriate for CRI — injectables/liquids used in continuous infusion
-  const CRI_IDS = new Set([
-    'fentanilo','morfina','hidromorfona','metadona','butorfanol','buprenorfina',
-    'ketamina','dexmedetomidina','medetomidina','lidocaina','propofol',
-    'midazolam','diazepam','alfaxalona',
-    'dopamina','dobutamina','epinefrina','norepinefrina','vasopresina',
-    'maropitant','ondansetron','metoclopramida',
-    'insulina_regular','furosemida','heparina_no_fraccionada',
-    'tramadol','gabapentina','morfina',
-  ]);
-
   const criDrugs = drugs.filter(d =>
-    CRI_IDS.has(d.id) &&
+    CRI_DOSE_REF.hasOwnProperty(d.id) &&
     (d.formType === 'injection' || d.formType === 'liquid_oral')
   ).sort((a,b) => a.generic.localeCompare(b.generic, 'es'));
-
   sel.innerHTML = '<option value="">-- seleccionar droga --</option>' +
     criDrugs.map(d =>
-      `<option value="${d.id}" ${d.id === current ? 'selected' : ''}>${d.generic} (${d.trade}) — ${d.conc} mg/mL</option>`
+      `<option value="${d.id}" ${d.id===current?'selected':''}>${d.generic} (${d.trade}) — ${d.conc} mg/mL</option>`
     ).join('');
+  if (current) onCRIDrugChange();
+}
+
+function onCRIDrugChange() {
+  const drugId = document.getElementById('cri-drug-select').value;
+  const ref = CRI_DOSE_REF[drugId];
+  if (!ref) return;
+  const defD = (state.species==='cat' && ref.defCat) ? ref.defCat : ref.def;
+  document.getElementById('cri-rate').value = defD;
+  // Set unit
+  const unitSel = document.getElementById('cri-rate-unit');
+  for (let i=0;i<unitSel.options.length;i++) {
+    if (unitSel.options[i].value === ref.unit) { unitSel.selectedIndex=i; break; }
+  }
+  showCRIRef(drugId, ref);
+  updateCRI();
+}
+
+function showCRIRef(drugId, ref) {
+  let panel = document.getElementById('cri-ref-panel');
+  if (!panel) {
+    panel = document.createElement('div');
+    panel.id = 'cri-ref-panel';
+    const firstCard = document.querySelector('#cri-single-mode .card');
+    if (firstCard) firstCard.after(panel);
+  }
+  const maxD = (state.species==='cat' && ref.maxCat) ? ref.maxCat : ref.max;
+  const defD = (state.species==='cat' && ref.defCat) ? ref.defCat : ref.def;
+  const wkg = getWeightKg();
+  const drugs = getDrugs();
+  const drug = drugs.find(x => x.id === drugId);
+
+  let loadHTML = '';
+  if (ref.loading && wkg > 0 && drug) {
+    loadHTML = `<div style="border-top:1px solid var(--border);margin-top:8px;padding-top:8px">
+      <div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:4px">Dosis de carga (loading)</div>
+      ${ref.loading.map(l => {
+        const loadMl = ((l.dose * wkg) / drug.conc).toFixed(2);
+        return `<div style="font-size:12px;padding:2px 0">
+          ${l.label} <b style="color:var(--accent)">→ ${loadMl} mL IV</b>
+        </div>`;
+      }).join('')}
+    </div>`;
+  }
+
+  panel.innerHTML = `
+    <div style="background:var(--accentlt);border:1px solid var(--border2);border-radius:10px;padding:10px 12px;margin-bottom:10px">
+      <div style="font-size:10px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px">📋 Referencia clínica</div>
+      <div style="display:flex;gap:16px;margin-bottom:6px;flex-wrap:wrap">
+        <div><div style="font-size:10px;color:var(--muted)">Rango</div><div style="font-size:13px;font-weight:700">${ref.min}–${maxD} ${ref.unit}</div></div>
+        <div><div style="font-size:10px;color:var(--muted)">⭐ Sugerida</div><div style="font-size:13px;font-weight:700;color:var(--accent)">${defD} ${ref.unit}</div></div>
+      </div>
+      ${ref.note ? `<div style="font-size:11px;color:var(--muted);font-style:italic">${ref.note}</div>` : ''}
+      ${loadHTML}
+    </div>`;
 }
 
 function updateCRI() {
   const drugId = document.getElementById('cri-drug-select').value;
   const rateInput = parseFloat(document.getElementById('cri-rate').value) || 0;
-  const rateUnit = document.getElementById('cri-rate-unit').value; // mcg/kg/min or mg/kg/h or mg/kg/min
+  const rateUnit = document.getElementById('cri-rate-unit').value;
   const weightKg = getWeightKg();
   const dilVol = parseFloat(document.getElementById('cri-dil-vol').value) || 50;
   const stockVol = parseFloat(document.getElementById('cri-stock-vol').value) || 0;
 
-  if (!drugId || rateInput <= 0 || weightKg <= 0) {
-    document.getElementById('cri-result').style.display = 'none'; return;
-  }
+  if (!drugId || rateInput<=0 || weightKg<=0) { document.getElementById('cri-result').style.display='none'; return; }
 
   const drugs = getDrugs();
-  const drug = drugs.find(d => d.id === drugId);
+  const drug = drugs.find(d => d.id===drugId);
   if (!drug) return;
 
-  const concMgPerMl = drug.conc; // mg/mL of stock
+  const ref = CRI_DOSE_REF[drugId];
+  const concMgPerMl = drug.conc;
+  const concPrep = stockVol>0 ? (concMgPerMl*stockVol)/dilVol : concMgPerMl;
 
-  // Concentration of prepared syringe
-  let concPrep = 0; // mg/mL of prepared solution
-  if (stockVol > 0) {
-    concPrep = (concMgPerMl * stockVol) / dilVol;
-  } else {
-    concPrep = concMgPerMl; // no dilution, use stock
+  // Convert to mg/kg/min
+  let rateMgKgMin = 0;
+  if (rateUnit==='mcg/kg/min') rateMgKgMin = rateInput/1000;
+  else if (rateUnit==='mcg/kg/h') rateMgKgMin = rateInput/1000/60;
+  else if (rateUnit==='mg/kg/min') rateMgKgMin = rateInput;
+  else if (rateUnit==='mg/kg/h') rateMgKgMin = rateInput/60;
+  else if (rateUnit==='U/kg/h') rateMgKgMin = rateInput/60;
+  else if (rateUnit==='mU/kg/min') rateMgKgMin = rateInput/1000;
+
+  const mlPerHour = (rateMgKgMin*weightKg*60)/concPrep;
+
+  // Range check
+  let rangeWarn = '';
+  if (ref) {
+    const maxD = (state.species==='cat' && ref.maxCat) ? ref.maxCat : ref.max;
+    if (rateInput > maxD) rangeWarn = `⚠ Dosis ${rateInput} ${rateUnit} supera el máximo recomendado (${maxD} ${rateUnit})`;
+    else if (rateInput < ref.min) rangeWarn = `ℹ Dosis por debajo del mínimo (${ref.min} ${rateUnit})`;
   }
 
-  // Rate desired: convert to mg/kg/min
-  let rateMgKgMin = 0;
-  if (rateUnit === 'mcg/kg/min') rateMgKgMin = rateInput / 1000;
-  else if (rateUnit === 'mg/kg/min') rateMgKgMin = rateInput;
-  else if (rateUnit === 'mg/kg/h') rateMgKgMin = rateInput / 60;
-
-  // mL/h = (rate mg/kg/min × weight × 60) / conc mg/mL
-  const mlPerHour = (rateMgKgMin * weightKg * 60) / concPrep;
-
-  document.getElementById('cri-conc-prep').textContent = concPrep.toFixed(3) + ' mg/mL';
-  document.getElementById('cri-ml-per-hour').textContent = mlPerHour.toFixed(2) + ' mL/h';
+  document.getElementById('cri-conc-prep').textContent = concPrep.toFixed(3)+' mg/mL';
+  document.getElementById('cri-ml-per-hour').textContent = mlPerHour.toFixed(2)+' mL/h';
   document.getElementById('cri-drug-name').textContent = drug.generic;
 
-  // Duration estimate if stock vol entered
-  if (stockVol > 0 && mlPerHour > 0) {
-    const hours = dilVol / mlPerHour;
-    document.getElementById('cri-duration').textContent = hours.toFixed(1) + ' horas';
-    document.getElementById('cri-duration-row').style.display = '';
+  if (stockVol>0 && mlPerHour>0) {
+    document.getElementById('cri-duration').textContent = (dilVol/mlPerHour).toFixed(1)+' horas';
+    document.getElementById('cri-duration-row').style.display='';
   } else {
-    document.getElementById('cri-duration-row').style.display = 'none';
+    document.getElementById('cri-duration-row').style.display='none';
   }
 
-  const instrText = stockVol > 0
-    ? `Tomar ${stockVol} cc de ${drug.generic} (${drug.conc} mg/mL) → llevar a ${dilVol} cc → concentración ${concPrep.toFixed(3)} mg/mL → pasar a ${mlPerHour.toFixed(2)} mL/h`
+  const instrText = stockVol>0
+    ? `Tomar ${stockVol} cc de ${drug.generic} (${drug.conc} mg/mL) → llevar a ${dilVol} cc → conc. ${concPrep.toFixed(3)} mg/mL → pasar a ${mlPerHour.toFixed(2)} mL/h`
     : `Usar ${drug.generic} sin diluir (${drug.conc} mg/mL) → pasar a ${mlPerHour.toFixed(2)} mL/h`;
   document.getElementById('cri-instruction').textContent = instrText;
-  document.getElementById('cri-result').style.display = 'block';
+
+  let warn = document.getElementById('cri-range-warn');
+  if (rangeWarn) {
+    if (!warn) { warn=document.createElement('div'); warn.id='cri-range-warn'; warn.className='warn-note'; document.getElementById('cri-result').prepend(warn); }
+    warn.innerHTML = `<span>⚠</span><span>${rangeWarn}</span>`;
+  } else if (warn) warn.remove();
+
+  document.getElementById('cri-result').style.display='block';
 }
+
 
 // ─── DRUGS DB ─────────────────────────────────────────────────────────────────
 function renderDrugsDB(filter = '') {
@@ -2505,7 +2583,68 @@ function calcNutricion() {
 }
 
 
-// ─── SETTINGS ─────────────────────────────────────────────────────────────────
+// ─── REGISTRO PRIMER ACCESO ──────────────────────────────────────────────────
+// Google Form entry IDs — reemplazar con IDs reales del formulario
+// Para obtenerlos: F12 en el formulario → buscar "entry."
+// Google Form entry IDs
+const GFORM_URL = 'https://docs.google.com/forms/d/e/1FAIpQLScfxoHRgjGSETTkhecKEU6aEDbd7KxuiD29yqes095g_XTmFA/formResponse';
+const GFORM_ENTRY_NOMBRE   = 'entry.1496369334';
+const GFORM_ENTRY_APELLIDO = 'entry.155769268';
+const GFORM_ENTRY_EMAIL    = 'entry.1867744646';
+const GFORM_ENTRY_PAIS     = 'entry.266488990';
+
+function checkRegistration() {
+  const registered = localStorage.getItem('vetdose_registered');
+  if (!registered) {
+    const overlay = document.getElementById('reg-overlay');
+    if (overlay) overlay.style.display = 'flex';
+  }
+}
+
+function submitRegistration() {
+  const nombre   = document.getElementById('reg-nombre').value.trim();
+  const apellido = document.getElementById('reg-apellido').value.trim();
+  const email    = document.getElementById('reg-email').value.trim();
+  const pais     = document.getElementById('reg-pais').value.trim();
+  const errDiv   = document.getElementById('reg-error');
+
+  if (!nombre)  { errDiv.textContent='Por favor ingresa tu nombre.'; errDiv.style.display='block'; return; }
+  if (!apellido){ errDiv.textContent='Por favor ingresa tu apellido.'; errDiv.style.display='block'; return; }
+  if (!email || !email.includes('@')){ errDiv.textContent='Por favor ingresa un email válido.'; errDiv.style.display='block'; return; }
+  if (!pais)    { errDiv.textContent='Por favor ingresa tu país.'; errDiv.style.display='block'; return; }
+  errDiv.style.display = 'none';
+
+  const now = new Date().toLocaleString('es-US', {
+    year:'numeric', month:'long', day:'numeric',
+    hour:'2-digit', minute:'2-digit', timeZoneName:'short'
+  });
+
+  // Submit to Google Form using no-cors (data saves even though CORS error)
+  const formData = new FormData();
+  formData.append(GFORM_ENTRY_NOMBRE,   nombre);
+  formData.append(GFORM_ENTRY_APELLIDO, apellido);
+  formData.append(GFORM_ENTRY_EMAIL,    email);
+  formData.append(GFORM_ENTRY_PAIS,     pais);
+
+  fetch(GFORM_URL, { method:'POST', body: formData, mode:'no-cors' })
+    .catch(() => {});
+
+  // Save locally
+  localStorage.setItem('vetdose_registered', now);
+  localStorage.setItem('vetdose_user_name', `${nombre} ${apellido}`);
+
+  // Pre-fill settings with name
+  const settings = getSettings();
+  if (!settings.doctorName) {
+    settings.doctorName = `Dr. ${nombre} ${apellido}`;
+    localStorage.setItem('vetdose_settings', JSON.stringify(settings));
+  }
+
+  // Close modal
+  document.getElementById('reg-overlay').style.display = 'none';
+}
+
+
 function loadSettings() {
   try {
     const s = JSON.parse(localStorage.getItem('vetdose_settings') || '{}');

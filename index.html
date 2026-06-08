@@ -352,15 +352,18 @@ input:focus{border-color:var(--accent-md);box-shadow:0 0 0 3px rgba(26,92,56,.1)
         <div class="card">
           <div class="mfield" style="margin-bottom:12px">
             <label>Seleccionar droga</label>
-            <select id="cri-drug-select" onchange="updateCRI()"><option value="">-- seleccionar --</option></select>
+            <select id="cri-drug-select" onchange="onCRIDrugChange()"><option value="">-- seleccionar --</option></select>
           </div>
           <div style="display:flex;gap:8px">
             <div class="mfield" style="flex:1;margin-bottom:0"><label>Tasa deseada</label><input type="number" id="cri-rate" placeholder="Ej: 5" step="0.01" min="0" oninput="updateCRI()"></div>
             <div class="mfield" style="width:142px;margin-bottom:0"><label>Unidad</label>
-              <select id="cri-rate-unit" onchange="updateCRI()">
+              <select id="cri-rate-unit" onchange="updateCRI()" style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-sm);padding:10px 12px;font-size:13px;font-family:var(--sans);outline:none">
                 <option value="mcg/kg/min">mcg/kg/min</option>
+                <option value="mcg/kg/h">mcg/kg/h</option>
                 <option value="mg/kg/h">mg/kg/h</option>
                 <option value="mg/kg/min">mg/kg/min</option>
+                <option value="U/kg/h">U/kg/h</option>
+                <option value="mU/kg/min">mU/kg/min</option>
               </select>
             </div>
           </div>
@@ -812,6 +815,49 @@ input:focus{border-color:var(--accent-md);box-shadow:0 0 0 3px rgba(26,92,56,.1)
     <div style="display:flex;gap:8px;margin-top:12px">
       <button class="btn btn-secondary" onclick="closeProtocolEdit()" style="flex:1">Cancelar</button>
       <button class="btn btn-primary" onclick="saveProtocolEdit()" style="flex:2">Guardar protocolo</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- REGISTRO PRIMER ACCESO -->
+<div id="reg-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:9999;align-items:center;justify-content:center;padding:20px">
+  <div style="background:#fff;border-radius:16px;padding:28px 24px;max-width:380px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,.3)">
+    <div style="text-align:center;margin-bottom:20px">
+      <img src="icon-logo.png" style="height:52px;margin-bottom:10px">
+      <div style="font-size:20px;font-weight:800;color:#1a5c38">Bienvenido a VetDose 2.0</div>
+      <div style="font-size:13px;color:#666;margin-top:4px">Calculadora de dosis veterinaria</div>
+    </div>
+    <div style="font-size:13px;color:#444;margin-bottom:16px;text-align:center;line-height:1.5">Gracias por probar esta aplicación — no hay una gran corporación detrás, solo un veterinario con muchos deseos de mejorar la clínica diaria.</div>
+    <div style="display:flex;gap:8px;margin-bottom:12px">
+      <div style="flex:1">
+        <div style="font-size:12px;font-weight:700;color:#1a5c38;margin-bottom:4px">Nombre *</div>
+        <input type="text" id="reg-nombre" placeholder="Juan"
+          style="width:100%;padding:10px 12px;border:1.5px solid #ddd;border-radius:8px;font-size:14px;outline:none;font-family:Arial;box-sizing:border-box">
+      </div>
+      <div style="flex:1">
+        <div style="font-size:12px;font-weight:700;color:#1a5c38;margin-bottom:4px">Apellido *</div>
+        <input type="text" id="reg-apellido" placeholder="Pérez"
+          style="width:100%;padding:10px 12px;border:1.5px solid #ddd;border-radius:8px;font-size:14px;outline:none;font-family:Arial;box-sizing:border-box">
+      </div>
+    </div>
+    <div style="margin-bottom:12px">
+      <div style="font-size:12px;font-weight:700;color:#1a5c38;margin-bottom:4px">Correo electrónico *</div>
+      <input type="email" id="reg-email" placeholder="dr@clinica.com"
+        style="width:100%;padding:10px 12px;border:1.5px solid #ddd;border-radius:8px;font-size:14px;outline:none;font-family:Arial;box-sizing:border-box">
+    </div>
+    <div style="margin-bottom:20px">
+      <div style="font-size:12px;font-weight:700;color:#1a5c38;margin-bottom:4px">País *</div>
+      <input type="text" id="reg-pais" placeholder="USA, Venezuela, Colombia..."
+        style="width:100%;padding:10px 12px;border:1.5px solid #ddd;border-radius:8px;font-size:14px;outline:none;font-family:Arial;box-sizing:border-box">
+    </div>
+    <div id="reg-error" style="display:none;color:#dc2626;font-size:12px;margin-bottom:10px;text-align:center"></div>
+    <button onclick="submitRegistration()"
+      style="width:100%;background:#1a5c38;color:#fff;border:none;border-radius:10px;padding:14px;font-size:15px;font-weight:700;cursor:pointer;font-family:Arial">
+      Acceder a VetDose →
+    </button>
+    <div style="text-align:center;margin-top:14px;font-size:11px;color:#999">
+      Dr. Yenen Villasmil-Ontiveros · Pembroke Pines, Florida
     </div>
   </div>
 </div>
