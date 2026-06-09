@@ -2780,6 +2780,7 @@ function setActiveProfile(profile) {
   if (profile && profile.settings) {
     localStorage.setItem('vetdose_settings', JSON.stringify(profile.settings));
   }
+  loadSettings();
   updateDrName();
   document.getElementById('profile-modal').classList.add('hidden');
 }
@@ -2853,6 +2854,8 @@ const GFORM_ENTRY_NOMBRE   = 'entry.1496369334';
 const GFORM_ENTRY_APELLIDO = 'entry.155769268';
 const GFORM_ENTRY_EMAIL    = 'entry.1867744646';
 const GFORM_ENTRY_PAIS     = 'entry.266488990';
+const GFORM_ENTRY_CLINICA  = 'entry.701960939';
+const GFORM_ENTRY_TELEFONO = 'entry.1296988385';
 
 function checkRegistration() {
   const registered = localStorage.getItem('vetdose_registered');
@@ -2867,6 +2870,8 @@ function submitRegistration() {
   const apellido = document.getElementById('reg-apellido').value.trim();
   const email    = document.getElementById('reg-email').value.trim();
   const pais     = document.getElementById('reg-pais').value.trim();
+  const clinica  = document.getElementById('reg-clinica')?.value.trim() || '';
+  const telefono = document.getElementById('reg-telefono')?.value.trim() || '';
   const errDiv   = document.getElementById('reg-error');
 
   if (!nombre)  { errDiv.textContent='Por favor ingresa tu nombre.'; errDiv.style.display='block'; return; }
@@ -2880,12 +2885,14 @@ function submitRegistration() {
     hour:'2-digit', minute:'2-digit', timeZoneName:'short'
   });
 
-  // Submit to Google Form using no-cors (data saves even though CORS error)
+  // Submit to Google Form
   const formData = new FormData();
   formData.append(GFORM_ENTRY_NOMBRE,   nombre);
   formData.append(GFORM_ENTRY_APELLIDO, apellido);
   formData.append(GFORM_ENTRY_EMAIL,    email);
   formData.append(GFORM_ENTRY_PAIS,     pais);
+  formData.append(GFORM_ENTRY_CLINICA,  clinica || 'No especificada');
+  formData.append(GFORM_ENTRY_TELEFONO, telefono || 'No especificado');
 
   fetch(GFORM_URL, { method:'POST', body: formData, mode:'no-cors' })
     .catch(() => {});
@@ -2894,36 +2901,61 @@ function submitRegistration() {
   localStorage.setItem('vetdose_registered', now);
   localStorage.setItem('vetdose_user_name', `${nombre} ${apellido}`);
 
-  // Pre-fill settings with name
+  // Pre-fill settings
   const settings = getSettings();
   if (!settings.doctorName) {
     settings.doctorName = `Dr. ${nombre} ${apellido}`;
+    settings.clinicName = clinica;
     localStorage.setItem('vetdose_settings', JSON.stringify(settings));
   }
 
-  // Close modal
+  // Also create a profile automatically
+  const words = `${nombre} ${apellido}`.split(' ');
+  const initials = (words[0][0] + words[words.length-1][0]).toUpperCase();
+  const profile = { initials, name: `Dr. ${nombre} ${apellido}`, clinic: clinica,
+    settings: { doctorName: `Dr. ${nombre} ${apellido}`, clinicName: clinica, phone: telefono } };
+  const profiles = loadProfiles();
+  const exists = profiles.find(p => p.name === profile.name);
+  if (!exists) { profiles.push(profile); saveProfiles(profiles); }
+
+  // Close modal and update header
   document.getElementById('reg-overlay').style.display = 'none';
+  updateDrName();
 }
 
+
+
+// ─── DR. NAME IN HEADER ──────────────────────────────────────────────────────
+function updateDrName() {
+  const s = getSettings();
+  const nameEl = document.getElementById('header-dr-name');
+  if (!nameEl) return;
+  if (s.doctorName && s.doctorName.trim()) {
+    // "Dr. Yenen Villasmil-Ontiveros" → "Dr. Yenen Villasmil-Ontiveros"
+    const clean = s.doctorName.trim();
+    const display = clean.match(/^Dr\.?\s*/i) ? clean : 'Dr. ' + clean;
+    nameEl.textContent = display;
+    nameEl.style.display = 'block';
+  } else {
+    nameEl.style.display = 'none';
+  }
+}
 
 function loadSettings() {
   try {
     const s = JSON.parse(localStorage.getItem('vetdose_settings') || '{}');
     if (s.doctorName) document.getElementById('set-doctor').value = s.doctorName;
     if (s.clinicName) document.getElementById('set-clinic').value = s.clinicName;
-    if (s.phone) document.getElementById('set-phone').value = s.phone;
   } catch(e) {}
 }
 
 function saveSettings() {
-  // Also update header
-  setTimeout(updateDrName, 100);
   const s = {
     doctorName: document.getElementById('set-doctor').value.trim(),
     clinicName: document.getElementById('set-clinic').value.trim(),
-    phone: document.getElementById('set-phone').value.trim(),
   };
   localStorage.setItem('vetdose_settings', JSON.stringify(s));
+  updateDrName();
   const btn = document.getElementById('set-save-btn');
   btn.textContent = '✓ Guardado';
   btn.style.background = 'var(--accent)';

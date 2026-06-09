@@ -796,8 +796,7 @@ input:focus{border-color:var(--accent-md);box-shadow:0 0 0 3px rgba(26,92,56,.1)
       <input type="text" id="set-doctor" placeholder="Ej: Dr. Yenen Villasmil-Ontiveros"></div>
     <div class="mfield"><label>Nombre de la clínica</label>
       <input type="text" id="set-clinic" placeholder="Ej: Pembroke Pines Animal Clinic"></div>
-    <div class="mfield"><label>Teléfono</label>
-      <input type="text" id="set-phone" placeholder="Ej: (305) 555-1234"></div>
+
     <button id="set-save-btn" class="btn btn-primary" onclick="saveSettings()" style="margin-bottom:16px">Guardar</button>
 
     <div style="border-top:1px solid var(--border);padding-top:14px;margin-top:4px">
@@ -869,9 +868,19 @@ input:focus{border-color:var(--accent-md);box-shadow:0 0 0 3px rgba(26,92,56,.1)
       <input type="email" id="reg-email" placeholder="dr@clinica.com"
         style="width:100%;padding:10px 12px;border:1.5px solid #ddd;border-radius:8px;font-size:14px;outline:none;font-family:Arial;box-sizing:border-box">
     </div>
-    <div style="margin-bottom:20px">
+    <div style="margin-bottom:12px">
       <div style="font-size:12px;font-weight:700;color:#1a5c38;margin-bottom:4px">País *</div>
       <input type="text" id="reg-pais" placeholder="USA, Venezuela, Colombia..."
+        style="width:100%;padding:10px 12px;border:1.5px solid #ddd;border-radius:8px;font-size:14px;outline:none;font-family:Arial;box-sizing:border-box">
+    </div>
+    <div style="margin-bottom:12px">
+      <div style="font-size:12px;font-weight:700;color:#1a5c38;margin-bottom:4px">Clínica</div>
+      <input type="text" id="reg-clinica" placeholder="Banfield, VCA, clínica propia..."
+        style="width:100%;padding:10px 12px;border:1.5px solid #ddd;border-radius:8px;font-size:14px;outline:none;font-family:Arial;box-sizing:border-box">
+    </div>
+    <div style="margin-bottom:20px">
+      <div style="font-size:12px;font-weight:700;color:#1a5c38;margin-bottom:4px">Teléfono</div>
+      <input type="tel" id="reg-telefono" placeholder="(305) 555-1234"
         style="width:100%;padding:10px 12px;border:1.5px solid #ddd;border-radius:8px;font-size:14px;outline:none;font-family:Arial;box-sizing:border-box">
     </div>
     <div id="reg-error" style="display:none;color:#dc2626;font-size:12px;margin-bottom:10px;text-align:center"></div>
