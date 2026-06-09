@@ -243,10 +243,12 @@ input:focus{border-color:var(--accent-md);box-shadow:0 0 0 3px rgba(26,92,56,.1)
 <div class="app">
   <div class="header">
     <img src="icon-logo.png" alt="VetDose">
-    <div id="header-dr-name" style="display:none;font-size:12px;font-weight:700;color:var(--accent);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:130px;flex-shrink:0"></div>
     <div class="header-pill" id="header-patient-info" style="flex:1;min-width:0"></div>
-    <button onclick="openHelp()" style="background:var(--surface2);border:1px solid var(--border);border-radius:50%;width:32px;height:32px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:14px;font-weight:700;color:var(--accent);flex-shrink:0">?</button>
-    <button onclick="openSettings()" style="background:var(--accent);border:none;border-radius:50%;width:34px;height:34px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;flex-shrink:0">⚙️</button>
+    <div id="header-dr-name" style="display:none;text-align:right;flex-shrink:0;line-height:1.2;margin-right:2px"></div>
+    <div style="display:flex;gap:6px;flex-shrink:0">
+      <button onclick="openHelp()" style="background:var(--surface2);border:1px solid var(--border);border-radius:50%;width:32px;height:32px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:13px;font-weight:700;color:var(--accent)">?</button>
+      <button onclick="openSettings()" style="background:var(--accent);border:none;border-radius:50%;width:34px;height:34px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px">⚙️</button>
+    </div>
   </div>
   <div class="tab-bar">
     <div class="tab active" onclick="showTab('calc')">
@@ -851,6 +853,20 @@ input:focus{border-color:var(--accent-md);box-shadow:0 0 0 3px rgba(26,92,56,.1)
       <div style="font-size:13px;color:#666;margin-top:4px">Calculadora de dosis veterinaria</div>
     </div>
     <div style="font-size:13px;color:#444;margin-bottom:16px;text-align:center;line-height:1.5">Gracias por probar esta aplicación — no hay una gran corporación detrás, solo un veterinario con muchos deseos de mejorar la clínica diaria.</div>
+    <div style="margin-bottom:12px">
+      <div style="font-size:12px;font-weight:700;color:#1a5c38;margin-bottom:6px">Título *</div>
+      <div style="display:flex;gap:8px">
+        <button id="reg-btn-dr" onclick="selectTitle('Dr.')"
+          style="flex:1;padding:10px;border-radius:8px;border:2px solid #1a5c38;background:#1a5c38;color:#fff;font-size:15px;font-weight:700;cursor:pointer;font-family:Arial">
+          Dr.
+        </button>
+        <button id="reg-btn-dra" onclick="selectTitle('Dra.')"
+          style="flex:1;padding:10px;border-radius:8px;border:2px solid #ddd;background:#fff;color:#666;font-size:15px;font-weight:700;cursor:pointer;font-family:Arial">
+          Dra.
+        </button>
+      </div>
+      <input type="hidden" id="reg-title" value="Dr.">
+    </div>
     <div style="display:flex;gap:8px;margin-bottom:12px">
       <div style="flex:1">
         <div style="font-size:12px;font-weight:700;color:#1a5c38;margin-bottom:4px">Nombre *</div>

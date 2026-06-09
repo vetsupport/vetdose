@@ -2865,7 +2865,22 @@ function checkRegistration() {
   }
 }
 
+
+function selectTitle(t) {
+  document.getElementById('reg-title').value = t;
+  const btnDr  = document.getElementById('reg-btn-dr');
+  const btnDra = document.getElementById('reg-btn-dra');
+  if (t === 'Dr.') {
+    btnDr.style.background  = '#1a5c38'; btnDr.style.color  = '#fff'; btnDr.style.borderColor  = '#1a5c38';
+    btnDra.style.background = '#fff';    btnDra.style.color = '#666'; btnDra.style.borderColor = '#ddd';
+  } else {
+    btnDra.style.background = '#1a5c38'; btnDra.style.color  = '#fff'; btnDra.style.borderColor  = '#1a5c38';
+    btnDr.style.background  = '#fff';    btnDr.style.color  = '#666'; btnDr.style.borderColor  = '#ddd';
+  }
+}
+
 function submitRegistration() {
+  const title    = document.getElementById('reg-title')?.value || 'Dr.';
   const nombre   = document.getElementById('reg-nombre').value.trim();
   const apellido = document.getElementById('reg-apellido').value.trim();
   const email    = document.getElementById('reg-email').value.trim();
@@ -2904,7 +2919,8 @@ function submitRegistration() {
   // Pre-fill settings
   const settings = getSettings();
   if (!settings.doctorName) {
-    settings.doctorName = `Dr. ${nombre} ${apellido}`;
+    settings.doctorName = `${title} ${nombre} ${apellido}`;
+    settings.drTitle = title;
     settings.clinicName = clinica;
     localStorage.setItem('vetdose_settings', JSON.stringify(settings));
   }
@@ -2912,8 +2928,8 @@ function submitRegistration() {
   // Also create a profile automatically
   const words = `${nombre} ${apellido}`.split(' ');
   const initials = (words[0][0] + words[words.length-1][0]).toUpperCase();
-  const profile = { initials, name: `Dr. ${nombre} ${apellido}`, clinic: clinica,
-    settings: { doctorName: `Dr. ${nombre} ${apellido}`, clinicName: clinica, phone: telefono } };
+  const profile = { initials, name: `${title} ${nombre} ${apellido}`, clinic: clinica,
+    settings: { doctorName: `${title} ${nombre} ${apellido}`, clinicName: clinica, phone: telefono, drTitle: title } };
   const profiles = loadProfiles();
   const exists = profiles.find(p => p.name === profile.name);
   if (!exists) { profiles.push(profile); saveProfiles(profiles); }
@@ -2931,10 +2947,16 @@ function updateDrName() {
   const nameEl = document.getElementById('header-dr-name');
   if (!nameEl) return;
   if (s.doctorName && s.doctorName.trim()) {
-    // "Dr. Yenen Villasmil-Ontiveros" → "Dr. Yenen Villasmil-Ontiveros"
     const clean = s.doctorName.trim();
-    const display = clean.match(/^Dr\.?\s*/i) ? clean : 'Dr. ' + clean;
-    nameEl.textContent = display;
+    // Extract title (Dr/Dra) and last name
+    const titleMatch = clean.match(/^(Dr[a]?\.?)\s*/i);
+    const title = titleMatch ? titleMatch[1] : (s.drTitle || 'Dr.');
+    const noTitle = clean.replace(/^Dr[a]?\.?\s*/i, '').trim();
+    const parts = noTitle.split(' ');
+    const apellido = parts[parts.length - 1]; // last word = apellido
+    nameEl.innerHTML =
+      '<div style="font-size:10px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;text-align:right">' + title + '</div>' +
+      '<div style="font-size:18px;font-weight:800;color:var(--accent);text-align:right;line-height:1">' + apellido + '</div>';
     nameEl.style.display = 'block';
   } else {
     nameEl.style.display = 'none';
