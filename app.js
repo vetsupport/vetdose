@@ -268,6 +268,24 @@ const SEED_DRUGS = [
     source: 'FDA NADA 141-567; Ceva/ISK label 2022', validationStatus: 'Revisión preliminar; validar por usuario' },
 
 
+  // ── MOD-034 new drugs ──────────────────────────────────────────────────────
+  { id: 'famotidina_inj', generic: 'Famotidina inyectable', trade: 'Pepcid IV/genérico', conc: 10,
+    doseMin: 0.5, doseMax: 1.0, dosePref: 0.5, unit: 'mg/kg',
+    route: 'IV lento, SQ, IM', category: 'gastrointestinal', formType: 'injection',
+    calcMode: 'standard', species: 'both',
+    frequency: 'BID', frequencies: ['SID','BID'],
+    notes: 'IV lento en 15 min — hipotensión con IV rápido. Reducir dosis en falla renal. Alternativa a omeprazol IV cuando no está disponible.',
+    source: 'Plumb 2024', validationStatus: 'Revisión preliminar; validar por usuario' },
+
+  { id: 'metronidazol_inj', generic: 'Metronidazol inyectable', trade: 'Flagyl IV/genérico', conc: 5,
+    doseMin: 10.0, doseMax: 15.0, dosePref: 15.0, unit: 'mg/kg',
+    route: 'IV lento', category: 'antibiotic', formType: 'injection',
+    calcMode: 'standard', species: 'both',
+    frequency: 'BID', frequencies: ['BID','TID'],
+    notes: 'IV lento mínimo 30 min. Presentación: 500 mg/100 mL (5 mg/mL). Neuropatía con uso prolongado. No en gestantes. No mezclar con aluminio.',
+    source: 'Plumb 2024', validationStatus: 'Revisión preliminar; validar por usuario' },
+
+
 ];
 
 // ─── TABLET SIZES MAP ────────────────────────────────────────────────────────
@@ -430,15 +448,15 @@ const TABLE_DRUGS = [
   // ── SIMPARICA TRIO ── Zoetis label verificado ───────────────────────────────
   {
     id: 'simparica_trio_table', generic: 'Sarolaner/Moxidectina/Pirantel (tabla)', trade: 'Simparica Trio',
-    species: ['dog'], category: 'antiparasitic/heartworm',
-    notes: 'Solo perros ≥ 8 semanas y ≥ 2.8 lb. Mensual. Heartworm, pulgas, 6 tipos garrapatas, Ancylostoma, Toxocara. Usar con precaución en perros con historia de convulsiones.',
+    species: ['dog'], category: 'antiparasitic',
+    notes: 'Solo perros ≥ 8 sem y ≥ 2.8 lb. Mensual. Con o sin comida. Ectoparásitos + heartworm + intestinales.',
     rows: [
-      { minLb: 2.8,  maxLb: 5.5,  result: '2.8–5.5 lb → 1 tab. (3/0.06/12.5 mg Caja Dorada' },
-      { minLb: 5.6,  maxLb: 11.0, result: '5.6–11 lb → 1 tab. (6/0.12/25 mg Caja Morada' },
-      { minLb: 11.1, maxLb: 22.0, result: '11.1–22 lb → 1 tab. (12/0.24/50 mg Caja Caramelo' },
-      { minLb: 22.1, maxLb: 44.0, result: '22.1–44 lb → 1 tab. (24/0.48/100 mg Caja Teal' },
-      { minLb: 44.1, maxLb: 88.0, result: '44.1–88 lb → 1 tab. (48/0.96/200 mg Caja Verde' },
-      { minLb: 88.1, maxLb: 132,  result: '88.1–132 lb → 1 tab. (72/1.44/300 mg Caja Café' },
+      { minLb: 2.8,  maxLb: 5.5,  result: '1 masticable MAGENTA (2.8–5.5 lb)' },
+      { minLb: 5.6,  maxLb: 11.0, result: '1 masticable MORADO (5.6–11 lb)' },
+      { minLb: 11.1, maxLb: 22.0, result: '1 masticable NARANJA (11.1–22 lb)' },
+      { minLb: 22.1, maxLb: 44.0, result: '1 masticable VERDE (22.1–44 lb)' },
+      { minLb: 44.1, maxLb: 88.0, result: '1 masticable AZUL (44.1–88 lb)' },
+      { minLb: 88.1, maxLb: 132.0,result: '1 masticable ROJO (88.1–132 lb)' },
     ]
   },
 
@@ -529,14 +547,14 @@ const TABLE_DRUGS = [
 
   // ── INTERCEPTOR PLUS (Milbemicina/Praziquantel) ── Elanco label ────────────
   {
-    id: 'interceptor_plus_table', generic: 'Milbemicina/Praziquantel (tabla)', trade: 'Interceptor Plus',
-    species: ['dog'], category: 'antiparasitic/heartworm',
-    notes: 'Solo perros. Mensual. Heartworm + tenias (Taenia, Echinococcus). Con o sin comida.',
+    id: 'interceptor_plus_table', generic: 'Milbemicina/Lufenuron (tabla)', trade: 'Interceptor Plus',
+    species: ['dog','cat'], category: 'antiparasitic',
+    notes: 'Perros ≥ 4 sem y ≥ 2 lb. Gatos ≥ 6 sem y ≥ 1.5 lb. Mensual. Dar con comida.',
     rows: [
-      { minLb: 2.0,  maxLb: 8.0,  result: '2–8 lb → 1 tab. (2.3 mg / 22.8 mg' },
-      { minLb: 8.1,  maxLb: 25.0, result: '8.1–25 lb → 1 tab. (5.75 mg / 57 mg' },
-      { minLb: 25.1, maxLb: 50.0, result: '25.1–50 lb → 1 tab. (11.5 mg / 114 mg' },
-      { minLb: 50.1, maxLb: 100.0,result: '50.1–100 lb → 1 tab. (23 mg / 228 mg' },
+      { minLb: 2.0,  maxLb: 8.0,  result: '1 masticable VERDE (2–8 lb)' },
+      { minLb: 8.1,  maxLb: 25.0, result: '1 masticable AMARILLO (8.1–25 lb)' },
+      { minLb: 25.1, maxLb: 50.0, result: '1 masticable MARRÓN (25.1–50 lb)' },
+      { minLb: 50.1, maxLb: 100.0,result: '1 masticable BLANCO (50.1–100 lb)' },
     ]
   },
 ];
@@ -665,7 +683,6 @@ function showTab(tab) {
   const screen = document.getElementById('screen-' + tab);
   if (screen) screen.classList.add('active');
   if (tab === 'protocolos') renderProtocols();
-  if (tab === 'cri') populateCRISelect();
   if (tab === 'nutricion') populateNutFactors();
 }
 
@@ -1618,6 +1635,21 @@ const CRI_PROTOCOLS = {
 };
 
 function setCRIMode(mode) {
+  // MOD-036: show instructions
+  const instrEl = document.getElementById('cri-instr');
+  if (instrEl) {
+    instrEl.innerHTML = mode === 'single'
+      ? `<div style="background:#e8f5ee;border-left:3px solid var(--accent);border-radius:6px;padding:9px 12px;margin-bottom:12px;font-size:12px;color:#374151;line-height:1.6">
+          Selecciona la droga — el peso del paciente se toma automáticamente de la pantalla Calcular.
+          La app sugiere la dosis estándar y calcula los mL/h para la bomba.
+          Ingresa el volumen a diluir si preparas jeringa o bolsa de fluidos.
+        </div>`
+      : `<div style="background:#e8f5ee;border-left:3px solid var(--accent);border-radius:6px;padding:9px 12px;margin-bottom:12px;font-size:12px;color:#374151;line-height:1.6">
+          Protocolo de analgesia multimodal en bolsa IV.
+          Ingresa el peso, tamaño de la bolsa y la tasa de fluido deseada.
+          La app calcula los mL de cada droga a agregar a la bolsa y la dosis de carga (loading) para cada medicamento.
+        </div>`;
+  }
   const isSingle = mode === 'single';
   document.getElementById('cri-single-mode').style.display = isSingle ? 'block' : 'none';
   document.getElementById('cri-protocol-mode').style.display = isSingle ? 'none' : 'block';
@@ -2169,9 +2201,24 @@ function closeChangelog() { document.getElementById('changelog-modal').classList
 
 // ─── NUTRICIÓN — MODO SELECTOR ───────────────────────────────────────────────
 function setNutMode(mode) {
+  // MOD-035/036: show instructions
+  const instrEl = document.getElementById('nut-instr');
+  if (instrEl) {
+    instrEl.innerHTML = mode === 'rer'
+      ? `<div style="background:#e8f5ee;border-left:3px solid var(--accent);border-radius:6px;padding:9px 12px;margin-bottom:12px;font-size:12px;color:#374151;line-height:1.6">
+          Estima las calorías diarias y la cantidad de alimento según el peso y estado fisiológico del paciente.
+          Si el alimento no está en la lista, ingresa las kcal directamente desde la etiqueta del producto.
+        </div>`
+      : `<div style="background:#e8f5ee;border-left:3px solid var(--accent);border-radius:6px;padding:9px 12px;margin-bottom:12px;font-size:12px;color:#374151;line-height:1.6">
+          Estima el peso ideal según la Condición Corporal (BCS), calcula las calorías para pérdida de peso
+          y convierte el resultado en tazas o latas del alimento seleccionado.
+          Incluye proyección de semanas para alcanzar el peso ideal a un ritmo seguro de 0.5–1% por semana.
+        </div>`;
+  }
   const isRer = mode === 'rer';
   document.getElementById('nut-rer-mode').style.display = isRer ? 'block' : 'none';
   document.getElementById('nut-bcs-mode').style.display = isRer ? 'none' : 'block';
+  // MOD-035 tabs renamed
   document.getElementById('nut-mode-rer').style.background = isRer ? 'var(--accent)' : 'var(--surface)';
   document.getElementById('nut-mode-rer').style.color = isRer ? '#fff' : 'var(--muted)';
   document.getElementById('nut-mode-rer').style.borderColor = isRer ? 'var(--accent)' : 'var(--border)';
@@ -2376,9 +2423,12 @@ function calcFluidos() {
   const volTotal = vol1 + Math.max(0, vol2);
 
   // Bolus emergency
-  const bolusMin = species === 'cat' ? 10 : 10;
+  const bolusMin = species === 'cat' ? 5 : 15;
   const bolusMax = species === 'cat' ? 10 : 20;
-  const showBolus = dehyd >= 12;
+  // AAHA 2024: Perros 15-20 mL/kg, Gatos 5-10 mL/kg en 15-30 min
+  const showBolus = dehyd >= 10;
+  const bolusMinAaha = species === 'cat' ? 5 : 15;
+  const bolusMaxAaha = species === 'cat' ? 10 : 20;
 
   // NaCl 7.2% special
   const isHypertonic = fluid === 'nacl72';
@@ -2681,7 +2731,7 @@ function closeSettings() { document.getElementById('settings-modal').classList.a
 // ─── PROTOCOLS ────────────────────────────────────────────────────────────────
 const DEFAULT_PROTOCOLS = [
   { id: 'pancreatitis', name: 'Pancreatitis aguda', icon: '🔥',
-    drugIds: ['fuzapladib','maropitant','ondansetron','pantoprazol','famotidina','gabapentina','buprenorfina','metronidazol','sucralfato'] },
+    drugIds: ['fuzapladib','maropitant','ondansetron','pantoprazol','famotidina','famotidina_inj','gabapentina','buprenorfina','metronidazol','metronidazol_inj','sucralfato'] },
   { id: 'preanest_dog', name: 'Pre-anestésico canino', icon: '💉',
     drugIds: ['acepromazina','butorfanol','midazolam','dexmedetomidina','ketamina','propofol'] },
   { id: 'preanest_cat', name: 'Pre-anestésico felino', icon: '💉',

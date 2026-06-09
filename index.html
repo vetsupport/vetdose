@@ -334,6 +334,9 @@ input:focus{border-color:var(--accent-md);box-shadow:0 0 0 3px rgba(26,92,56,.1)
     <!-- CRI -->
     <div class="screen" id="screen-cri">
 
+      <!-- Instruction box -->
+      <div id="cri-instr"></div>
+
       <!-- Mode selector -->
       <div style="display:flex;gap:8px;margin-bottom:14px">
         <button id="cri-mode-single" onclick="setCRIMode('single')"
@@ -525,17 +528,23 @@ input:focus{border-color:var(--accent-md);box-shadow:0 0 0 3px rgba(26,92,56,.1)
     <!-- NUTRICIÓN -->
     <div class="screen" id="screen-nutricion">
 
+      <!-- Instruction box -->
+      <div id="cri-instr"></div>
+
       <!-- Mode selector -->
       <div style="display:flex;gap:8px;margin-bottom:14px">
         <button id="nut-mode-rer" onclick="setNutMode('rer')"
           style="flex:1;padding:10px;border-radius:10px;font-size:13px;font-weight:700;border:2px solid var(--accent);background:var(--accent);color:#fff;cursor:pointer;font-family:var(--sans)">
-          🔢 RER / MER
+          🔢 Requerimiento Calórico
         </button>
         <button id="nut-mode-bcs" onclick="setNutMode('bcs')"
           style="flex:1;padding:10px;border-radius:10px;font-size:13px;font-weight:700;border:2px solid var(--border);background:var(--surface);color:var(--muted);cursor:pointer;font-family:var(--sans)">
-          ⚖️ Manejo de Peso BCS
+          ⚖️ Plan de Reducción de Peso
         </button>
       </div>
+
+      <!-- Instruction box -->
+      <div id="nut-instr"></div>
 
       <!-- RER/MER MODE -->
       <div id="nut-rer-mode">
