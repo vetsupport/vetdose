@@ -286,6 +286,36 @@ const SEED_DRUGS = [
     source: 'Plumb 2024', validationStatus: 'Revisión preliminar; validar por usuario' },
 
 
+  // ── CRI drugs missing from SEED ────────────────────────────────────────────
+  { id: 'vasopresina', generic: 'Vasopresina', trade: 'Pitressin', conc: 20,
+    doseMin: 0.5, doseMax: 2.0, dosePref: 1.0, unit: 'mU/kg/min',
+    route: 'IV (CRI)', category: 'emergency', formType: 'injection',
+    calcMode: 'standard', frequency: 'CRI', frequencies: ['CRI'],
+    notes: 'Vasopresor no adrenérgico. PCR refractaria a epinefrina. 20 U/mL.',
+    source: 'Plumb 2024', validationStatus: 'Revisión preliminar; validar por usuario' },
+
+  { id: 'propofol', generic: 'Propofol', trade: 'PropoFlo/Rapinovet', conc: 10,
+    doseMin: 2.0, doseMax: 6.0, dosePref: 4.0, unit: 'mg/kg',
+    route: 'IV lento', category: 'sedation', formType: 'injection',
+    calcMode: 'standard', frequency: 'PRN', frequencies: ['PRN','CRI'],
+    notes: 'Inducción: 2-6 mg/kg IV titulado. CRI TIVA: 0.5-8 mg/kg/h. Apnea posible. Sin conservantes — descartar en 6h.',
+    source: 'Plumb 2024', validationStatus: 'Revisión preliminar; validar por usuario' },
+
+  { id: 'dobutamina', generic: 'Dobutamina', trade: 'Dobutrex/genérico', conc: 12.5,
+    doseMin: 2.0, doseMax: 20.0, dosePref: 5.0, unit: 'mcg/kg/min',
+    route: 'IV (CRI)', category: 'emergency/cardiac', formType: 'injection',
+    calcMode: 'standard', frequency: 'CRI', frequencies: ['CRI'],
+    notes: 'Inotrópico positivo. ICC descompensada. Taquicardia a dosis altas. Monitorear FC y PA.',
+    source: 'Plumb 2024', validationStatus: 'Revisión preliminar; validar por usuario' },
+
+  { id: 'norepinefrina', generic: 'Norepinefrina', trade: 'Levophed/genérico', conc: 1,
+    doseMin: 0.05, doseMax: 1.0, dosePref: 0.1, unit: 'mcg/kg/min',
+    route: 'IV (CRI)', category: 'emergency', formType: 'injection',
+    calcMode: 'standard', frequency: 'CRI', frequencies: ['CRI'],
+    notes: 'Vasopresor. Shock séptico/distributivo. Monitorear PA invasiva idealmente.',
+    source: 'Plumb 2024', validationStatus: 'Revisión preliminar; validar por usuario' },
+
+
 ];
 
 // ─── TABLET SIZES MAP ────────────────────────────────────────────────────────
@@ -664,7 +694,9 @@ document.addEventListener('DOMContentLoaded', () => {
   }
   loadFreqPrefs();
   loadSettings();
+  updateDrName();
   checkRegistration();
+  checkProfile();
   renderDrugList();
   renderDrugsDB();
   populateCRISelect();
@@ -856,7 +888,7 @@ function renderDrugList() {
       <div class="drug-item" onclick="toggleDrug('${d.id}')">
         <div class="drug-check ${state.selectedDrugs.has(d.id) ? 'checked' : ''}" id="check-${d.id}"></div>
         <div class="drug-info">
-          <div class="drug-generic">${d.generic}${needsVal ? ' <span style="font-size:10px;color:#b45309">⚠</span>' : ''}</div>
+          <div class="drug-generic">${d.generic}</div>
           <div class="drug-trade">${d.trade}</div>
           <div class="drug-meta">${doseUnitLabel(d)}</div>
         </div>
@@ -2362,6 +2394,26 @@ function calcBCS() {
   resultDiv.style.display = 'block';
 }
 
+
+function setFeverUnit(unit) {
+  document.getElementById('fl-fever-unit').value = unit;
+  const btnC = document.getElementById('fever-btn-c');
+  const btnF = document.getElementById('fever-btn-f');
+  if (!btnC || !btnF) return;
+  if (unit === 'C') {
+    btnC.style.background = 'var(--accent)'; btnC.style.color = '#fff'; btnC.style.borderColor = 'var(--accent)';
+    btnF.style.background = 'var(--surface)'; btnF.style.color = 'var(--muted)'; btnF.style.borderColor = 'var(--border)';
+    document.getElementById('fl-fever').placeholder = 'Ej: 40.5°C (normal: 38.5–39.5)';
+  } else {
+    btnF.style.background = 'var(--accent)'; btnF.style.color = '#fff'; btnF.style.borderColor = 'var(--accent)';
+    btnC.style.background = 'var(--surface)'; btnC.style.color = 'var(--muted)'; btnC.style.borderColor = 'var(--border)';
+    document.getElementById('fl-fever').placeholder = 'Ej: 104.9°F (normal: 101.3–103.1)';
+  }
+}
+
+function openHelp() { document.getElementById('help-modal').classList.remove('hidden'); }
+function closeHelp() { document.getElementById('help-modal').classList.add('hidden'); }
+
 // ─── MÓDULO FLUIDOS ──────────────────────────────────────────────────────────
 
 const FLUID_DATA = {
@@ -2371,7 +2423,7 @@ const FLUID_DATA = {
   d5w:      { name: 'Dextrosa 5% en agua (D5W)',     uso: 'Hipernatremia. NO usar SQ. Solo fuente calórica IV.' },
   nacl045:  { name: 'NaCl 0.45% + Dex 2.5%',        uso: 'Mantenimiento felino. Hiperosmolaridad. Corrección lenta.' },
   hetastarch:{ name: 'Hetastarch (coloide)',          uso: 'Shock hipovolémico. Máx 20 mL/kg/día perros, 10 gatos.' },
-  plasma:   { name: 'Plasma fresco congelado',       uso: 'Coagulopatías, déficit de factores de coagulación.' },
+  plasma:   { name: 'Plasma fresco congelado',       uso: 'Coagulopatías: 6–10 mL/kg IV. Hipoalbuminemia: 20–25 mL/kg (efecto limitado). NO calcular como cristaloide.' },
   nacl72:   { name: 'NaCl 7.2% (hipertónico)',       uso: 'Solo bolo emergencia: 3-5 mL/kg IV rápido. NO mantenimiento.' },
 };
 
@@ -2391,7 +2443,9 @@ function calcFluidos() {
   const dehyd = parseFloat(document.getElementById('fl-dehydration').value) || 0;
   const repTime = document.getElementById('fl-reptime').value;
   const hours = parseFloat(document.getElementById('fl-hours').value) || 24;
-  const fever = parseFloat(document.getElementById('fl-fever').value) || 0;
+  const feverRaw = parseFloat(document.getElementById('fl-fever').value) || 0;
+  const feverUnit = document.getElementById('fl-fever-unit')?.value || 'C';
+  const fever = feverUnit === 'F' ? (feverRaw - 32) * 5/9 : feverRaw;
   const losses = parseFloat(document.getElementById('fl-losses').value) || 0;
 
   if (wkg <= 0) { alert('Ingresa el peso del paciente.'); return; }
@@ -2433,6 +2487,76 @@ function calcFluidos() {
   // NaCl 7.2% special
   const isHypertonic = fluid === 'nacl72';
   const isColloid = fluid === 'hetastarch';
+  const isPlasma = fluid === 'plasma';
+
+  // Plasma — special dosing, not crystalloid
+  if (isPlasma) {
+    const coagMin = (6 * wkg).toFixed(0);
+    const coagMax = (10 * wkg).toFixed(0);
+    const albMin  = (20 * wkg).toFixed(0);
+    const albMax  = (25 * wkg).toFixed(0);
+    document.getElementById('fl-result').innerHTML = `
+      <div style="background:#1a5c38;border-radius:12px;padding:13px 16px;margin-bottom:12px;color:#fff">
+        <div style="font-size:16px;font-weight:800">🩸 Plasma Fresco Congelado</div>
+        <div style="font-size:12px;color:#a7f3d0;margin-top:3px">${wkg} kg — dosis según indicación</div>
+      </div>
+      <div class="result-card">
+        <div class="result-header" style="background:linear-gradient(135deg,#fef3c7,var(--surface));border-bottom:2px solid #fbbf24">
+          <div class="result-names"><div class="result-generic">Coagulopatías / Déficit de factores</div><div class="result-trade">6–10 mL/kg IV</div></div>
+          <div style="text-align:right"><div style="font-size:11px;color:var(--muted)">Volumen</div>
+          <div style="font-size:22px;font-weight:800;color:#92400e">${coagMin}–${coagMax} mL</div></div>
+        </div>
+        <div class="result-body">
+          <div class="result-row"><div class="result-lbl">Tasa</div><div class="result-val">4–6 mL/kg/h (pasar en 4–6h)</div></div>
+        </div>
+      </div>
+      <div class="result-card">
+        <div class="result-header" style="background:linear-gradient(135deg,#eff6ff,var(--surface));border-bottom:2px solid #93c5fd">
+          <div class="result-names"><div class="result-generic">Hipoalbuminemia</div><div class="result-trade">20–25 mL/kg IV (efecto limitado)</div></div>
+          <div style="text-align:right"><div style="font-size:11px;color:var(--muted)">Volumen</div>
+          <div style="font-size:22px;font-weight:800;color:#1d4ed8">${albMin}–${albMax} mL</div></div>
+        </div>
+        <div class="result-body">
+          <div class="result-row"><div class="result-lbl">Alternativa</div><div class="result-val">Albúmina canina específica — más eficiente</div></div>
+        </div>
+      </div>
+      <div class="warn-note"><span>ℹ</span><span>El plasma NO se calcula como cristaloide. La eficacia para corregir albúmina es limitada — 22 mL/kg aumenta solo 0.5 g/dL. Priorizar soporte nutricional cuando sea posible. Fuente: AAHA 2024.</span></div>`;
+    document.getElementById('fl-result').style.display = 'block';
+    return;
+  }
+
+  // NaCl 7.2% — ONLY emergency bolus, block maintenance calc
+  if (isHypertonic) {
+    const bolusVolMin = (3 * wkg).toFixed(0);
+    const bolusVolMax = (5 * wkg).toFixed(0);
+    const rateMin = ((3 * wkg) / 0.25).toFixed(0);
+    const rateMax = ((5 * wkg) / 0.25).toFixed(0);
+    document.getElementById('fl-result').innerHTML = `
+      <div style="background:#dc2626;border-radius:12px;padding:13px 16px;margin-bottom:12px;color:#fff">
+        <div style="font-size:16px;font-weight:800">⚠ NaCl 7.2% Hipertónico — SOLO EMERGENCIA</div>
+        <div style="font-size:12px;color:#fca5a5;margin-top:3px">Este fluido NO se usa para mantenimiento ni reposición de deshidratación</div>
+      </div>
+      <div class="result-card" style="border-color:#fca5a5">
+        <div class="result-header" style="background:#fee2e2">
+          <div class="result-names">
+            <div class="result-generic" style="color:#991b1b">Bolo de Emergencia / Shock / TBI</div>
+            <div class="result-trade" style="color:#b91c1c">${wkg} kg · 3–5 mL/kg en 15 min</div>
+          </div>
+          <div style="text-align:right">
+            <div style="font-size:11px;color:#b91c1c">Volumen</div>
+            <div style="font-size:22px;font-weight:800;color:#991b1b">${bolusVolMin}–${bolusVolMax} mL</div>
+          </div>
+        </div>
+        <div class="result-body">
+          <div class="result-row"><div class="result-lbl">Tasa (15 min)</div><div class="result-val" style="font-weight:700">${rateMin}–${rateMax} mL/h</div></div>
+          <div class="result-row"><div class="result-lbl">Indicaciones</div><div class="result-val">Shock, Trauma, TBI, Edema cerebral</div></div>
+          <div class="result-row"><div class="result-lbl">Luego del bolo</div><div class="result-val">Cambiar a cristaloide isotónico (LR/PlasmaLyte)</div></div>
+        </div>
+      </div>
+      <div class="warn-note" style="background:#fee2e2;border-color:#fca5a5"><span>⚠</span><span>NUNCA usar NaCl 7.2% para mantenimiento. El espacio intersticial e intracelular debe estar HIDRATADO para que funcione. No repetir más de 1–2 veces.</span></div>`;
+    document.getElementById('fl-result').style.display = 'block';
+    return;
+  }
 
   const fluidInfo = FLUID_DATA[fluid] || FLUID_DATA.lr;
   const speciesIcon = species === 'dog' ? '🐕' : '🐈';
@@ -2448,6 +2572,10 @@ function calcFluidos() {
     <div style="background:#1a5c38;border-radius:12px;padding:13px 16px;margin-bottom:12px;color:#fff">
       <div style="font-size:18px;font-weight:800">${speciesIcon} Plan de Fluidos — ${wkg} kg</div>
       <div style="font-size:12px;color:#a7f3d0;margin-top:3px">${fluidInfo.name}</div>
+    </div>
+    <div style="background:#f0fdf4;border-left:3px solid var(--accent);border-radius:6px;padding:8px 12px;margin-bottom:10px;font-size:11px;color:#374151;line-height:1.5">
+      ℹ Las tasas son recomendaciones basadas en las <b>Guías AAHA 2024 de Fluidoterapia</b>.
+      Cada paciente debe evaluarse individualmente y la dosis ajustarse según sus condiciones clínicas.
     </div>
 
     ${deficitMl > 0 ? `
@@ -2519,7 +2647,7 @@ function calcFluidos() {
 const MER_FACTORS_DOG = [
   { id: 'neutered',   label: 'Adulto castrado/castrada',     factor: 1.6 },
   { id: 'intact',     label: 'Adulto intacto/intacta',       factor: 1.8 },
-  { id: 'weightloss', label: 'Pérdida de peso',              factor: 1.0 },
+  { id: 'weightloss', label: 'Pérdida de peso (80% RER)',     factor: 1.0 },
   { id: 'weightgain', label: 'Ganancia de peso',             factor: 1.4 },
   { id: 'puppy4',     label: 'Cachorro < 4 meses',           factor: 3.0 },
   { id: 'puppy4plus', label: 'Cachorro > 4 meses',           factor: 2.0 },
@@ -2532,7 +2660,7 @@ const MER_FACTORS_DOG = [
 const MER_FACTORS_CAT = [
   { id: 'neutered',   label: 'Adulto castrado/castrada',     factor: 1.2 },
   { id: 'intact',     label: 'Adulto intacto/activo',        factor: 1.5 },
-  { id: 'weightloss', label: 'Pérdida de peso',              factor: 0.8 },
+  { id: 'weightloss', label: 'Pérdida de peso (80% RER)',     factor: 0.8 },
   { id: 'growth',     label: 'Crecimiento/cachorro',         factor: 2.25},
   { id: 'gestation',  label: 'Gestación',                    factor: 2.0 },
   { id: 'lactation',  label: 'Lactancia',                    factor: 3.0 },
@@ -2633,6 +2761,89 @@ function calcNutricion() {
 }
 
 
+
+// ─── PERFIL DE VETERINARIO ───────────────────────────────────────────────────
+function loadProfiles() {
+  try { return JSON.parse(localStorage.getItem('vetdose_profiles_list') || '[]'); }
+  catch(e) { return []; }
+}
+function saveProfiles(profiles) {
+  localStorage.setItem('vetdose_profiles_list', JSON.stringify(profiles));
+}
+function getActiveProfile() {
+  try { return JSON.parse(localStorage.getItem('vetdose_active_profile') || 'null'); }
+  catch(e) { return null; }
+}
+function setActiveProfile(profile) {
+  localStorage.setItem('vetdose_active_profile', JSON.stringify(profile));
+  // Load this profile's settings
+  if (profile && profile.settings) {
+    localStorage.setItem('vetdose_settings', JSON.stringify(profile.settings));
+  }
+  updateDrName();
+  document.getElementById('profile-modal').classList.add('hidden');
+}
+
+function checkProfile() {
+  // Always show profile selector on open
+  const profiles = loadProfiles();
+  renderProfileModal(profiles);
+  document.getElementById('profile-modal').classList.remove('hidden');
+}
+
+function renderProfileModal(profiles) {
+  const list = document.getElementById('profile-list');
+  if (!list) return;
+  if (profiles.length === 0) {
+    list.innerHTML = `<div style="text-align:center;padding:16px;color:var(--muted);font-size:13px">
+      No hay perfiles guardados.<br>Crea el tuyo abajo.
+    </div>`;
+  } else {
+    list.innerHTML = profiles.map((p,i) => `
+      <div onclick="setActiveProfile(${JSON.stringify(JSON.stringify(p)).slice(1,-1)})"
+        style="display:flex;align-items:center;gap:12px;padding:12px 14px;border:1.5px solid var(--border);
+               border-radius:10px;margin-bottom:8px;cursor:pointer;background:var(--surface);transition:all .15s"
+        onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--border)'">
+        <div style="width:40px;height:40px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;
+                    font-size:16px;font-weight:800;color:#fff;flex-shrink:0">${p.initials}</div>
+        <div style="flex:1">
+          <div style="font-size:14px;font-weight:700">${p.name}</div>
+          <div style="font-size:11px;color:var(--muted)">${p.clinic||'Sin clínica registrada'}</div>
+        </div>
+        <button onclick="event.stopPropagation();deleteProfile(${i})"
+          style="background:none;border:none;color:var(--muted);font-size:16px;cursor:pointer;padding:4px">✕</button>
+      </div>`).join('');
+  }
+}
+
+function createProfile() {
+  const name = document.getElementById('new-profile-name').value.trim();
+  const clinic = document.getElementById('new-profile-clinic').value.trim();
+  if (!name) { alert('Ingresa tu nombre completo.'); return; }
+  // Generate initials
+  const words = name.replace(/^Dr\.?\s*/i,'').trim().split(' ');
+  const initials = words.length >= 2
+    ? (words[0][0] + words[words.length-1][0]).toUpperCase()
+    : words[0].slice(0,2).toUpperCase();
+  const profile = {
+    initials, name, clinic,
+    settings: { doctorName: name, clinicName: clinic, phone: '' }
+  };
+  const profiles = loadProfiles();
+  profiles.push(profile);
+  saveProfiles(profiles);
+  setActiveProfile(profile);
+}
+
+function deleteProfile(idx) {
+  if (!confirm('¿Eliminar este perfil?')) return;
+  const profiles = loadProfiles();
+  profiles.splice(idx, 1);
+  saveProfiles(profiles);
+  renderProfileModal(profiles);
+}
+
+
 // ─── REGISTRO PRIMER ACCESO ──────────────────────────────────────────────────
 // Google Form entry IDs — reemplazar con IDs reales del formulario
 // Para obtenerlos: F12 en el formulario → buscar "entry."
@@ -2705,6 +2916,8 @@ function loadSettings() {
 }
 
 function saveSettings() {
+  // Also update header
+  setTimeout(updateDrName, 100);
   const s = {
     doctorName: document.getElementById('set-doctor').value.trim(),
     clinicName: document.getElementById('set-clinic').value.trim(),
@@ -2811,7 +3024,7 @@ function renderDrugListProtocol(drugIds) {
       <div class="drug-item" onclick="toggleDrug('${d.id}')">
         <div class="drug-check ${state.selectedDrugs.has(d.id)?'checked':''}" id="check-${d.id}"></div>
         <div class="drug-info">
-          <div class="drug-generic">${d.generic}${needsVal?' <span style="font-size:10px;color:#b45309">⚠</span>':''}</div>
+          <div class="drug-generic">${d.generic}</div>
           <div class="drug-trade">${d.trade}</div>
           <div class="drug-meta">${doseUnitLabel(d)}</div>
         </div>
@@ -2884,6 +3097,167 @@ function deleteProtocol(idx) {
 }
 
 function closeProtocolEdit() { document.getElementById('protocol-edit-modal').classList.add('hidden'); }
+
+
+
+// ─── PRESCRIPCIÓN ─────────────────────────────────────────────────────────────
+function openPrescription() {
+  const drugs = getDrugs();
+  const selected = drugs.filter(d => state.selectedDrugs.has(d.id));
+  if (selected.length === 0) { alert('Calcula las dosis primero.'); return; }
+
+  const wkg = getWeightKg();
+  const rows = selected.map(d => {
+    const ft = d.formType || 'injection';
+    const isSolid = ft === 'tablet' || ft === 'capsule';
+    const activeDose = state.species==='cat'&&d.doseCat ? d.doseCat
+                     : state.species==='dog'&&d.doseDog ? d.doseDog : d.dosePref;
+    let dosePerAdmin = '';
+    if (isSolid) {
+      const totalMg = activeDose * wkg;
+      const opts = smartTabletOptions(totalMg, d.id, ft, d.tabSizes||null);
+      dosePerAdmin = opts[0] || '';
+    } else {
+      dosePerAdmin = ((activeDose * wkg) / d.conc).toFixed(2) + ' mL';
+    }
+    const freq = state.selectedFrequency[d.id] || d.frequency || 'SID';
+    // Estimate daily count
+    const freqMap = {'SID':1,'BID':2,'TID':3,'QID':4,'q8h':3,'q12h':2,'q24h':1,'q6h':4};
+    const dailyCount = freqMap[freq] || 1;
+    return { id:d.id, name:d.generic, trade:d.trade, dosePerAdmin, freq, dailyCount,
+             unit: isSolid ? (ft==='tablet'?'tab.':'cáps.') : 'mL' };
+  });
+
+  const container = document.getElementById('rx-drugs');
+  if (!container) return;
+  container.innerHTML = rows.map(r => `
+    <div style="border:1px solid var(--border);border-radius:10px;padding:12px;margin-bottom:10px;background:var(--surface2)">
+      <div style="font-size:14px;font-weight:700;color:var(--accent);margin-bottom:8px">${r.name} <span style="font-size:11px;color:var(--muted);font-weight:400">(${r.trade})</span></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <div style="flex:1;min-width:100px">
+          <div style="font-size:10px;color:var(--muted);text-transform:uppercase;margin-bottom:3px">Dosis/administración</div>
+          <div style="font-size:13px;font-weight:700">${r.dosePerAdmin}</div>
+        </div>
+        <div style="flex:1;min-width:80px">
+          <div style="font-size:10px;color:var(--muted);text-transform:uppercase;margin-bottom:3px">Frecuencia</div>
+          <select id="rx-freq-${r.id}" style="width:100%;background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:6px 8px;font-size:13px;font-family:var(--sans);outline:none" onchange="updateRxTotal('${r.id}')">
+            ${['SID','BID','TID','QID','q8h','q12h'].map(f=>`<option ${f===r.freq?'selected':''}>${f}</option>`).join('')}
+          </select>
+        </div>
+        <div style="flex:1;min-width:60px">
+          <div style="font-size:10px;color:var(--muted);text-transform:uppercase;margin-bottom:3px">Días</div>
+          <input type="number" id="rx-days-${r.id}" value="7" min="1" max="365" step="1"
+            style="width:100%;background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:6px 8px;font-size:13px;font-family:var(--mono);outline:none"
+            oninput="updateRxTotal('${r.id}')">
+        </div>
+        <div style="flex:1;min-width:80px">
+          <div style="font-size:10px;color:var(--muted);text-transform:uppercase;margin-bottom:3px">Total a dispensar</div>
+          <div id="rx-total-${r.id}" style="font-size:15px;font-weight:800;color:var(--accent);padding-top:4px">—</div>
+        </div>
+      </div>
+    </div>`).join('');
+
+  // Store rows for calculation
+  window._rxRows = rows;
+  rows.forEach(r => updateRxTotal(r.id));
+  document.getElementById('rx-modal').classList.remove('hidden');
+}
+
+function updateRxTotal(drugId) {
+  const row = (window._rxRows||[]).find(r => r.id === drugId);
+  if (!row) return;
+  const freqEl = document.getElementById(`rx-freq-${drugId}`);
+  const daysEl = document.getElementById(`rx-days-${drugId}`);
+  const totalEl = document.getElementById(`rx-total-${drugId}`);
+  if (!freqEl || !daysEl || !totalEl) return;
+  const freqMap = {'SID':1,'BID':2,'TID':3,'QID':4,'q8h':3,'q12h':2,'q24h':1,'q6h':4};
+  const freq = freqEl.value;
+  const days = parseInt(daysEl.value) || 7;
+  const daily = freqMap[freq] || 1;
+  const total = daily * days;
+  totalEl.textContent = `${total} ${row.unit}`;
+}
+
+function closePrescription() {
+  document.getElementById('rx-modal').classList.add('hidden');
+}
+
+function printPrescription() {
+  const name = document.getElementById('patient-name')?.value.trim() || 'Paciente';
+  const wkg = getWeightKg();
+  const settings = getSettings();
+  const today = new Date().toLocaleDateString('es-US',{year:'numeric',month:'long',day:'numeric'});
+  const rows = window._rxRows || [];
+
+  let itemsHtml = '';
+  rows.forEach(r => {
+    const freqEl = document.getElementById('rx-freq-' + r.id);
+    const daysEl = document.getElementById('rx-days-' + r.id);
+    const freq = freqEl ? freqEl.value : r.freq;
+    const days = parseInt(daysEl ? daysEl.value : 7) || 7;
+    const freqMap = {'SID':1,'BID':2,'TID':3,'QID':4,'q8h':3,'q12h':2,'q24h':1,'q6h':4};
+    const total = (freqMap[freq]||1) * days;
+    itemsHtml += '<div class="rx-item"><div class="rx-name">' + r.name +
+      ' <span style="font-size:9pt;font-weight:400;color:#555">(' + r.trade + ')</span></div>' +
+      '<div class="rx-detail">Dosis: ' + r.dosePerAdmin + ' · ' + freq + ' · ' + days + ' días</div>' +
+      '<div class="rx-total">Total a dispensar: ' + total + ' ' + r.unit + '</div></div>';
+  });
+
+  const printWin = window.open('','_blank','width=700,height=900');
+  printWin.document.write('<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Prescripcion</title>' +
+    '<style>body{font-family:Arial;font-size:10pt;padding:20px;color:#111}' +
+    'h2{color:#1a5c38;font-size:14pt;margin-bottom:4px}' +
+    '.rx-item{border:1px solid #ccc;border-radius:6px;padding:10px;margin-bottom:8px}' +
+    '.rx-name{font-size:12pt;font-weight:700;color:#1a5c38}' +
+    '.rx-detail{font-size:9pt;color:#333;margin-top:4px}' +
+    '.rx-total{font-size:13pt;font-weight:800;color:#1a5c38;margin-top:4px}' +
+    '.footer{border-top:1px solid #ccc;padding-top:8px;margin-top:16px;font-size:8pt;color:#666;display:flex;justify-content:space-between}' +
+    '@page{margin:10mm;size:letter}</style></head><body>' +
+    '<div style="display:flex;justify-content:space-between;margin-bottom:12px">' +
+    '<div><h2>Prescripcion Medica</h2><div style="font-size:9pt;color:#555">' + today + '</div></div>' +
+    '<div style="text-align:right;font-size:9pt;color:#555">' +
+    (settings.doctorName||'') + '<br>' + (settings.clinicName||'') + '<br>' + (settings.phone||'') + '</div></div>' +
+    '<div style="background:#1a5c38;color:#fff;border-radius:6px;padding:8px 12px;margin-bottom:12px;font-size:11pt;font-weight:700">' +
+    'Paciente: ' + name + ' (' + wkg.toFixed(1) + ' kg)</div>' +
+    itemsHtml +
+    '<div style="margin-top:16px;border-top:1px solid #ccc;padding-top:10px">' +
+    '<div style="font-size:9pt;color:#555;margin-bottom:6px">Instrucciones:</div>' +
+    '<div style="border:1px solid #ddd;border-radius:4px;height:40px"></div></div>' +
+    '<div class="footer"><span>VetDose 2.0</span><span>Firma: _____________________</span></div>' +
+    '</body></html>');
+  printWin.document.close();
+  setTimeout(function(){printWin.print();}, 400);
+}
+
+
+function sharePrescription() {
+  const name = document.getElementById('patient-name')?.value.trim() || 'Paciente';
+  const wkg = getWeightKg();
+  const settings = getSettings();
+  const today = new Date().toLocaleDateString('es-US',{year:'numeric',month:'long',day:'numeric'});
+  const rows = window._rxRows || [];
+
+  let text = 'PRESCRIPCION\n' + today + '\n';
+  if (settings.doctorName) text += settings.doctorName + '\n';
+  if (settings.clinicName) text += settings.clinicName + '\n';
+  text += '\nPaciente: ' + name + ' (' + wkg.toFixed(1) + ' kg)\n\n';
+
+  rows.forEach(function(r) {
+    const freqEl = document.getElementById('rx-freq-' + r.id);
+    const daysEl = document.getElementById('rx-days-' + r.id);
+    const freq = freqEl ? freqEl.value : r.freq;
+    const days = parseInt(daysEl ? daysEl.value : 7) || 7;
+    const freqMap = {'SID':1,'BID':2,'TID':3,'QID':4,'q8h':3,'q12h':2,'q24h':1,'q6h':4};
+    const total = (freqMap[freq]||1) * days;
+    text += '- ' + r.name + ' (' + r.trade + ')\n  ' + r.dosePerAdmin + ' · ' + freq + ' · ' + days + ' dias\n  Total: ' + total + ' ' + r.unit + '\n\n';
+  });
+
+  if (navigator.share) {
+    navigator.share({title: 'Prescripcion - ' + name, text: text}).catch(function(){});
+  } else {
+    navigator.clipboard.writeText(text).then(function(){alert('Copiado al portapapeles');}).catch(function(){prompt('Copia:', text);});
+  }
+}
 
 
 // ─── EXPORT / IMPORT ─────────────────────────────────────────────────────────

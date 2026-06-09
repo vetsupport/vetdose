@@ -243,7 +243,9 @@ input:focus{border-color:var(--accent-md);box-shadow:0 0 0 3px rgba(26,92,56,.1)
 <div class="app">
   <div class="header">
     <img src="icon-logo.png" alt="VetDose">
-    <div class="header-pill" id="header-patient-info"></div>
+    <div id="header-dr-name" style="display:none;font-size:12px;font-weight:700;color:var(--accent);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:130px;flex-shrink:0"></div>
+    <div class="header-pill" id="header-patient-info" style="flex:1;min-width:0"></div>
+    <button onclick="openHelp()" style="background:var(--surface2);border:1px solid var(--border);border-radius:50%;width:32px;height:32px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:14px;font-weight:700;color:var(--accent);flex-shrink:0">?</button>
     <button onclick="openSettings()" style="background:var(--accent);border:none;border-radius:50%;width:34px;height:34px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;flex-shrink:0">⚙️</button>
   </div>
   <div class="tab-bar">
@@ -326,6 +328,7 @@ input:focus{border-color:var(--accent-md);box-shadow:0 0 0 3px rgba(26,92,56,.1)
       <div id="results-container"></div>
       <div style="padding-bottom:16px">
         <button class="btn btn-share" onclick="shareResults()">Compartir resultado</button>
+        <button class="btn btn-primary" onclick="openPrescription()" style="background:#1d4ed8;margin-bottom:4px">📋 Prescripción</button>
         <button class="btn btn-print" onclick="printResults()">🖨 Imprimir</button>
         <button class="btn btn-secondary" style="margin-top:8px" onclick="backToCalc()">&#8592; Volver</button>
       </div>
@@ -511,8 +514,16 @@ input:focus{border-color:var(--accent-md);box-shadow:0 0 0 3px rgba(26,92,56,.1)
         </div>
         <div style="display:flex;gap:8px">
           <div style="flex:1">
-            <div class="field-label">Temperatura (°C) — opcional</div>
-            <input type="number" id="fl-fever" placeholder="Ej: 40.5" step="0.1" min="37" max="43" style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-sm);padding:10px 12px;font-size:16px;font-family:var(--mono);outline:none">
+            <div class="field-label" style="display:flex;justify-content:space-between">
+              <span>Temperatura — opcional</span>
+              <span>
+                <button onclick="setFeverUnit('C')" id="fever-btn-c" style="padding:2px 7px;border-radius:4px;border:1px solid var(--accent);background:var(--accent);color:#fff;font-size:11px;cursor:pointer;font-family:var(--sans)">°C</button>
+                <button onclick="setFeverUnit('F')" id="fever-btn-f" style="padding:2px 7px;border-radius:4px;border:1px solid var(--border);background:var(--surface);color:var(--muted);font-size:11px;cursor:pointer;font-family:var(--sans)">°F</button>
+              </span>
+            </div>
+            <input type="number" id="fl-fever" placeholder="Ej: 40.5°C / 104.9°F" step="0.1"
+              style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-sm);padding:10px 12px;font-size:16px;font-family:var(--mono);outline:none">
+            <input type="hidden" id="fl-fever-unit" value="C">
           </div>
           <div style="flex:1">
             <div class="field-label">Pérdidas activas (mL/h)</div>
@@ -668,7 +679,10 @@ input:focus{border-color:var(--accent-md);box-shadow:0 0 0 3px rgba(26,92,56,.1)
 
     <!-- PROTOCOLOS -->
     <div class="screen" id="screen-protocolos">
-      <div class="section-label">Mis protocolos clínicos</div>
+      <div style="background:#e8f5ee;border-left:3px solid var(--accent);border-radius:6px;padding:9px 12px;margin-bottom:12px;font-size:12px;color:#374151;line-height:1.6">
+        📋 Protocolos ajustables a tus preferencias clínicas. Crea tu lista de medicamentos para cada condición que manejas frecuentemente. Toca un protocolo para calcular las dosis de los medicamentos que necesitas.
+      </div>
+      <div class="section-label">Mis protocolos</div>
       <div id="protocols-list" style="padding-bottom:80px"></div>
     </div>
 
@@ -868,6 +882,78 @@ input:focus{border-color:var(--accent-md);box-shadow:0 0 0 3px rgba(26,92,56,.1)
     <div style="text-align:center;margin-top:14px;font-size:11px;color:#999">
       Dr. Yenen Villasmil-Ontiveros · Pembroke Pines, Florida
     </div>
+  </div>
+</div>
+
+
+<!-- PERFIL SELECTOR MODAL -->
+<div class="overlay hidden" id="profile-modal" onclick="if(event.target===this&&false){}">
+  <div class="modal" style="max-width:360px">
+    <div class="modal-hdr">
+      <div class="modal-title">👤 ¿Quién eres?</div>
+    </div>
+    <div id="profile-list" style="margin-bottom:14px"></div>
+    <div style="border-top:1px solid var(--border);padding-top:12px">
+      <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px">Crear nuevo perfil</div>
+      <div class="mfield"><label>Nombre completo</label>
+        <input type="text" id="new-profile-name" placeholder="Dr. Juan Pérez"></div>
+      <div class="mfield"><label>Clínica (opcional)</label>
+        <input type="text" id="new-profile-clinic" placeholder="Animal Clinic"></div>
+      <button class="btn btn-primary" onclick="createProfile()">Crear perfil y entrar</button>
+    </div>
+  </div>
+</div>
+
+<!-- PRESCRIPCIÓN MODAL -->
+<div class="overlay hidden" id="rx-modal" onclick="if(event.target===this)closePrescription()">
+  <div class="modal" style="max-height:90vh;overflow-y:auto">
+    <div class="modal-hdr">
+      <div class="modal-title">📋 Prescripción</div>
+      <button class="close-btn" onclick="closePrescription()">&#10005;</button>
+    </div>
+    <div id="rx-drugs" style="margin-bottom:12px"></div>
+    <div style="display:flex;gap:8px">
+      <button class="btn btn-share" style="margin-top:0;flex:1" onclick="sharePrescription()">📤 Compartir</button>
+      <button class="btn btn-print" style="flex:1;margin-top:0" onclick="printPrescription()">🖨 Imprimir</button>
+    </div>
+  </div>
+</div>
+
+<!-- AYUDA MODAL -->
+<div class="overlay hidden" id="help-modal" onclick="if(event.target===this)closeHelp()">
+  <div class="modal" style="max-height:90vh;overflow-y:auto">
+    <div class="modal-hdr">
+      <div class="modal-title">❓ Guía Rápida VetDose 2.0</div>
+      <button class="close-btn" onclick="closeHelp()">&#10005;</button>
+    </div>
+    <div style="font-size:13px;line-height:1.7;color:var(--text)">
+
+      <div style="background:var(--accentlt);border-radius:8px;padding:10px 12px;margin-bottom:12px;font-size:11px;color:var(--muted)">
+        VetDose 2.0 — Dr. Yenen Villasmil-Ontiveros · Pembroke Pines, Florida · 2026
+      </div>
+
+      <div style="font-weight:700;font-size:15px;color:var(--accent);margin-bottom:4px">💊 Calcular</div>
+      <p style="margin-bottom:12px">Pantalla principal. Ingresa el nombre del paciente, peso y especie. Selecciona los medicamentos que necesitas — la app calcula automáticamente la dosis, concentración y volumen. Usa los filtros de categoría para encontrar drogas rápidamente. El botón <b>Prescripción</b> genera la hoja de dispensación con total de tabletas o cc por número de días.</p>
+
+      <div style="font-weight:700;font-size:15px;color:var(--accent);margin-bottom:4px">💉 CRI</div>
+      <p style="margin-bottom:12px"><b>Droga única:</b> selecciona la droga, la app sugiere la dosis estándar y calcula los mL/h para la bomba incluyendo la dosis de carga (loading dose).<br>
+      <b>Protocolo:</b> calcula múltiples drogas en la misma bolsa IV, como el protocolo BLK (Buprenorfina + Lidocaína + Ketamina). Ingresa el tamaño de la bolsa y la tasa de fluido.</p>
+
+      <div style="font-weight:700;font-size:15px;color:var(--accent);margin-bottom:4px">💧 Fluidos</div>
+      <p style="margin-bottom:12px">Calcula el plan completo de fluidoterapia: déficit de deshidratación, tasa de reposición, tasa de mantenimiento y volumen total. Incluye bolos de emergencia para pacientes en shock. Tasas basadas en las Guías AAHA 2024 de Fluidoterapia.</p>
+
+      <div style="font-weight:700;font-size:15px;color:var(--accent);margin-bottom:4px">🥗 Nutrición</div>
+      <p style="margin-bottom:12px"><b>Requerimiento Calórico:</b> estima las calorías diarias y calcula el número de tazas o latas según el peso, especie y estado fisiológico. Si el alimento no está en la lista, ingresa las kcal desde la etiqueta del producto.<br>
+      <b>Plan de Reducción de Peso:</b> usa la Condición Corporal (BCS 1–9) para estimar el peso ideal, calcular las calorías para pérdida de peso segura, y convertir a cantidad de alimento. Incluye proyección de semanas para alcanzar el peso meta.</p>
+
+      <div style="font-weight:700;font-size:15px;color:var(--accent);margin-bottom:4px">📋 Protocolos</div>
+      <p style="margin-bottom:12px">Protocolos ajustables a tus preferencias clínicas. Crea listas de medicamentos para condiciones frecuentes. Toca un protocolo, selecciona los medicamentos que usarás en este paciente, y la app calcula todas las dosis automáticamente.</p>
+
+      <div style="font-weight:700;font-size:15px;color:var(--accent);margin-bottom:4px">⚙ Ajustes</div>
+      <p style="margin-bottom:4px">Personaliza nombre, clínica y teléfono (aparecen en hojas de indicaciones y prescripciones). Gestiona la base de datos de drogas: agrega nuevas drogas específicas a tu práctica, exporta o importa tu base de datos.</p>
+
+    </div>
+    <button class="btn btn-secondary" onclick="closeHelp()" style="margin-top:8px">Cerrar</button>
   </div>
 </div>
 
