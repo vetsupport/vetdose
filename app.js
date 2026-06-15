@@ -551,7 +551,16 @@ let state = {
 function loadDrugs() {
   try {
     const saved = localStorage.getItem('vetdose_drugs');
-    return saved ? JSON.parse(saved) : JSON.parse(JSON.stringify(SEED_DRUGS));
+    if (!saved) return JSON.parse(JSON.stringify(SEED_DRUGS));
+    const parsed = JSON.parse(saved);
+    // Ensure species field is preserved from SEED for each drug
+    const seedMap = {};
+    SEED_DRUGS.forEach(function(d){ seedMap[d.id] = d; });
+    return parsed.map(function(d) {
+      const seed = seedMap[d.id];
+      if (seed && seed.species && !d.species) d.species = seed.species;
+      return d;
+    });
   } catch(e) { return JSON.parse(JSON.stringify(SEED_DRUGS)); }
 }
 function saveDrugs(drugs) { localStorage.setItem('vetdose_drugs', JSON.stringify(drugs)); }
@@ -567,6 +576,9 @@ document.addEventListener('DOMContentLoaded', () => {
   updateDrName();
   checkRegistration();
   checkProfile();
+  // Ensure localStorage drugs have species field synced from SEED
+  const storedDrugs = loadDrugs();
+  saveDrugs(storedDrugs); // re-save with species fields restored
   renderDrugList();
   renderDrugsDB();
   populateCRISelect();
@@ -597,6 +609,10 @@ function setSpecies(sp) {
   document.getElementById('sp-cat').classList.toggle('active', sp === 'cat');
   state.selectedDrugs.clear();
   state.selectedTableDrugs.clear();
+  // Reset search when switching species
+  searchQuery = '';
+  const searchEl = document.getElementById('drug-search');
+  if (searchEl) searchEl.value = '';
   renderDrugList();
 }
 
@@ -1710,6 +1726,42 @@ function renderBCSSelector(){var c=document.getElementById('bcs-selector');if(!c
 function selectBCS(n){selectedBCS=n;renderBCSSelector();calcBCS();}
 function calcBCS(){var wA=parseFloat((document.getElementById('bcs-weight')||{value:0}).value)||0,sp=(document.getElementById('bcs-species')||{value:'dog'}).value,lp=parseFloat((document.getElementById('bcs-loss-pct')||{value:80}).value)||80,bd=BCS_DATA[selectedBCS];if(wA<=0||!bd)return;var res=document.getElementById('bcs-result');if(!res)return;var wI=bd.factor?wA*bd.factor:wA,exc=wA-wI,pct=wI>0?((wA-wI)/wI)*100:0,rer=70*Math.pow(wI,0.75),wlc=rer*(lp/100),wkMin=exc>0?Math.ceil(exc/(wA*0.01)):0,wkMax=exc>0?Math.ceil(exc/(wA*0.005)):0,ic=sp==='dog'?'🐕':'🐈',isU=selectedBCS<=4,isI=selectedBCS===5;var h='<div style="background:#1a5c38;border-radius:12px;padding:13px 16px;margin-bottom:12px;color:#fff"><div style="font-size:17px;font-weight:800">'+ic+' Plan Peso - BCS '+selectedBCS+'/9</div><div style="font-size:12px;color:#a7f3d0">'+wA+' kg</div></div>';if(isU){h+='<div class="warn-note"><span>⚠</span><span>Bajo peso — no restringir calorías.</span></div>';res.innerHTML=h;res.style.display='block';return;}h+='<div class="result-card"><div class="result-body"><div class="result-row"><div class="result-lbl">Peso actual</div><div class="result-val">'+wA+' kg</div></div>'+(!isI?'<div class="result-row"><div class="result-lbl">Peso ideal</div><div class="result-val" style="font-weight:700;color:var(--accent)">'+wI.toFixed(1)+' kg</div></div><div class="result-row"><div class="result-lbl">Exceso</div><div class="result-val">'+exc.toFixed(1)+' kg · '+pct.toFixed(1)+'%</div></div>':'')+'<div class="result-row"><div class="result-lbl">RER</div><div class="result-val">'+rer.toFixed(0)+' kcal/día</div></div><div class="result-row"><div class="result-lbl">Meta calórica</div><div class="result-val" style="font-weight:700;color:var(--accent)">'+wlc.toFixed(0)+' kcal/día ('+lp+'% RER)</div></div>'+(!isI&&exc>0?'<div class="result-row"><div class="result-lbl">Proyección</div><div class="result-val">'+wkMin+'–'+wkMax+' sem</div></div>':'')+'</div></div>';if(sp==='cat'&&!isI)h+='<div class="warn-note"><span>ℹ</span><span>Gatos: NO restricción severa — riesgo lipidosis hepática.</span></div>';res.innerHTML=h;res.style.display='block';}
 
+
+function setNutMode(mode) {
+  var isRer = mode === 'rer';
+  var rerEl = document.getElementById('nut-rer-mode');
+  var bcsEl = document.getElementById('nut-bcs-mode');
+  if (rerEl) rerEl.style.display = isRer ? 'block' : 'none';
+  if (bcsEl) bcsEl.style.display = isRer ? 'none' : 'block';
+  var btnRer = document.getElementById('nut-mode-rer');
+  var btnBcs = document.getElementById('nut-mode-bcs');
+  if (btnRer) { btnRer.style.background = isRer ? 'var(--accent)' : 'var(--surface)'; btnRer.style.color = isRer ? '#fff' : 'var(--muted)'; btnRer.style.borderColor = isRer ? 'var(--accent)' : 'var(--border)'; }
+  if (btnBcs) { btnBcs.style.background = !isRer ? 'var(--accent)' : 'var(--surface)'; btnBcs.style.color = !isRer ? '#fff' : 'var(--muted)'; btnBcs.style.borderColor = !isRer ? 'var(--accent)' : 'var(--border)'; }
+  if (!isRer) renderBCSSelector();
+}
+
+
+// ─── TEMPERATURA °C / °F ─────────────────────────────────────────────────────
+var _feverUnit = 'C';
+function setFeverUnit(unit) {
+  var inp = document.getElementById('fl-fever');
+  var val = parseFloat(inp.value) || 0;
+  if (unit === 'F' && _feverUnit === 'C' && val > 0) {
+    inp.value = ((val * 9/5) + 32).toFixed(1);
+  } else if (unit === 'C' && _feverUnit === 'F' && val > 0) {
+    inp.value = ((val - 32) * 5/9).toFixed(1);
+  }
+  _feverUnit = unit;
+  var btnC = document.getElementById('fl-fever-c');
+  var btnF = document.getElementById('fl-fever-f');
+  if (btnC) { btnC.style.background = unit==='C'?'var(--accent)':'var(--surface)'; btnC.style.color = unit==='C'?'#fff':'var(--muted)'; btnC.style.borderColor = unit==='C'?'var(--accent)':'var(--border)'; }
+  if (btnF) { btnF.style.background = unit==='F'?'var(--accent)':'var(--surface)'; btnF.style.color = unit==='F'?'#fff':'var(--muted)'; btnF.style.borderColor = unit==='F'?'var(--accent)':'var(--border)'; }
+}
+function getFeverCelsius() {
+  var val = parseFloat(document.getElementById('fl-fever').value) || 0;
+  return _feverUnit === 'F' ? (val - 32) * 5/9 : val;
+}
+
 // ─── MÓDULO FLUIDOS ──────────────────────────────────────────────────────────
 
 const FLUID_DATA = {
@@ -1731,6 +1783,28 @@ const DEHYDRATION_LEVELS = [
   { value: 13,   label: '> 12% — Crítico (shock)',           desc: 'Extremidades frías, colapso. Requiere bolo urgente.' },
 ];
 
+
+  // ── COLOIDE: solo mostrar dosis bolus ────────────────────────────────────
+  if (isColloid) {
+    const bolusColloid = species === 'cat' ? 10 : 20;
+    const bolusColloidMl = bolusColloid * wkg;
+    resDiv.innerHTML = '<div style="background:#1a5c38;border-radius:12px;padding:13px 16px;margin-bottom:12px;color:#fff">' +
+      '<div style="font-size:17px;font-weight:800">🩸 ' + fluidInfo.name + ' — Coloide</div>' +
+      '<div style="font-size:12px;color:#a7f3d0">' + speciesIcon + ' ' + wkg.toFixed(1) + ' kg</div></div>' +
+      '<div class="result-card"><div class="result-header" style="background:#7c3aed15;border-bottom:2px solid #7c3aed44"><div class="result-names"><div class="result-generic" style="color:#7c3aed">Dosis de bolo IV</div><div class="result-trade">5–' + bolusColloid + ' mL/kg — titulado</div></div>' +
+      '<div class="result-dose" style="color:#7c3aed">' + (5*wkg).toFixed(0) + '–' + bolusColloidMl.toFixed(0) + ' mL</div></div>' +
+      '<div class="result-body">' +
+      '<div class="result-row"><div class="result-lbl">Bolo mínimo (5 mL/kg)</div><div class="result-val">' + (5*wkg).toFixed(1) + ' mL IV</div></div>' +
+      '<div class="result-row"><div class="result-lbl">Bolo máximo (' + bolusColloid + ' mL/kg/día)</div><div class="result-val" style="font-weight:800;color:#7c3aed">' + bolusColloidMl.toFixed(1) + ' mL IV</div></div>' +
+      '<div class="result-row"><div class="result-lbl">Tasa recomendada</div><div class="result-val">10–20 mL/kg/h (bolus)</div></div>' +
+      '<div class="result-row"><div class="result-lbl">Uso con cristaloide</div><div class="result-val">SÍ — combinar con LR o NaCl 0.9%</div></div>' +
+      '</div></div>' +
+      warnings.map(w => '<div class="warn-note"><span>⚠</span><span>' + w.replace('⚠ ','') + '</span></div>').join('');
+    resDiv.style.display = 'block';
+    return;
+  }
+
+
 function calcFluidos() {
   const wkg = parseFloat(document.getElementById('fl-weight').value) || 0;
   const species = document.getElementById('fl-species').value;
@@ -1739,7 +1813,7 @@ function calcFluidos() {
   const dehyd = parseFloat(document.getElementById('fl-dehydration').value) || 0;
   const repTime = document.getElementById('fl-reptime').value;
   const hours = parseFloat(document.getElementById('fl-hours').value) || 24;
-  const fever = parseFloat(document.getElementById('fl-fever').value) || 0;
+  const fever = getFeverCelsius();
   const losses = parseFloat(document.getElementById('fl-losses').value) || 0;
 
   if (wkg <= 0) { alert('Ingresa el peso del paciente.'); return; }
@@ -1749,8 +1823,14 @@ function calcFluidos() {
   let maintMax = species === 'cat' ? 3 : 5;
   let maintPref = species === 'cat' ? 2.5 : 3;
 
-  // Cardiac adjustment
-  if (cardiac) { maintMax = 2; maintPref = 1.5; }
+  // Cardiac adjustment — AAHA 2024
+  if (cardiac) {
+    if (species === 'cat') {
+      maintMin = 1; maintMax = 2; maintPref = 1.5;
+    } else {
+      maintMin = 2; maintMax = 4; maintPref = 3;
+    }
+  }
 
   // Deficit
   const deficitMl = (dehyd / 100) * wkg * 1000;
@@ -1771,9 +1851,9 @@ function calcFluidos() {
   const volTotal = vol1 + Math.max(0, vol2);
 
   // Bolus emergency
-  const bolusMin = species === 'cat' ? 10 : 10;
-  const bolusMax = species === 'cat' ? 10 : 20;
-  const showBolus = dehyd >= 12;
+  const bolusMin = cardiac ? 2 : (species === 'cat' ? 5 : 10);
+  const bolusMax = cardiac ? 5 : (species === 'cat' ? 10 : 20);
+  const showBolus = dehyd >= 8;
 
   // NaCl 7.2% special
   const isHypertonic = fluid === 'nacl72';
@@ -1785,7 +1865,10 @@ function calcFluidos() {
   let warnings = [];
   if (cardiac) warnings.push('⚠ CARDIOPATÍA: tasa máxima 2 mL/kg/h. Sin bolos rápidos. Reposición siempre en 24h.');
   if (isHypertonic) warnings.push('⚠ NaCl 7.2%: SOLO bolo emergencia 3-5 mL/kg IV rápido. NO usar para mantenimiento.');
-  if (isColloid) warnings.push(`⚠ Hetastarch: máx ${species==='cat'?10:20} mL/kg/día. Solo shock refractario a cristaloides.`);
+  if (isColloid) {
+    warnings.push('⚠ Hetastarch: COLOIDE — NO usar como cristaloide ni para mantenimiento. Solo shock refractario.');
+    warnings.push('⚠ Dosis máxima: ' + (species==='cat'?'10':'20') + ' mL/kg/día. Monitorear coagulación.');
+  }
   if (fluid === 'd5w') warnings.push('⚠ D5W: NO usar SQ. Solo IV. Monitorear electrolitos — puede causar hiponatremia.');
   if (fever > 39.5) warnings.push(`🌡 Fiebre ${fever}°C: +${feverExtra.toFixed(1)} mL/h adicionales.`);
 

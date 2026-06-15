@@ -387,8 +387,8 @@ input:focus{border-color:var(--accent-md);box-shadow:0 0 0 3px rgba(26,92,56,.1)
         </div>
         <div style="display:flex;gap:8px">
           <div style="flex:1">
-            <div class="field-label">Temperatura (°C) — opcional</div>
-            <input type="number" id="fl-fever" placeholder="Ej: 40.5" step="0.1" min="37" max="43" style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-sm);padding:10px 12px;font-size:16px;font-family:var(--mono);outline:none">
+            <div class="field-label">Temperatura (°C) — opcional<div style="display:flex;gap:6px;margin-top:6px"><button id="fl-fever-c" onclick="setFeverUnit('C')" style="flex:1;padding:6px;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer;border:1.5px solid var(--accent);background:var(--accent);color:#fff;font-family:var(--sans)">°C</button><button id="fl-fever-f" onclick="setFeverUnit('F')" style="flex:1;padding:6px;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer;border:1.5px solid var(--border);background:var(--surface);color:var(--muted);font-family:var(--sans)">°F</button></div></div>
+            <input type="number" id="fl-fever" oninput="convertFeverDisplay()" placeholder="Ej: 40.5" step="0.1" min="37" max="43" style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-sm);padding:10px 12px;font-size:16px;font-family:var(--mono);outline:none">
           </div>
           <div style="flex:1">
             <div class="field-label">Pérdidas activas (mL/h)</div>
@@ -403,6 +403,11 @@ input:focus{border-color:var(--accent-md);box-shadow:0 0 0 3px rgba(26,92,56,.1)
 
     <!-- NUTRICIÓN -->
     <div class="screen" id="screen-nutricion">
+    <div style="display:flex;gap:8px;margin-bottom:14px">
+      <button id="nut-mode-rer" onclick="setNutMode('rer')" style="flex:1;padding:9px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;border:1.5px solid var(--accent);background:var(--accent);color:#fff;font-family:var(--sans)">🔢 Requerimiento Calórico</button>
+      <button id="nut-mode-bcs" onclick="setNutMode('bcs')" style="flex:1;padding:9px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;border:1.5px solid var(--border);background:var(--surface);color:var(--muted);font-family:var(--sans)">⚖️ Plan de Reducción de Peso</button>
+    </div>
+    <div id="nut-rer-mode">
       <div class="section-label">Paciente</div>
       <div class="card">
         <div style="display:flex;gap:8px;align-items:flex-end;margin-bottom:10px">
@@ -464,7 +469,27 @@ input:focus{border-color:var(--accent-md);box-shadow:0 0 0 3px rgba(26,92,56,.1)
     </div>
 
     <!-- PROTOCOLOS -->
-    <div class="screen" id="screen-protocolos">
+    </div>
+    <div id="nut-bcs-mode" style="display:none">
+      <div class="card">
+        <div class="section-label">Especie</div>
+        <select id="bcs-species" style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-sm);padding:10px 12px;font-size:14px;font-family:var(--sans);outline:none;margin-bottom:12px">
+          <option value="dog">🐕 Canino</option>
+          <option value="cat">🐈 Felino</option>
+        </select>
+        <div class="section-label">Peso actual (kg)</div>
+        <input type="number" id="bcs-weight" placeholder="Ej: 15.5" step="0.1" style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-sm);padding:10px 12px;font-size:16px;font-family:var(--mono);outline:none;box-sizing:border-box;margin-bottom:12px">
+        <div class="section-label">Condición Corporal (BCS 1–9)</div>
+        <div id="bcs-selector" style="display:grid;grid-template-columns:repeat(9,1fr);gap:4px;margin-bottom:6px"></div>
+        <div id="bcs-desc" style="font-size:11px;color:var(--muted);margin-bottom:12px;min-height:16px"></div>
+        <div class="section-label">Meta calórica (% del RER)</div>
+        <input type="number" id="bcs-loss-pct" value="80" min="60" max="100" step="5"
+          style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-sm);padding:10px 12px;font-size:16px;font-family:var(--mono);outline:none;box-sizing:border-box;margin-bottom:12px">
+        <button class="btn btn-primary" onclick="calcBCS()">Calcular Plan de Peso</button>
+      </div>
+      <div id="bcs-result" style="display:none;margin-top:12px"></div>
+    </div>
+<div class="screen" id="screen-protocolos">
     <div id="pt-instr"></div>
       <div class="section-label">Mis protocolos clínicos</div>
       <div id="protocols-list" style="padding-bottom:80px"></div>
