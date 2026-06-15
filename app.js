@@ -23,7 +23,7 @@ const SEED_DRUGS = [
   { id: 'ciclosporina_oral', generic: 'Ciclosporina oral', trade: 'Atopica/Neoral', conc: 10, tabSizes: [10, 25, 50, 100], doseMin: 5.0, doseMax: 7.0, dosePref: 5.0, unit: 'mg/kg', route: 'PO', category: 'dermatology/immunosuppressive', formType: 'capsule', calcMode: 'standard', notes: 'Perros DAC: 5 mg/kg SID inicial. Gatos: dosis puede diferir según enfermedad; monitorear GI/infecciones. Cápsulas guardadas en congelador producen menos efectos GI. Presentaciones: 10, 25, 50, 100 mg cápsulas.', source: 'Plumb 2024; Papich 2020', frequency: 'SID', frequencies: ['SID', 'BID'], validationStatus: 'Revisión preliminar; validar por usuario' },
   { id: 'clindamicina', generic: 'Clindamicina', trade: 'Antirobe', conc: 25, tabSizes: [25, 75, 150], doseMin: 5.5, doseMax: 11.0, dosePref: 5.5, unit: 'mg/kg', route: 'PO', category: 'antibiotic', formType: 'capsule', calcMode: 'standard', notes: 'Cápsulas: 25, 75, 150 mg. Suspensión oral: 25 mg/mL (disponible como magistral). Tejidos blandos, dental, hueso; también toxoplasmosis a protocolos distintos.', source: 'Plumb 2024; Papich 2020', frequency: 'BID', frequencies: ['BID','TID'], validationStatus: 'Revisión preliminar; validar por usuario' },
   { id: 'clonidine', generic: 'Clonidine', trade: 'Catapres', conc: 0.1, tabSizes: [0.1,0.2,0.3], doseMin: 0.005, doseMax: 0.02, dosePref: 0.01, unit: 'mg/kg', route: 'PO', category: 'behavior/cardiovascular', formType: 'tablet', calcMode: 'standard', notes: 'Adyuvante ansiedad/hiperarousal; puede causar hipotensión/bradicardia.', source: 'Plumb 2024; Papich 2020', frequency: 'BID', frequencies: ['BID', 'TID'], validationStatus: 'Revisión preliminar; validar por usuario' },
-  { id: 'clopidogrel', generic: 'Clopidogrel', trade: 'Plavix', conc: 75, tabSizes: [75], doseMin: 2.0, doseMax: 10.0, dosePref: 2.0, unit: 'mg/kg', doseDog: 2.0, doseCat: 0.0, route: 'PO', category: 'antiplatelet', formType: 'tablet', calcMode: 'standard', notes: 'Perros: dosis de carga 10 mg/kg PO, luego 2–3 mg/kg SID. Gatos: 18.75 mg/gato (1/4 comprimido de 75 mg) SID. Gatos frecuentemente 18.75 mg/gato SID; perros puede usarse mg/kg. Nota crítica por especie/indicación.', source: 'Plumb 2024; Papich 2020', frequency: 'SID', frequencies: ['SID'], validationStatus: 'Revisión preliminar; validar por usuario' },
+  { id: 'clopidogrel', generic: 'Clopidogrel', trade: 'Plavix', conc: 75, tabSizes: [75], doseMin: 2.0, doseMax: 10.0, dosePref: 2.0, unit: 'mg/kg', doseDog: 2.0, doseCat: 0.0, route: 'PO', category: 'antiplatelet', formType: 'injection', calcMode: 'standard', notes: 'Perros (>8kg): 2-3 mg/kg SID. Tab 75mg disponible. Para dar ¼ tab (18.75mg) a gatos SID. Carga: 10 mg/kg. Tab 75mg = mínimo para perros >8kg. GATOS: 18.75 mg/gato SID (¼ tab 75mg) — usar dosis fija, no mg/kg.', source: 'Plumb 2024; Papich 2020', frequency: 'SID', frequencies: ['SID'], validationStatus: 'Revisión preliminar; validar por usuario' },
   { id: 'darbepoetina_alfa', generic: 'Darbepoetina alfa', trade: 'Aranesp', conc: 0.5, doseMin: 0.45, doseMax: 1.0, dosePref: 0.45, unit: 'mcg/kg', route: 'SQ', category: 'renal/hematologic', formType: 'injection', calcMode: 'standard', notes: 'Anemia por ERC; monitorear PCV, presión, hierro. Dosis en mcg/kg, no mg/kg.', source: 'Plumb 2024; Papich 2020', frequency: 'semanal', frequencies: ['semanal', 'quincenal'], validationStatus: 'Revisión preliminar; validar por usuario' },
   { id: 'deracoxib', generic: 'Deracoxib', trade: 'Deramaxx', conc: 12, tabSizes: [12, 25, 75, 100], doseMin: 1.0, doseMax: 2.0, dosePref: 1.0, unit: 'mg/kg', route: 'PO', category: 'nsaid', formType: 'tablet', calcMode: 'standard', notes: 'Solo perros; dosis difiere analgesia vs postquirúrgico.', source: 'Plumb 2024; Papich 2020', frequency: 'SID', frequencies: ['SID'], validationStatus: 'Revisión preliminar; validar por usuario' },
   { id: 'desoxicorticosterona_pivalato', generic: 'Desoxicorticosterona pivalato', trade: 'Zycortal/DOCP', conc: 25, doseMin: 2.2, doseMax: 2.2, dosePref: 2.2, unit: 'mg/kg', route: 'IM, SQ', category: 'endocrine', formType: 'injection', calcMode: 'standard', notes: 'Addison; repetir aprox cada 25-30 días, ajustar por electrolitos.', source: 'Plumb 2024; Papich 2020', frequency: '25d', frequencies: ['25d'], validationStatus: 'Revisión preliminar; validar por usuario' },
@@ -103,7 +103,7 @@ const SEED_DRUGS = [
   { id: 'esomeprazol_iv', generic: 'Esomeprazol', trade: 'Nexium IV', conc: 4, doseMin: 0.5, doseMax: 1.0, dosePref: 0.5, unit: 'mg/kg', route: 'IV, PO', category: 'GI/PPI', formType: 'injection', calcMode: 'standard', notes: 'Perros: 0.5–1 mg/kg BID. Dosis >1 mg/kg puede causar vómitos y/o diarrea. IBP. Cápsulas orales: 20, 40 mg.', source: 'Plumb 2024', frequency: 'BID', frequencies: ['SID', 'BID'], validationStatus: 'Revisión preliminar; validar por usuario' },
   { id: 'bario_sulfato', generic: 'Sulfato de Bario', trade: 'Novopaque/E-Z Paque', conc: 1, doseMin: 5.0, doseMax: 20.0, dosePref: 10.0, unit: 'mL/kg', route: 'PO', category: 'other', formType: 'liquid_oral', calcMode: 'standard', notes: 'Estudio tránsito intestinal. Perros <20 kg: 8–12 mL/kg; >20 kg: 5–7 mL/kg. Gatos: 12–20 mL/kg. Radiografías a los 5, 15, 30 min, 1h y 2h. NO usar si hay sospecha de perforación.', source: 'Plumb 2024', frequency: 'única', frequencies: ['única'], validationStatus: 'Revisión preliminar; validar por usuario' },
   { id: 'dorzolamida_timolol', generic: 'Dorzolamida/Timolol', trade: 'Cosopt', conc: 1, doseMin: 1.0, doseMax: 1.0, dosePref: 1.0, unit: 'gota/ojo', route: 'Tópico ocular', category: 'ophthalmic', formType: 'injection', calcMode: 'fixed', notes: 'Glaucoma. PRECAUCIÓN: No usar Timolol en pacientes cardíacos (produce bradicardia). NO usar en gatos asmáticos (puede precipitar crisis broncoespástica). 1 gota en ojo afectado BID o TID.', source: 'Plumb 2024', frequency: 'BID', frequencies: ['BID', 'TID'], validationStatus: 'Revisión preliminar; validar por usuario' },
-  { id: 'diltiazem_er', generic: 'Diltiazem ER', trade: 'Cardizem CD/LA', conc: 60, doseMin: 1.0, doseMax: 4.0, dosePref: 2.0, unit: 'mg/kg', route: 'PO', category: 'cardiac', formType: 'tablet', calcMode: 'standard', tabSizes: [60, 90, 120, 180, 240], doseCat: 0, notes: 'Extended Release — NO partir ni triturar. Perros: 1–4 mg/kg c/12h. Gatos: 30–60 mg/gato c/12–24h (dosis fija). HCM felina y fibrilación auricular. Alternativa c/12h vs IR c/8h.', source: 'Plumb 2024', frequency: 'BID', frequencies: ['SID', 'BID'], validationStatus: 'Revisión preliminar; validar por usuario' },
+  { id: 'diltiazem_er', generic: 'Diltiazem ER (capsule)', trade: 'Cardizem CD/LA', conc: 60, doseMin: 1.0, doseMax: 4.0, dosePref: 2.0, unit: 'mg/kg', route: 'PO', category: 'cardiac', formType: 'liquid_oral', calcMode: 'standard', doseCat: 0, notes: 'Extended Release — NO partir ni triturar. Perros: 1–4 mg/kg c/12h. Gatos: 30–60 mg/gato c/12–24h (dosis fija). HCM felina y fibrilación auricular. Alternativa c/12h vs IR c/8h.', source: 'Plumb 2024', frequency: 'BID', frequencies: ['SID', 'BID'], validationStatus: 'Revisión preliminar; validar por usuario' },
   { id: 'ampicilina_sulbactam', generic: 'Ampicilina-Sulbactam', trade: 'Unasyn', conc: 30, doseMin: 11.0, doseMax: 22.0, dosePref: 20.0, unit: 'mg/kg', route: 'IV BID', category: 'antibiotic', formType: 'injection', calcMode: 'standard', notes: 'Presentación: vial 1.5 g (1 g ampicilina + 0.5 g sulbactam). Diluir en 50 cc NaCl 0.9% → concentración 30 mg/mL. Administrar BID IV. Espectro amplio incluyendo anaerobios.', source: 'Plumb 2024', frequency: 'BID', frequencies: ['BID'], validationStatus: 'Revisión preliminar; validar por usuario' },
   { id: 'carbonato_lantano', generic: 'Carbonato de Lantano', trade: 'Fosrenol', conc: 250, doseMin: 60.0, doseMax: 90.0, dosePref: 60.0, unit: 'mg/kg', route: 'PO con comida', category: 'renal/phosphate binder', formType: 'tablet', calcMode: 'standard', tabSizes: [250, 500, 750, 1000], notes: 'Quelante de fósforo. Administrar dividido en 2 comidas (BID). Indicado en enfermedad renal crónica con hiperfosfatemia.', source: 'Plumb 2024', frequency: 'BID con comida', frequencies: ['BID con comida', 'TID con comida'], validationStatus: 'Revisión preliminar; validar por usuario' },
   { id: 'calcio_carbonato', generic: 'Calcio Carbonato', trade: 'Tums/genérico', conc: 500, doseMin: 90.0, doseMax: 150.0, dosePref: 100.0, unit: 'mg/kg', route: 'PO con comida', category: 'renal/phosphate binder', formType: 'tablet', calcMode: 'standard', tabSizes: [500, 750, 1000], notes: 'Quelante de fósforo. Administrar dividido en 2 comidas. Enfermedad renal crónica con hiperfosfatemia.', source: 'Plumb 2024', frequency: 'BID con comida', frequencies: ['BID con comida', 'TID con comida'], validationStatus: 'Revisión preliminar; validar por usuario' },
@@ -136,22 +136,19 @@ const SEED_DRUGS = [
     source: 'Papich 5th Ed. p.401', validationStatus: 'Revisión preliminar; validar por usuario' },
   { id: 'colchicina', generic: 'Colchicina', trade: 'Colcrys/genérico', conc: 0.5,
     doseMin: 0.01, doseMax: 0.03, dosePref: 0.01, unit: 'mg/kg',
-    route: 'PO', category: 'other', formType: 'tablet',
-    calcMode: 'standard', tabSizes: [0.5, 0.6], species: 'dog',
+    route: 'PO', category: 'other', formType: 'liquid_oral', calcMode: 'standard', species: 'dog',
     frequency: 'SID', frequencies: ['SID'],
     notes: 'Solo perros. Pericarditis recurrente, amiloidosis hepática, fibrosis hepática crónica. Dar con comida. Puede causar vómitos y diarrea. Monitorear función hepática.',
     source: 'Papich 5th Ed. p.221', validationStatus: 'Revisión preliminar; validar por usuario' },
   { id: 'guaifenesina', generic: 'Guaifenesina', trade: 'Mucinex/genérico', conc: 100,
     doseMin: 3.0, doseMax: 5.0, dosePref: 3.0, unit: 'mg/kg',
-    route: 'PO', category: 'respiratory', formType: 'tablet',
-    calcMode: 'standard', tabSizes: [200, 400], species: 'dog',
+    route: 'PO', category: 'respiratory', formType: 'liquid_oral', calcMode: 'standard', species: 'dog',
     frequency: 'TID', frequencies: ['BID','TID'],
     notes: 'Solo perros — NO usar en gatos (puede causar anemia por cuerpos de Heinz). Expectorante para tos productiva. Syrup 100 mg/5 mL disponible. Dar con abundante agua.',
     source: 'Papich 5th Ed. p.435', validationStatus: 'Revisión preliminar; validar por usuario' },
   { id: 'paracetamol', generic: 'Paracetamol (Acetaminofén)', trade: 'Tylenol/genérico', conc: 325,
     doseMin: 10.0, doseMax: 15.0, dosePref: 10.0, unit: 'mg/kg',
-    route: 'PO', category: 'analgesic', formType: 'tablet',
-    calcMode: 'standard', tabSizes: [325, 500], species: 'dog',
+    route: 'PO', category: 'analgesic', formType: 'liquid_oral', calcMode: 'standard', species: 'dog',
     frequency: 'BID', frequencies: ['BID','TID'],
     notes: '⚠⚠⚠ SOLO PERROS — NUNCA EN GATOS (causa methemoglobinemia fatal). Uso extra-label. Analgesia leve. Máx 15 mg/kg. No exceder 3 dosis/día. Hepatotóxico en sobredosis. No combinar con AINEs.',
     source: 'Papich 5th Ed. p.695', validationStatus: 'Revisión preliminar; validar por usuario' },
@@ -463,22 +460,56 @@ const TABLET_SIZES = {
 
 // Smart tablet rounding: minimize number of units, prefer larger sizes
 // Only whole or half tablets. Capsules: whole only.
-function smartTabletOptions(totalMg, drugId, formType, tabSizesOverride) {
+function smartTabletOptions(totalMg, drugId, formType, tabSizesOverride, doseMin, doseMax, weightKg) {
   const sizes = tabSizesOverride || TABLET_SIZES[drugId] || null;
   const unit = formType === 'capsule' ? 'cáps.' : 'tab.';
   if (!sizes || !sizes.length) return [totalMg.toFixed(1) + ' mg'];
   const sorted = [...sizes].sort((a,b)=>a-b);
   const mults = [0.5, 1, 1.5, 2];
-  function sc(combo){let s=0;for(const [m] of combo){if(m===1)s+=1;else if(m===2)s+=2;else if(m===0.5)s+=3;else s+=4;}return s+combo.length*0.1;}
-  function lb(m,sz){return(m===0.5?'0.5':m===1?'1':m===1.5?'1.5':'2')+' '+unit+' '+sz+'mg';}
-  const C=new Map();
-  for(const sz of sorted)for(const m of mults){const mg=parseFloat((sz*m).toFixed(4)),sv=sc([[m,sz]]);if(!C.has(mg)||sv<C.get(mg).score)C.set(mg,{score:sv,label:lb(m,sz)});}
-  for(let i=0;i<sorted.length;i++)for(let j=i;j<sorted.length;j++)for(const m1 of mults)for(const m2 of mults){if(i===j&&m2<m1)continue;const mg=parseFloat((sorted[i]*m1+sorted[j]*m2).toFixed(4)),sv=sc([[m1,sorted[i]],[m2,sorted[j]]]);if(!C.has(mg)||sv<C.get(mg).score)C.set(mg,{score:sv,label:lb(m1,sorted[i])+' + '+lb(m2,sorted[j])});}
-  const all=Array.from(C.entries()).sort((a,b)=>a[0]-b[0]);
-  const best=all.reduce((b,c)=>Math.abs(c[0]-totalMg)<Math.abs(b[0]-totalMg)?c:b);
-  const res=[best[1].label];
-  all.filter(([mg,v])=>Math.abs(mg-totalMg)/totalMg<0.5&&v.label!==best[1].label).sort((a,b)=>a[1].score-b[1].score).slice(0,3).forEach(([,v])=>res.push(v.label));
-  return res;
+
+  function sc(combo) {
+    let s=0;
+    for(const [m] of combo){if(m===1)s+=1;else if(m===2)s+=2;else if(m===0.5)s+=3;else s+=4;}
+    return s + combo.length*0.1;
+  }
+  function lb(m,sz) {
+    return(m===0.5?'0.5':m===1?'1':m===1.5?'1.5':'2')+' '+unit+' '+sz+'mg';
+  }
+
+  const C = new Map();
+  for(const sz of sorted) for(const m of mults) {
+    const mg=parseFloat((sz*m).toFixed(4)), sv=sc([[m,sz]]);
+    if(!C.has(mg)||sv<C.get(mg).score) C.set(mg,{score:sv,label:lb(m,sz)});
+  }
+  for(let i=0;i<sorted.length;i++) for(let j=i;j<sorted.length;j++)
+    for(const m1 of mults) for(const m2 of mults) {
+      if(i===j&&m2<m1) continue;
+      const mg=parseFloat((sorted[i]*m1+sorted[j]*m2).toFixed(4));
+      const sv=sc([[m1,sorted[i]],[m2,sorted[j]]]);
+      if(!C.has(mg)||sv<C.get(mg).score) C.set(mg,{score:sv,label:lb(m1,sorted[i])+' + '+lb(m2,sorted[j])});
+    }
+
+  // Use dose range if provided, else ±25% of totalMg
+  const mgMin = (doseMin && weightKg) ? doseMin*weightKg : totalMg*0.75;
+  const mgMax = (doseMax && weightKg) ? doseMax*weightKg : totalMg*1.25;
+
+  const inRange = Array.from(C.entries())
+    .filter(([mg]) => mg >= mgMin*0.98 && mg <= mgMax*1.02)
+    .sort((a,b) => a[0]-b[0]);
+
+  if (!inRange.length) {
+    // Fallback: closest to totalMg
+    const best = Array.from(C.entries()).reduce((b,c)=>Math.abs(c[0]-totalMg)<Math.abs(b[0]-totalMg)?c:b);
+    return [best[1].label];
+  }
+
+  // Pick best 5: always include min and max, fill middle with simplest
+  let picks = inRange.length<=5 ? inRange :
+    [inRange[0],
+     ...inRange.slice(1,-1).sort((a,b)=>a[1].score-b[1].score).slice(0,3).sort((a,b)=>a[0]-b[0]),
+     inRange[inRange.length-1]];
+
+  return picks.map(([mg,v]) => v.label);
 }
 
 function calcBSA(weightKg, species) {
@@ -1109,6 +1140,15 @@ function renderResult(r, idx) {
   const needsVal  = r.validationStatus && r.validationStatus.toLowerCase().includes('validar');
   const isBSA     = r.unit === 'mg/m²';
 
+  // mg range for header
+  const wkg = getWeightKg();
+  let mgRangeLabel = '';
+  if (!isFixed && !isBSA && r.unit === 'mg/kg' && wkg > 0) {
+    const mgLo = (r.doseMin * wkg).toFixed(1);
+    const mgHi = (r.doseMax * wkg).toFixed(1);
+    mgRangeLabel = mgLo === mgHi ? mgLo + ' mg' : mgLo + '–' + mgHi + ' mg';
+  }
+
   let mainDisplay, concLabel, concValue, tabOptionsHTML = '';
   if (isFixed) {
     mainDisplay = r.resultDisplay || r.doseDisplay;
@@ -1168,8 +1208,8 @@ function renderResult(r, idx) {
     <div class="result-card" id="result-card-${idx}">
       <div class="result-header">
         <div class="result-names">
-          <div class="result-generic">${r.generic}</div>
-          <div class="result-trade">${r.trade}</div>
+          <div class="result-generic">${r.generic} <span style="font-weight:500;color:var(--accent2)">(${r.trade})</span></div>
+          ${mgRangeLabel ? `<div style="font-size:14px;color:var(--text2);margin-top:2px;font-weight:600">Requerido: <span style="color:var(--text)">${mgRangeLabel}</span></div>` : ''}
         </div>
         <div class="result-dose" style="font-size:${isSolid||isFixed ? '17px':'24px'}">${mainDisplay}</div>
       </div>
