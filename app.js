@@ -1218,27 +1218,40 @@ function renderResult(r, idx) {
   const isFixed   = mode === 'fixed' || r.resultDisplay;
   const needsVal  = r.validationStatus && r.validationStatus.toLowerCase().includes('validar');
   const isBSA     = r.unit === 'mg/m²';
+  const wkg       = getWeightKg();
 
-  let mainDisplay, concLabel, concValue, tabOptionsHTML = '';
+  // ── Calculate mg totals for header ──────────────────────────────────────
+  let mgMin = 0, mgMax = 0, mgPref = 0;
+  if (!isFixed && !isBSA && r.unit === 'mg/kg') {
+    mgMin  = r.doseMin * wkg;
+    mgMax  = r.doseMax * wkg;
+    mgPref = (r.dosePref || r.doseMin) * wkg;
+  }
+  const mgRangeLabel = (mgMin > 0 && mgMin !== mgMax)
+    ? `${mgMin.toFixed(1)}–${mgMax.toFixed(1)} mg`
+    : mgPref > 0 ? `${mgPref.toFixed(1)} mg` : '';
+
+  // ── Main dose display ────────────────────────────────────────────────────
+  let mainDisplay = '', concLabel = '', concValue = '', tabOptionsHTML = '';
   if (isFixed) {
     mainDisplay = r.resultDisplay || r.doseDisplay;
     concLabel = 'Unidad'; concValue = r.unit;
   } else if (isBSA) {
     const cc = r.cc || 0;
     mainDisplay = cc < 0.01 ? '< 0.01 cc' : cc.toFixed(2) + ' cc';
-    concLabel = 'BSA'; concValue = `${r.bsa.toFixed(3)} m²`;
+    concLabel = 'BSA'; concValue = `${r.bsa ? r.bsa.toFixed(3) : '?'} m²`;
   } else if (isSolid) {
-    const totalMg = r.qty * r.conc; // qty = total tabs before rounding
+    const totalMg = mgPref > 0 ? mgPref : (r.qty * r.conc);
     const opts = smartTabletOptions(totalMg, r.id, ft, r.tabSizes || null);
-    mainDisplay = opts[0]; // primary option
+    mainDisplay = opts[0];
     concLabel = 'Presentación';
     concValue = `${r.conc} mg / ${isTablet ? 'comprimido' : 'cápsula'}`;
     if (opts.length > 1) {
       tabOptionsHTML = `
         <div style="background:#f0fdf4;border:1px solid #86efac;border-radius:8px;padding:8px 12px;margin-top:8px">
-          <div style="font-size:11px;font-weight:800;color:var(--accent);margin-bottom:4px">Opciones de dosificación</div>
-          ${opts.map((o, i) => `<div style="font-size:13px;font-family:var(--mono);color:var(--text);padding:2px 0">
-            <span style="color:var(--muted);font-weight:700">Opción ${String.fromCharCode(65+i)}:</span> ${o}
+          <div style="font-size:11px;font-weight:800;color:var(--accent);margin-bottom:4px">Otras opciones</div>
+          ${opts.slice(1).map((o,i) => `<div style="font-size:13px;font-family:var(--mono);color:var(--text);padding:2px 0">
+            <span style="color:var(--muted);font-weight:700">${String.fromCharCode(66+i)}:</span> ${o}
           </div>`).join('')}
         </div>`;
     }
@@ -1248,50 +1261,85 @@ function renderResult(r, idx) {
     concLabel = 'Conc. vial'; concValue = `${r.conc} mg/mL`;
   }
 
-  const plumbRange = r.doseMin === r.doseMax
-    ? `${r.doseMin} ${r.unit}` : `${r.doseMin}–${r.doseMax} ${r.unit}`;
-  const warnHTML = r.notes ? `<div class="warn-note"><span>ℹ</span><span>${r.notes}</span></div>` : '';
+  const doseUsed = r.dosePref || r.doseMin;
+  const mgPerKgUsed = isSolid && wkg > 0 ? (mgPref / wkg).toFixed(2) : null;
+
+  // ── Dose adjustment ──────────────────────────────────────────────────────
+  const canAdjust = !isFixed && (r.unit === 'mg/kg' || r.unit === 'mcg/kg') && r.doseMin !== r.doseMax;
+  let adjustHTML = '';
+  if (canAdjust) {
+    const adjId = `adj-${r.id}`;
+    adjustHTML = `
+      <div id="${adjId}" style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:8px 12px;margin-top:8px">
+        <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">Ajustar dosis</div>
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+          <input type="range" min="${r.doseMin}" max="${r.doseMax}" step="${((r.doseMax-r.doseMin)/20).toFixed(3)}"
+            value="${doseUsed}"
+            style="flex:1;min-width:120px;accent-color:var(--accent)"
+            oninput="updateAdjDose('${r.id}',this.value,${idx})">
+          <span id="adj-val-${r.id}" style="font-family:var(--mono);font-size:14px;font-weight:700;color:var(--accent);min-width:80px">${doseUsed} ${r.unit}</span>
+        </div>
+        <div id="adj-result-${r.id}" style="font-size:12px;color:var(--muted);margin-top:4px"></div>
+      </div>`;
+  }
+
+  // ── Presentation selector for tablets ────────────────────────────────────
+  let presHTML = '';
+  if (isSolid && r.tabSizes && r.tabSizes.length > 1) {
+    const selSize = state.selectedPresentation[r.id] || r.tabSizes[0];
+    presHTML = `
+      <div class="result-row">
+        <div class="result-lbl">Presentación</div>
+        <div style="display:flex;gap:4px;flex-wrap:wrap">
+          ${r.tabSizes.map(s => `
+            <button onclick="setPresentation('${r.id}',${s})"
+              style="padding:3px 10px;border-radius:6px;font-size:12px;font-family:var(--mono);cursor:pointer;
+                     border:1.5px solid ${s==selSize?'var(--accent)':'var(--border)'};
+                     background:${s==selSize?'var(--accent)':'var(--surface2)'};
+                     color:${s==selSize?'#fff':'var(--text2)'}">
+              ${s} mg
+            </button>`).join('')}
+        </div>
+      </div>`;
+  }
+
+  const warnHTML   = r.notes  ? `<div class="warn-note"><span>ℹ</span><span>${r.notes}</span></div>` : '';
   const sourceHTML = r.source ? `<div class="result-row"><div class="result-lbl">Fuente</div><div class="result-val" style="color:var(--muted);font-size:11px">${r.source}</div></div>` : '';
   const valHTML = needsVal
     ? `<div style="background:#f0f6ff;border:1px solid #b8d4f0;border-radius:8px;padding:8px 12px;margin-top:8px;font-size:12px;color:#1a3a6a;display:flex;justify-content:space-between;align-items:center;gap:8px">
         <span>⚠ Pendiente validación clínica</span>
-        <button onclick="validateDrug('${r.id}',${idx})" style="background:var(--accent);color:#fff;border:none;border-radius:6px;padding:5px 12px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;flex-shrink:0">✓ Confirmar dosis</button>
+        <button onclick="validateDrug('${r.id}',${idx})" style="background:var(--accent);color:#fff;border:none;border-radius:6px;padding:5px 12px;font-size:12px;font-weight:700;cursor:pointer">✓ Confirmar</button>
        </div>` : '';
 
-  // Dose adjustment - only for standard mg/kg injectable/oral
-  const canAdjust = !isFixed && (r.unit === 'mg/kg' || r.unit === 'mcg/kg') && r.doseMin !== r.doseMax;
-  const adjustHTML = canAdjust ? `
-    <div style="margin-top:10px;background:var(--surface2);border-radius:10px;padding:10px 12px">
-      <div style="font-size:11px;font-weight:700;color:var(--muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:.8px">Ajustar dosis (${r.doseMin}–${r.doseMax} ${r.unit})</div>
-      <div style="display:flex;align-items:center;gap:8px">
-        <input type="number" id="adj-dose-${idx}" value="${r._currentDose}" min="${r.doseMin}" max="${r.doseMax}" step="0.01"
-          style="width:90px;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-size:15px;font-family:var(--mono);color:var(--text);outline:none"
-          oninput="recalcDose(${idx}, this.value)">
-        <span style="font-size:12px;color:var(--muted);flex-shrink:0">${r.unit}</span>
-        <button onclick="recalcDose(${idx}, document.getElementById('adj-dose-${idx}').value)"
-          style="background:var(--accent);color:#fff;border:none;border-radius:8px;padding:8px 12px;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap">Recalcular</button>
-        <div id="adj-result-${idx}" style="font-size:14px;color:var(--accent);font-family:var(--mono);font-weight:600;min-width:80px;background:var(--accent-lt);border-radius:8px;padding:8px 10px;text-align:center"></div>
-      </div>
-    </div>` : '';
+  const freq = r._selectedFreq || r.frequency || '';
 
   return `
-    <div class="result-card" id="result-card-${idx}">
+    <div class="result-card" id="card-${r.id}">
+      <!-- HEADER: Nombre + mg totales requeridos -->
       <div class="result-header">
         <div class="result-names">
           <div class="result-generic">${r.generic}</div>
           <div class="result-trade">${r.trade}</div>
+          ${mgRangeLabel ? `<div style="font-size:12px;color:var(--muted);margin-top:2px">Requerido: <b style="color:var(--text)">${mgRangeLabel}</b> · ${r.doseMin}${r.doseMin!==r.doseMax?'–'+r.doseMax:''} ${r.unit}</div>` : ''}
         </div>
-        <div class="result-dose" style="font-size:${isSolid||isFixed ? '17px':'24px'}">${mainDisplay}</div>
+        <div class="result-dose" style="font-size:${isSolid||isFixed?'17px':'24px'}">${mainDisplay}</div>
       </div>
+      <!-- BODY: detalles en orden clínico -->
       <div class="result-body">
+        ${presHTML}
+        ${adjustHTML}
+        ${tabOptionsHTML}
+        ${isSolid && mgPerKgUsed ? `<div class="result-row"><div class="result-lbl">Dosis real</div><div class="result-val">${mgPerKgUsed} mg/kg</div></div>` : ''}
+        <div class="result-row"><div class="result-lbl">Frecuencia</div><div class="result-val" style="font-weight:700">${freq || '—'}</div></div>
         <div class="result-row"><div class="result-lbl">Vía</div><div class="route-badge">${r.route}</div></div>
-        ${(r._selectedFreq || r.frequency) ? `<div class="result-row"><div class="result-lbl">Frecuencia</div><div class="result-val" style="font-weight:700;color:var(--accent)">${r._selectedFreq || r.frequency}</div></div>` : ''}
-        <div class="result-row"><div class="result-lbl">Dosis</div><div class="result-val">${r.doseDisplay} <span style="color:var(--muted);font-size:11px">(${plumbRange})</span></div></div>
-        <div class="result-row"><div class="result-lbl">${concLabel}</div><div class="result-val">${concValue}</div></div>
-        ${sourceHTML}${warnHTML}${tabOptionsHTML}${valHTML}${adjustHTML}
+        ${concLabel ? `<div class="result-row"><div class="result-lbl">${concLabel}</div><div class="result-val">${concValue}</div></div>` : ''}
+        ${sourceHTML}
+        ${warnHTML}
+        ${valHTML}
       </div>
     </div>`;
 }
+
 
 function recalcDose(idx, newDose) {
   const r = state.lastResults[idx];
@@ -2764,8 +2812,17 @@ function calcNutricion() {
 
 // ─── PERFIL DE VETERINARIO ───────────────────────────────────────────────────
 function loadProfiles() {
-  try { return JSON.parse(localStorage.getItem('vetdose_profiles_list') || '[]'); }
-  catch(e) { return []; }
+  try {
+    const raw = JSON.parse(localStorage.getItem('vetdose_profiles_list') || '[]');
+    // De-duplicate by name
+    const seen = new Set();
+    return raw.filter(p => {
+      const key = p.name + '|' + (p.clinic||'');
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+  } catch(e) { return []; }
 }
 function saveProfiles(profiles) {
   localStorage.setItem('vetdose_profiles_list', JSON.stringify(profiles));
@@ -2786,8 +2843,14 @@ function setActiveProfile(profile) {
 }
 
 function checkProfile() {
-  // Always show profile selector on open
   const profiles = loadProfiles();
+  if (profiles.length === 0) return; // New user — registration handles it
+  if (profiles.length === 1) {
+    // Single profile — auto-login silently
+    setActiveProfile(profiles[0]);
+    return;
+  }
+  // Multiple profiles — show selector
   renderProfileModal(profiles);
   document.getElementById('profile-modal').classList.remove('hidden');
 }
@@ -2925,18 +2988,23 @@ function submitRegistration() {
     localStorage.setItem('vetdose_settings', JSON.stringify(settings));
   }
 
-  // Also create a profile automatically
-  const words = `${nombre} ${apellido}`.split(' ');
-  const initials = (words[0][0] + words[words.length-1][0]).toUpperCase();
-  const profile = { initials, name: `${title} ${nombre} ${apellido}`, clinic: clinica,
-    settings: { doctorName: `${title} ${nombre} ${apellido}`, clinicName: clinica, phone: telefono, drTitle: title } };
+  // Create profile only if not already registered
+  const fullName = `${title} ${nombre} ${apellido}`;
+  const initials = (nombre[0] + apellido[0]).toUpperCase();
+  const profile = { initials, name: fullName, clinic: clinica,
+    settings: { doctorName: fullName, clinicName: clinica, phone: telefono, drTitle: title } };
   const profiles = loadProfiles();
-  const exists = profiles.find(p => p.name === profile.name);
-  if (!exists) { profiles.push(profile); saveProfiles(profiles); }
+  // Check by email to avoid duplicates
+  const exists = profiles.find(p => p.email === email || p.name === fullName);
+  if (!exists) {
+    profile.email = email;
+    profiles.push(profile);
+    saveProfiles(profiles);
+  }
 
-  // Close modal and update header
+  // Auto-login with this profile
+  setActiveProfile(profile);
   document.getElementById('reg-overlay').style.display = 'none';
-  updateDrName();
 }
 
 
