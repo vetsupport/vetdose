@@ -318,6 +318,175 @@ const SEED_DRUGS = [
 
 ];
 
+const TABLE_DRUGS = [
+  // ── APOQUEL (Oclacitinib) ── Zoetis label verified ──────────────────────────
+  {
+    id: 'apoquel_table', generic: 'Oclacitinib (tabla)', trade: 'Apoquel',
+    species: ['dog'], category: 'dermatology/JAK inhibitor',
+    notes: 'Solo perros ≥ 12 meses y ≥ 6.6 lb. Fase aguda: c/12h x 14 días, luego c/24h. Con o sin comida.',
+    rows: [
+      { minLb: 6.6,  maxLb: 9.9,  result: '3.6 mg — 1 tab. 3.6 mg' },
+      { minLb: 10.0, maxLb: 14.9, result: '5.4 mg — 1 tab. 5.4 mg' },
+      { minLb: 15.0, maxLb: 19.9, result: '5.4 mg — 1 tab. 5.4 mg' },
+      { minLb: 20.0, maxLb: 29.9, result: '16 mg — 1 tab. 16 mg' },
+      { minLb: 30.0, maxLb: 44.9, result: '16 mg — 1 tab. 16 mg' },
+      { minLb: 45.0, maxLb: 59.9, result: '16 mg — 1.5 comprimidos 16 mg' },
+      { minLb: 60.0, maxLb: 89.9, result: '16 mg — 2 tab. 16 mg' },
+      { minLb: 90.0, maxLb: 130,  result: '16 mg — 3 tab. 16 mg' },
+    ]
+  },
+
+  // ── CYTOPOINT (Lokivetmab) ── Zoetis label: 2 mg/kg mínimo, viales 10/20/30/40 mg ──
+  // Tabla oficial US: calcular mg = 2mg/kg x peso, elegir vial(es) que cubran esa dosis
+  {
+    id: 'cytopoint_table', generic: 'Lokivetmab (tabla)', trade: 'Cytopoint',
+    species: ['dog'], category: 'dermatology/biologic',
+    notes: 'Solo perros. Dosis mínima 2 mg/kg SQ. Viales de uso único: 10, 20, 30, 40 mg. Combinar viales en la misma jeringa para dosis mayores. Repetir c/4-8 semanas según respuesta. Refrigerar.',
+    rows: [
+      { minLb: 0,    maxLb: 9.9,  result: '< 10 lb → 1 vial 10 mg SQ' },
+      { minLb: 10,   maxLb: 19.9, result: '10–<20 lb → 1 vial 20 mg SQ' },
+      { minLb: 20,   maxLb: 29.9, result: '20–<30 lb → 1 vial 30 mg SQ' },
+      { minLb: 30,   maxLb: 39.9, result: '30–<40 lb → 1 vial 40 mg SQ' },
+      { minLb: 40,   maxLb: 49.9, result: '40–<50 lb → 1 vial 40 mg + 1 vial 10 mg SQ' },
+      { minLb: 50,   maxLb: 59.9, result: '50–<60 lb → 1 vial 40 mg + 1 vial 20 mg SQ' },
+      { minLb: 60,   maxLb: 69.9, result: '60–<70 lb → 1 vial 40 mg + 1 vial 30 mg SQ' },
+      { minLb: 70,   maxLb: 79.9, result: '70–<80 lb → 2 viales 40 mg SQ' },
+      { minLb: 80,   maxLb: 89.9, result: '80–<90 lb → 2 viales 40 mg + 1 vial 10 mg SQ' },
+      { minLb: 90,   maxLb: 99.9, result: '90–<100 lb → 2 viales 40 mg + 1 vial 20 mg SQ' },
+      { minLb: 100,  maxLb: 109.9,result: '100–<110 lb → 2 viales 40 mg + 1 vial 30 mg SQ' },
+      { minLb: 110,  maxLb: 999,  result: '≥ 110 lb → 3 viales 40 mg SQ' },
+    ]
+  },
+
+  // ── SIMPARICA (Sarolaner) ── Zoetis label verificado ───────────────────────
+  {
+    id: 'simparica_table', generic: 'Sarolaner (tabla)', trade: 'Simparica',
+    species: ['dog'], category: 'antiparasitic',
+    notes: 'Solo perros ≥ 6 meses y ≥ 2.8 lb. Mensual. Pulgas y 6 tipos de garrapatas. Con o sin comida.',
+    rows: [
+      { minLb: 2.8,  maxLb: 5.5,  result: '2.8–5.5 lb → 1 tab. 5 mg — Amarilla' },
+      { minLb: 5.6,  maxLb: 11.0, result: '5.6–11 lb → 1 tab. 10 mg — Morada' },
+      { minLb: 11.1, maxLb: 22.0, result: '11.1–22 lb → 1 tab. 20 mg — Naranja' },
+      { minLb: 22.1, maxLb: 44.0, result: '22.1–44 lb → 1 tab. 40 mg — Azul' },
+      { minLb: 44.1, maxLb: 88.0, result: '44.1–88 lb → 1 tab. 80 mg — Verde' },
+      { minLb: 88.1, maxLb: 132,  result: '88.1–132 lb → 1 tab. 120 mg — Café' },
+    ]
+  },
+
+  // ── SIMPARICA TRIO ── Zoetis label verificado ───────────────────────────────
+  {
+    id: 'simparica_trio_table', generic: 'Sarolaner/Moxidectina/Pirantel (tabla)', trade: 'Simparica Trio',
+    species: ['dog'], category: 'antiparasitic/heartworm',
+    notes: 'Solo perros ≥ 8 semanas y ≥ 2.8 lb. Mensual. Heartworm, pulgas, 6 tipos garrapatas, Ancylostoma, Toxocara. Usar con precaución en perros con historia de convulsiones.',
+    rows: [
+      { minLb: 2.8,  maxLb: 5.5,  result: '2.8–5.5 lb → 1 tab. (3/0.06/12.5 mg Caja Dorada' },
+      { minLb: 5.6,  maxLb: 11.0, result: '5.6–11 lb → 1 tab. (6/0.12/25 mg Caja Morada' },
+      { minLb: 11.1, maxLb: 22.0, result: '11.1–22 lb → 1 tab. (12/0.24/50 mg Caja Caramelo' },
+      { minLb: 22.1, maxLb: 44.0, result: '22.1–44 lb → 1 tab. (24/0.48/100 mg Caja Teal' },
+      { minLb: 44.1, maxLb: 88.0, result: '44.1–88 lb → 1 tab. (48/0.96/200 mg Caja Verde' },
+      { minLb: 88.1, maxLb: 132,  result: '88.1–132 lb → 1 tab. (72/1.44/300 mg Caja Café' },
+    ]
+  },
+
+  // ── TRIFEXIS (Spinosad/Milbemicina) ── Elanco label ────────────────────────
+  {
+    id: 'trifexis_table', generic: 'Spinosad/Milbemicina (tabla)', trade: 'Trifexis',
+    species: ['dog'], category: 'antiparasitic/heartworm',
+    notes: 'Solo perros ≥ 8 semanas y ≥ 5 lb. Mensual CON COMIDA (reduce vómito). Heartworm, pulgas, Ancylostoma, Toxocara, Trichuris.',
+    rows: [
+      { minLb: 5.0,  maxLb: 10.0, result: '5–10 lb → 1 tab. 140/2.3 mg (Magenta' },
+      { minLb: 10.1, maxLb: 20.0, result: '10.1–20 lb → 1 tab. 270/4.5 mg (Azul' },
+      { minLb: 20.1, maxLb: 40.0, result: '20.1–40 lb → 1 tab. 560/9.3 mg (Verde' },
+      { minLb: 40.1, maxLb: 60.0, result: '40.1–60 lb → 1 tab. 810/13.5 mg (Naranja' },
+      { minLb: 60.1, maxLb: 120,  result: '60.1–120 lb → 1 tab. 1620/27 mg (Café' },
+    ]
+  },
+
+  // ── CERENIA TABS (Maropitant) ── Zoetis label ───────────────────────────────
+  {
+    id: 'cerenia_tab_table', generic: 'Maropitant tabletas (tabla)', trade: 'Cerenia tabs',
+    species: ['dog', 'cat'], category: 'antiemetic',
+    notes: 'Perros y gatos ≥ 16 semanas. DAR CON COMIDA para reducir hipersalivación. Vómito agudo: 1 dosis/día x 5 días. Cinetosis: dar 2h antes del viaje.',
+    rows: [
+      { minLb: 4.4,  maxLb: 8.8,  result: '4.4–8.8 lb → 1 tab. 16 mg' },
+      { minLb: 8.9,  maxLb: 17.6, result: '8.9–17.6 lb → 1 tab. 24 mg' },
+      { minLb: 17.7, maxLb: 33.0, result: '17.7–33 lb → 1 tab. 60 mg' },
+      { minLb: 33.1, maxLb: 66.0, result: '33.1–66 lb → 1 tab. 60 mg' },
+      { minLb: 66.1, maxLb: 110,  result: '66.1–110 lb → 2 tab. 60 mg' },
+    ]
+  },
+
+  // ── LIBRELA (Bedinvetmab) ── Zoetis US label: 0.5 mg/kg SQ mensual ──────────
+  // Viales: 5, 10, 15, 20, 30 mg/mL (1 mL c/u). Para 5–60 kg: 1 mL del vial correspondiente
+  {
+    id: 'librela_table', generic: 'Bedinvetmab (tabla)', trade: 'Librela',
+    species: ['dog'], category: 'analgesic',
+    notes: 'Solo perros. Anti-NGF. Dolor osteoarticular. Dosis: 0.5 mg/kg (0.23 mg/lb) SQ mensual. Administrar contenido completo (1 mL) del vial. Para >60 kg combinar viales. No usar con AINEs a largo plazo. No usar en gestantes/lactantes/reproductores.',
+    rows: [
+      { minLb: 11.0, maxLb: 22.0, result: '11–22 lb (5–10 kg → 1 mL vial 5 mg SQ' },
+      { minLb: 22.1, maxLb: 44.0, result: '22.1–44 lb (10–20 kg → 1 mL vial 10 mg SQ' },
+      { minLb: 44.1, maxLb: 66.0, result: '44.1–66 lb (20–30 kg → 1 mL vial 15 mg SQ' },
+      { minLb: 66.1, maxLb: 88.0, result: '66.1–88 lb (30–40 kg → 1 mL vial 20 mg SQ' },
+      { minLb: 88.1, maxLb: 132,  result: '88.1–132 lb (40–60 kg → 1 mL vial 30 mg SQ' },
+      { minLb: 132.1,maxLb: 176,  result: '>132 lb (>60 kg → combinar viales según peso. Consultar tabla Zoetis.' },
+    ]
+  },
+
+  // ── SOLENSIA (Frunevetmab) ── Zoetis label: 1 mg/kg SQ mensual gatos ────────
+  {
+    id: 'solensia_table', generic: 'Frunevetmab (tabla)', trade: 'Solensia',
+    species: ['cat'], category: 'analgesic',
+    notes: 'Solo gatos. Anti-NGF felino. Dolor osteoarticular. Dosis: 1 mg/kg SQ mensual. Administrar contenido completo del vial. No usar en gestantes/lactantes/reproductores.',
+    rows: [
+      { minLb: 4.4,  maxLb: 8.8,  result: '4.4–8.8 lb (2–4 kg → 1 vial 1 mg SQ' },
+      { minLb: 8.9,  maxLb: 13.2, result: '8.9–13.2 lb (4–6 kg → 1 vial 2 mg SQ' },
+      { minLb: 13.3, maxLb: 17.6, result: '13.3–17.6 lb (6–8 kg → 1 vial 3 mg SQ' },
+      { minLb: 17.7, maxLb: 22.0, result: '17.7–22 lb (8–10 kg → 1 vial 4 mg SQ' },
+    ]
+  },
+
+  // ── ZENRELIA (Ilunocitinib) ── Zoetis label 2024 ────────────────────────────
+  {
+    id: 'zenrelia_table', generic: 'Ilunocitinib (tabla)', trade: 'Zenrelia',
+    species: ['dog'], category: 'dermatology/JAK inhibitor',
+    notes: 'Solo perros ≥ 12 meses. JAK1 inhibidor. Dermatitis atópica. Una vez al día. Comprimidos de 4, 8 y 16 mg.',
+    rows: [
+      { minLb: 6.6,  maxLb: 11.0, result: '6.6–11 lb → 1 tab. 4 mg SID' },
+      { minLb: 11.1, maxLb: 22.0, result: '11.1–22 lb → 1 tab. 8 mg SID' },
+      { minLb: 22.1, maxLb: 44.0, result: '22.1–44 lb → 1 tab. 16 mg SID' },
+      { minLb: 44.1, maxLb: 88.0, result: '44.1–88 lb → 2 tab. 16 mg SID' },
+      { minLb: 88.1, maxLb: 132,  result: '88.1–132 lb → 3 tab. 16 mg SID' },
+    ]
+  },
+
+  // ── CARDALIS (Benazepril/Espironolactona) ── Ceva label ─────────────────────
+  {
+    id: 'cardalis_table', generic: 'Benazepril/Espironolactona (tabla)', trade: 'Cardalis',
+    species: ['dog'], category: 'cardiac',
+    notes: 'Solo perros. ICC. Benazepril (~0.25 mg/kg) + Espironolactona (~2 mg/kg) SID con comida. Presentaciones: Small, Medium, Large.',
+    rows: [
+      { minLb: 5.5,  maxLb: 11.0, result: '5.5–11 lb → 1 tab. Small (2.5 mg benazepril / 20 mg espironolactona' },
+      { minLb: 11.1, maxLb: 22.0, result: '11.1–22 lb → 1 tab. Medium (5 mg benazepril / 40 mg espironolactona' },
+      { minLb: 22.1, maxLb: 44.0, result: '22.1–44 lb → 1 tab. Large (10 mg benazepril / 80 mg espironolactona' },
+      { minLb: 44.1, maxLb: 88.0, result: '44.1–88 lb → 2 tab. Large (10/80 mg c/u' },
+      { minLb: 88.1, maxLb: 132,  result: '88.1–132 lb → 3 tab. Large (10/80 mg c/u' },
+    ]
+  },
+
+  // ── INTERCEPTOR PLUS (Milbemicina/Praziquantel) ── Elanco label ────────────
+  {
+    id: 'interceptor_plus_table', generic: 'Milbemicina/Praziquantel (tabla)', trade: 'Interceptor Plus',
+    species: ['dog'], category: 'antiparasitic/heartworm',
+    notes: 'Solo perros. Mensual. Heartworm + tenias (Taenia, Echinococcus). Con o sin comida.',
+    rows: [
+      { minLb: 2.0,  maxLb: 8.0,  result: '2–8 lb → 1 tab. (2.3 mg / 22.8 mg' },
+      { minLb: 8.1,  maxLb: 25.0, result: '8.1–25 lb → 1 tab. (5.75 mg / 57 mg' },
+      { minLb: 25.1, maxLb: 50.0, result: '25.1–50 lb → 1 tab. (11.5 mg / 114 mg' },
+      { minLb: 50.1, maxLb: 100.0,result: '50.1–100 lb → 1 tab. (23 mg / 228 mg' },
+    ]
+  },
+];
+
 // ─── TABLET SIZES MAP ────────────────────────────────────────────────────────
 // Available tablet strengths per drug id (mg). Used for smart rounding.
 const TABLET_SIZES = {
