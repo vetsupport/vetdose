@@ -373,291 +373,107 @@ const TABLET_SIZES = {
 // Smart tablet rounding: minimize number of units, prefer larger sizes
 // Only whole or half tablets. Capsules: whole only.
 function smartTabletOptions(totalMg, drugId, formType, tabSizesOverride) {
-  // Use passed tabSizes first (from drug object), then TABLET_SIZES map
-  const sizes = tabSizesOverride || TABLET_SIZES[drugId] || null;
-  const sorted = sizes ? [...sizes].sort((a,b) => a-b) : null;
+  const drugs = getDrugs();
+  const d = drugs.find(x => x.id === drugId);
+  const sizes = tabSizesOverride || (d && d.tabSizes) || [];
+  const unit = formType === 'capsule' ? 'cáps.' : 'tab.';
 
-  if (formType === 'capsule') {
-    if (!sorted) return [`${Math.max(1, Math.round(totalMg))} cáps.`];
-    for (const s of [...sorted].reverse()) {
-      if (s >= totalMg*0.75 && s <= totalMg*1.35) return [`1 cáps. ${s}mg`];
+  if (!sizes.length) return [totalMg.toFixed(1) + ' mg'];
+
+  // Valid multipliers: 0.5, 1, 1.5, 2
+  const mults = [0.5, 1, 1.5, 2];
+
+  // Simplicity score: lower = simpler
+  function score(combo) {
+    let s = 0;
+    for (const [mult, size] of combo) {
+      if (mult === 1) s += 1;        // whole tablet — best
+      else if (mult === 2) s += 2;   // two whole tablets
+      else if (mult === 0.5) s += 3; // half tablet
+      else s += 4;                   // 1.5 tablets
     }
-    for (const s of [...sorted].reverse()) {
-      if (s*2 >= totalMg*0.85 && s*2 <= totalMg*1.20) return [`2 cáps. ${s}mg`];
+    return s + combo.length * 0.1; // fewer pieces = simpler
+  }
+
+  function label(mult, size) {
+    if (mult === 0.5) return '0.5 ' + unit + ' ' + size + 'mg';
+    if (mult === 1)   return '1 '   + unit + ' ' + size + 'mg';
+    if (mult === 1.5) return '1.5 ' + unit + ' ' + size + 'mg';
+    if (mult === 2)   return '2 '   + unit + ' ' + size + 'mg';
+    return mult + ' ' + unit + ' ' + size + 'mg';
+  }
+
+  // Generate all valid single and double combinations
+  const candidates = new Map(); // mg total → {combo, score}
+
+  // Single tablet combos
+  for (const size of sizes) {
+    for (const mult of mults) {
+      const mg = parseFloat((size * mult).toFixed(4));
+      const combo = [[mult, size]];
+      const sc = score(combo);
+      if (!candidates.has(mg) || sc < candidates.get(mg).score) {
+        candidates.set(mg, { combo, score: sc, label: label(mult, size) });
+      }
     }
-    const best = sorted.reduce((a,b) => Math.abs(a-totalMg)<Math.abs(b-totalMg)?a:b);
-    return [`${Math.max(1,Math.round(totalMg/best))} cáps. ${best}mg`];
   }
 
-  if (!sorted) {
-    const r = Math.max(0.5, Math.round(totalMg*2)/2);
-    return [`${r} tab.`];
+  // Double tablet combos (two pieces, can be same or different size)
+  for (let i = 0; i < sizes.length; i++) {
+    for (let j = i; j < sizes.length; j++) {
+      for (const m1 of mults) {
+        for (const m2 of mults) {
+          if (i === j && m2 < m1) continue; // avoid duplicates
+          const mg = parseFloat((sizes[i]*m1 + sizes[j]*m2).toFixed(4));
+          const combo = [[m1, sizes[i]], [m2, sizes[j]]];
+          const sc = score(combo);
+          if (!candidates.has(mg) || sc < candidates.get(mg).score) {
+            candidates.set(mg, {
+              combo, score: sc,
+              label: label(m1, sizes[i]) + ' + ' + label(m2, sizes[j])
+            });
+          }
+        }
+      }
+    }
   }
 
-  const opts = [], seen = new Set();
-  const add = (label, units, diff) => { if (!seen.has(label)) { seen.add(label); opts.push({label, units, diff}); }};
+  // Get D object for range
+  const doseMin = d ? d.doseMin : 0;
+  const doseMax = d ? d.doseMax : Infinity;
+  const wkg = getWeightKg();
+  const mgMin = doseMin * wkg;
+  const mgMax = doseMax * wkg;
 
-  for (const s of [...sorted].reverse()) {
-    const p = n => Math.abs(s*n-totalMg)/totalMg;
-    if (p(1)   <= 0.20) add(`1 tab. ${s}mg`,    1,   p(1));
-    if (p(0.5) <= 0.20) add(`½ tab. ${s}mg`,    0.5, p(0.5));
-    if (p(1.5) <= 0.15) add(`1½ tab. ${s}mg`,   1.5, p(1.5));
-    if (p(2)   <= 0.15) add(`2 tab. ${s}mg`,    2,   p(2));
+  // Filter to combinations within range, sort by mg
+  const inRange = Array.from(candidates.entries())
+    .filter(([mg]) => mg >= mgMin * 0.98 && mg <= mgMax * 1.02)
+    .sort((a, b) => a[0] - b[0]);
+
+  if (inRange.length === 0) {
+    const sorted = Array.from(candidates.entries()).sort((a,b) =>
+      Math.abs(a[0]-totalMg) - Math.abs(b[0]-totalMg));
+    return [sorted[0][1].label];
   }
 
-  if (opts.length === 0) {
-    const up = sorted.find(s => s >= totalMg*0.65) || sorted[sorted.length-1];
-    return [`1 tab. ${up}mg`];
+  // Pick best 5: always include min and max, fill middle with simplest
+  let picks = [];
+  if (inRange.length <= 5) {
+    picks = inRange;
+  } else {
+    const first = inRange[0];
+    const last  = inRange[inRange.length - 1];
+    const middle = inRange.slice(1, -1)
+      .sort((a, b) => a[1].score - b[1].score)
+      .slice(0, 3)
+      .sort((a, b) => a[0] - b[0]);
+    picks = [first, ...middle, last];
   }
 
-  opts.sort((a,b) => a.units!==b.units ? a.units-b.units : a.diff-b.diff);
-  const top = [];
-  for (const o of opts) { if (!top.find(t=>t.label===o.label)) top.push(o); if (top.length>=2) break; }
-  return top.map(o => o.label);
+  return picks.map(([mg, val]) => val.label);
 }
 
-// ─── WEIGHT-BASED TABLE DRUGS ─────────────────────────────────────────────────
-// Format: { id, generic, trade, species: ['dog','cat'], rows: [{minLb, maxLb, result}] }
-const TABLE_DRUGS = [
-  // ── APOQUEL (Oclacitinib) ── Zoetis label verified ──────────────────────────
-  {
-    id: 'apoquel_table', generic: 'Oclacitinib (tabla)', trade: 'Apoquel',
-    species: ['dog'], category: 'dermatology/JAK inhibitor',
-    notes: 'Solo perros ≥ 12 meses y ≥ 6.6 lb. Presentaciones: 3.6 mg, 5.4 mg, 16 mg. Fase aguda: c/12h x 14 días, luego c/24h mantenimiento. Con o sin comida. Fuente: Zoetis label.',
-    rows: [
-      { minLb: 6.6,  maxLb: 9.9,  result: '½ tab. 3.6 mg' },
-      { minLb: 10.0, maxLb: 14.9, result: '½ tab. 5.4 mg' },
-      { minLb: 15.0, maxLb: 19.9, result: '1 tab. 3.6 mg' },
-      { minLb: 20.0, maxLb: 29.9, result: '1 tab. 5.4 mg' },
-      { minLb: 30.0, maxLb: 44.9, result: '½ tab. 16 mg' },
-      { minLb: 45.0, maxLb: 53.9, result: '½ tab. 3.6 mg + ½ tab. 16 mg' },
-      { minLb: 54.0, maxLb: 59.9, result: '½ tab. 5.4 mg + ½ tab. 16 mg' },
-      { minLb: 60.0, maxLb: 89.9, result: '1 tab. 16 mg' },
-      { minLb: 90.0, maxLb: 129.9,result: '1½ tab. 16 mg' },
-      { minLb: 130,  maxLb: 175.9,result: '2 tab. 16 mg' },
-    ]
-  },
 
-  // ── CYTOPOINT (Lokivetmab) ── Zoetis label: 2 mg/kg mínimo, viales 10/20/30/40 mg ──
-  // Tabla oficial US: calcular mg = 2mg/kg x peso, elegir vial(es) que cubran esa dosis
-  {
-    id: 'cytopoint_table', generic: 'Lokivetmab (tabla)', trade: 'Cytopoint',
-    species: ['dog'], category: 'dermatology/biologic',
-    notes: 'Solo perros. Dosis mínima 2 mg/kg SQ. Viales de uso único: 10, 20, 30, 40 mg. Combinar viales en la misma jeringa para dosis mayores. Repetir c/4-8 semanas según respuesta. Refrigerar.',
-    rows: [
-      { minLb: 0,    maxLb: 9.9,  result: '< 10 lb → 1 vial 10 mg SQ' },
-      { minLb: 10,   maxLb: 19.9, result: '10–<20 lb → 1 vial 20 mg SQ' },
-      { minLb: 20,   maxLb: 29.9, result: '20–<30 lb → 1 vial 30 mg SQ' },
-      { minLb: 30,   maxLb: 39.9, result: '30–<40 lb → 1 vial 40 mg SQ' },
-      { minLb: 40,   maxLb: 49.9, result: '40–<50 lb → 1 vial 40 mg + 1 vial 10 mg SQ' },
-      { minLb: 50,   maxLb: 59.9, result: '50–<60 lb → 1 vial 40 mg + 1 vial 20 mg SQ' },
-      { minLb: 60,   maxLb: 69.9, result: '60–<70 lb → 1 vial 40 mg + 1 vial 30 mg SQ' },
-      { minLb: 70,   maxLb: 79.9, result: '70–<80 lb → 2 viales 40 mg SQ' },
-      { minLb: 80,   maxLb: 89.9, result: '80–<90 lb → 2 viales 40 mg + 1 vial 10 mg SQ' },
-      { minLb: 90,   maxLb: 99.9, result: '90–<100 lb → 2 viales 40 mg + 1 vial 20 mg SQ' },
-      { minLb: 100,  maxLb: 109.9,result: '100–<110 lb → 2 viales 40 mg + 1 vial 30 mg SQ' },
-      { minLb: 110,  maxLb: 999,  result: '≥ 110 lb → 3 viales 40 mg SQ' },
-    ]
-  },
-
-  // ── SIMPARICA (Sarolaner) ── Zoetis label verificado ───────────────────────
-  {
-    id: 'simparica_table', generic: 'Sarolaner (tabla)', trade: 'Simparica',
-    species: ['dog'], category: 'antiparasitic',
-    notes: 'Solo perros ≥ 6 meses y ≥ 2.8 lb. Mensual. Pulgas y 6 tipos de garrapatas. Con o sin comida.',
-    rows: [
-      { minLb: 2.8,  maxLb: 5.5,  result: '2.8–5.5 lb → 1 tab. 5 mg — Amarilla' },
-      { minLb: 5.6,  maxLb: 11.0, result: '5.6–11 lb → 1 tab. 10 mg — Morada' },
-      { minLb: 11.1, maxLb: 22.0, result: '11.1–22 lb → 1 tab. 20 mg — Naranja' },
-      { minLb: 22.1, maxLb: 44.0, result: '22.1–44 lb → 1 tab. 40 mg — Azul' },
-      { minLb: 44.1, maxLb: 88.0, result: '44.1–88 lb → 1 tab. 80 mg — Verde' },
-      { minLb: 88.1, maxLb: 132,  result: '88.1–132 lb → 1 tab. 120 mg — Café' },
-    ]
-  },
-
-  // ── SIMPARICA TRIO ── Zoetis label verificado ───────────────────────────────
-  {
-    id: 'simparica_trio_table', generic: 'Sarolaner/Moxidectina/Pirantel (tabla)', trade: 'Simparica Trio',
-    species: ['dog'], category: 'antiparasitic',
-    notes: 'Solo perros ≥ 8 sem y ≥ 2.8 lb. Mensual. Con o sin comida. Ectoparásitos + heartworm + intestinales.',
-    rows: [
-      { minLb: 2.8,  maxLb: 5.5,  result: '1 masticable MAGENTA (2.8–5.5 lb)' },
-      { minLb: 5.6,  maxLb: 11.0, result: '1 masticable MORADO (5.6–11 lb)' },
-      { minLb: 11.1, maxLb: 22.0, result: '1 masticable NARANJA (11.1–22 lb)' },
-      { minLb: 22.1, maxLb: 44.0, result: '1 masticable VERDE (22.1–44 lb)' },
-      { minLb: 44.1, maxLb: 88.0, result: '1 masticable AZUL (44.1–88 lb)' },
-      { minLb: 88.1, maxLb: 132.0,result: '1 masticable ROJO (88.1–132 lb)' },
-    ]
-  },
-
-  // ── TRIFEXIS (Spinosad/Milbemicina) ── Elanco label ────────────────────────
-  {
-    id: 'trifexis_table', generic: 'Spinosad/Milbemicina (tabla)', trade: 'Trifexis',
-    species: ['dog'], category: 'antiparasitic/heartworm',
-    notes: 'Solo perros ≥ 8 semanas y ≥ 5 lb. Mensual CON COMIDA (reduce vómito). Heartworm, pulgas, Ancylostoma, Toxocara, Trichuris.',
-    rows: [
-      { minLb: 5.0,  maxLb: 10.0, result: '5–10 lb → 1 tab. 140/2.3 mg (Magenta' },
-      { minLb: 10.1, maxLb: 20.0, result: '10.1–20 lb → 1 tab. 270/4.5 mg (Azul' },
-      { minLb: 20.1, maxLb: 40.0, result: '20.1–40 lb → 1 tab. 560/9.3 mg (Verde' },
-      { minLb: 40.1, maxLb: 60.0, result: '40.1–60 lb → 1 tab. 810/13.5 mg (Naranja' },
-      { minLb: 60.1, maxLb: 120,  result: '60.1–120 lb → 1 tab. 1620/27 mg (Café' },
-    ]
-  },
-
-  // ── CERENIA TABS (Maropitant) ── Zoetis label ───────────────────────────────
-  {
-    id: 'cerenia_tab_table', generic: 'Maropitant tabletas (tabla)', trade: 'Cerenia tabs',
-    species: ['dog', 'cat'], category: 'antiemetic',
-    notes: 'Perros y gatos ≥ 16 semanas. DAR CON COMIDA para reducir hipersalivación. Vómito agudo: 1 dosis/día x 5 días. Cinetosis: dar 2h antes del viaje.',
-    rows: [
-      { minLb: 4.4,  maxLb: 8.8,  result: '4.4–8.8 lb → 1 tab. 16 mg' },
-      { minLb: 8.9,  maxLb: 17.6, result: '8.9–17.6 lb → 1 tab. 24 mg' },
-      { minLb: 17.7, maxLb: 33.0, result: '17.7–33 lb → 1 tab. 60 mg' },
-      { minLb: 33.1, maxLb: 66.0, result: '33.1–66 lb → 1 tab. 60 mg' },
-      { minLb: 66.1, maxLb: 110,  result: '66.1–110 lb → 2 tab. 60 mg' },
-    ]
-  },
-
-  // ── LIBRELA (Bedinvetmab) ── Zoetis US label: 0.5 mg/kg SQ mensual ──────────
-  // Viales: 5, 10, 15, 20, 30 mg/mL (1 mL c/u). Para 5–60 kg: 1 mL del vial correspondiente
-  {
-    id: 'librela_table', generic: 'Bedinvetmab (tabla)', trade: 'Librela',
-    species: ['dog'], category: 'analgesic',
-    notes: 'Solo perros. Anti-NGF. Dolor osteoarticular. Dosis: 0.5 mg/kg (0.23 mg/lb) SQ mensual. Administrar contenido completo (1 mL) del vial. Para >60 kg combinar viales. No usar con AINEs a largo plazo. No usar en gestantes/lactantes/reproductores.',
-    rows: [
-      { minLb: 11.0, maxLb: 22.0, result: '11–22 lb (5–10 kg → 1 mL vial 5 mg SQ' },
-      { minLb: 22.1, maxLb: 44.0, result: '22.1–44 lb (10–20 kg → 1 mL vial 10 mg SQ' },
-      { minLb: 44.1, maxLb: 66.0, result: '44.1–66 lb (20–30 kg → 1 mL vial 15 mg SQ' },
-      { minLb: 66.1, maxLb: 88.0, result: '66.1–88 lb (30–40 kg → 1 mL vial 20 mg SQ' },
-      { minLb: 88.1, maxLb: 132,  result: '88.1–132 lb (40–60 kg → 1 mL vial 30 mg SQ' },
-      { minLb: 132.1,maxLb: 176,  result: '>132 lb (>60 kg → combinar viales según peso. Consultar tabla Zoetis.' },
-    ]
-  },
-
-  // ── SOLENSIA (Frunevetmab) ── Zoetis label: 1 mg/kg SQ mensual gatos ────────
-  {
-    id: 'solensia_table', generic: 'Frunevetmab (tabla)', trade: 'Solensia',
-    species: ['cat'], category: 'analgesic',
-    notes: 'Solo gatos. Anti-NGF felino. Dolor osteoarticular. Dosis: 1 mg/kg SQ mensual. Administrar contenido completo del vial. No usar en gestantes/lactantes/reproductores.',
-    rows: [
-      { minLb: 4.4,  maxLb: 8.8,  result: '4.4–8.8 lb (2–4 kg → 1 vial 1 mg SQ' },
-      { minLb: 8.9,  maxLb: 13.2, result: '8.9–13.2 lb (4–6 kg → 1 vial 2 mg SQ' },
-      { minLb: 13.3, maxLb: 17.6, result: '13.3–17.6 lb (6–8 kg → 1 vial 3 mg SQ' },
-      { minLb: 17.7, maxLb: 22.0, result: '17.7–22 lb (8–10 kg → 1 vial 4 mg SQ' },
-    ]
-  },
-
-  // ── ZENRELIA (Ilunocitinib) ── Zoetis label 2024 ────────────────────────────
-  {
-    id: 'zenrelia_table', generic: 'Ilunocitinib (tabla)', trade: 'Zenrelia',
-    species: ['dog'], category: 'dermatology/JAK inhibitor',
-    notes: 'Solo perros ≥ 12 meses. JAK1 inhibidor. Dermatitis atópica. Una vez al día. Comprimidos de 4, 8 y 16 mg.',
-    rows: [
-      { minLb: 6.6,  maxLb: 11.0, result: '6.6–11 lb → 1 tab. 4 mg SID' },
-      { minLb: 11.1, maxLb: 22.0, result: '11.1–22 lb → 1 tab. 8 mg SID' },
-      { minLb: 22.1, maxLb: 44.0, result: '22.1–44 lb → 1 tab. 16 mg SID' },
-      { minLb: 44.1, maxLb: 88.0, result: '44.1–88 lb → 2 tab. 16 mg SID' },
-      { minLb: 88.1, maxLb: 132,  result: '88.1–132 lb → 3 tab. 16 mg SID' },
-    ]
-  },
-
-  // ── CARDALIS (Benazepril/Espironolactona) ── Ceva label ─────────────────────
-  {
-    id: 'cardalis_table', generic: 'Benazepril/Espironolactona (tabla)', trade: 'Cardalis',
-    species: ['dog'], category: 'cardiac',
-    notes: 'Solo perros. ICC. Benazepril (~0.25 mg/kg) + Espironolactona (~2 mg/kg) SID con comida. Presentaciones: Small, Medium, Large.',
-    rows: [
-      { minLb: 5.5,  maxLb: 11.0, result: '5.5–11 lb → 1 tab. Small (2.5 mg benazepril / 20 mg espironolactona' },
-      { minLb: 11.1, maxLb: 22.0, result: '11.1–22 lb → 1 tab. Medium (5 mg benazepril / 40 mg espironolactona' },
-      { minLb: 22.1, maxLb: 44.0, result: '22.1–44 lb → 1 tab. Large (10 mg benazepril / 80 mg espironolactona' },
-      { minLb: 44.1, maxLb: 88.0, result: '44.1–88 lb → 2 tab. Large (10/80 mg c/u' },
-      { minLb: 88.1, maxLb: 132,  result: '88.1–132 lb → 3 tab. Large (10/80 mg c/u' },
-    ]
-  },
-
-  // ── INTERCEPTOR PLUS (Milbemicina/Praziquantel) ── Elanco label ────────────
-  {
-    id: 'interceptor_plus_table', generic: 'Milbemicina/Lufenuron (tabla)', trade: 'Interceptor Plus',
-    species: ['dog','cat'], category: 'antiparasitic',
-    notes: 'Perros ≥ 4 sem y ≥ 2 lb. Gatos ≥ 6 sem y ≥ 1.5 lb. Mensual. Dar con comida.',
-    rows: [
-      { minLb: 2.0,  maxLb: 8.0,  result: '1 masticable VERDE (2–8 lb)' },
-      { minLb: 8.1,  maxLb: 25.0, result: '1 masticable AMARILLO (8.1–25 lb)' },
-      { minLb: 25.1, maxLb: 50.0, result: '1 masticable MARRÓN (25.1–50 lb)' },
-      { minLb: 50.1, maxLb: 100.0,result: '1 masticable BLANCO (50.1–100 lb)' },
-    ]
-  },
-];
-
-// ─── ANTAGONIST MAP ───────────────────────────────────────────────────────────
-const ANTAGONISTS = {
-  'dexmedetomidina': {
-    id: 'atipamezole', name: 'Atipamezole (Antisedan)',
-    rule: 'mismo_volumen',
-    note: 'Administrar el MISMO VOLUMEN que se usó de dexmedetomidina. Vía IM.',
-  },
-  'medetomidina': {
-    id: 'atipamezole', name: 'Atipamezole (Antisedan)',
-    rule: 'mismo_volumen',
-    note: 'Administrar el MISMO VOLUMEN que se usó de medetomidina. Vía IM.',
-  },
-  'xilacina': {
-    id: 'atipamezole', name: 'Atipamezole (Antisedan)',
-    rule: 'mismo_volumen',
-    note: 'Administrar el MISMO VOLUMEN que se usó de xilacina. Vía IM.',
-  },
-  'morfina': {
-    id: 'naloxona', name: 'Naloxona (Narcan)',
-    conc: 0.4, dose: 0.01, unit: 'mg/kg',
-    note: 'IV o IM. Duración corta — puede necesitar dosis repetidas. Monitorear.',
-  },
-  'hidromorfona': {
-    id: 'naloxona', name: 'Naloxona (Narcan)',
-    conc: 0.4, dose: 0.01, unit: 'mg/kg',
-    note: 'IV o IM. Reversión parcial si es necesario para preservar algo de analgesia.',
-  },
-  'butorfanol': {
-    id: 'naloxona', name: 'Naloxona (Narcan)',
-    conc: 0.4, dose: 0.01, unit: 'mg/kg',
-    note: 'IV o IM. Agonista-antagonista — reversión generalmente no necesaria.',
-  },
-  'buprenorfina': {
-    id: 'naloxona', name: 'Naloxona (Narcan)',
-    conc: 0.4, dose: 0.04, unit: 'mg/kg',
-    note: 'Dosis alta de naloxona necesaria por alta afinidad. Puede requerir infusión.',
-  },
-  'fentanilo': {
-    id: 'naloxona', name: 'Naloxona (Narcan)',
-    conc: 0.4, dose: 0.01, unit: 'mg/kg',
-    note: 'IV o IM. Duración de naloxona < fentanilo en infusión — monitoreo estricto.',
-  },
-  'metadona': {
-    id: 'naloxona', name: 'Naloxona (Narcan)',
-    conc: 0.4, dose: 0.04, unit: 'mg/kg',
-    note: 'Metadona dura más que naloxona — monitorear y repetir dosis si necesario.',
-  },
-  'midazolam': {
-    id: 'flumazenil', name: 'Flumazenil (Romazicon)',
-    conc: 0.1, dose: 0.01, unit: 'mg/kg',
-    note: 'IV lento. Duración corta 30-60 min — paciente puede re-sedarse.',
-  },
-  'diazepam': {
-    id: 'flumazenil', name: 'Flumazenil (Romazicon)',
-    conc: 0.1, dose: 0.01, unit: 'mg/kg',
-    note: 'IV lento. Diazepam dura más que flumazenil — monitorear.',
-  },
-  'propofol': {
-    id: null, name: 'Sin antagonista específico',
-    note: 'Soporte ventilatorio y cardiovascular. No hay reversor para propofol.',
-  },
-  'ketamina': {
-    id: null, name: 'Sin antagonista específico',
-    note: 'No hay reversor para ketamina. Manejo de soporte. Dexmed puede ayudar a suavizar emergencia.',
-  },
-};
-
-// ─── BODY SURFACE AREA (BSA) ──────────────────────────────────────────────────
-// m² = K × (weight_kg)^(2/3) / 10000  where K=10.1 for dogs, K=10.0 for cats
 function calcBSA(weightKg, species) {
   const K = species === 'cat' ? 10.0 : 10.1;
   return (K * Math.pow(weightKg, 2/3)) / 10000;
@@ -1268,24 +1084,34 @@ function renderResult(r, idx) {
   const canAdjust = !isFixed && (r.unit === 'mg/kg' || r.unit === 'mcg/kg') && r.doseMin !== r.doseMax;
   let adjustHTML = '';
   if (canAdjust) {
-    const steps = [];
-    for (let i = 0; i <= 4; i++) {
-      const v = parseFloat((r.doseMin + (r.doseMax - r.doseMin) * i / 4).toFixed(2));
-      if (!steps.includes(v)) steps.push(v);
+    // Get real tablet combinations within dose range
+    const isSolidAdj = r.formType === 'tablet' || r.formType === 'capsule';
+    const wkgAdj = getWeightKg();
+    let adjOptions = [];
+    if (isSolidAdj && r.tabSizes && r.tabSizes.length > 0 && wkgAdj > 0) {
+      // Use smartTabletOptions which now returns combinations in range
+      adjOptions = smartTabletOptions(doseUsed * wkgAdj, r.id, r.formType, r.tabSizes);
+    } else {
+      // For injectables: dose steps
+      for (let i = 0; i <= 4; i++) {
+        const v = parseFloat((r.doseMin + (r.doseMax - r.doseMin) * i / 4).toFixed(2));
+        if (!adjOptions.includes(v.toString())) adjOptions.push(v.toString());
+      }
     }
     adjustHTML = `
       <div style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:10px 12px;margin-top:8px">
-        <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Ajustar dosis (mg/kg)</div>
+        <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">${isSolidAdj ? 'Opciones de dosificación' : 'Ajustar dosis (mg/kg)'}</div>
         <div style="display:flex;gap:6px;flex-wrap:wrap">
-          ${steps.map(s => `
-            <button onclick="updateAdjDose('${r.id}',${s})"
-              style="flex:1;min-width:50px;padding:11px 4px;border-radius:8px;font-size:13px;
-                     font-weight:700;font-family:var(--mono);cursor:pointer;border:2px solid;
-                     border-color:${Math.abs(s-doseUsed)<0.001?'var(--accent)':'var(--border)'};
-                     background:${Math.abs(s-doseUsed)<0.001?'var(--accent)':'var(--surface)'};
-                     color:${Math.abs(s-doseUsed)<0.001?'#fff':'var(--text2)'}">${s}</button>`).join('')}
+          ${adjOptions.map((opt, oi) => `
+            <button onclick="selectTabOption('${r.id}','${opt.replace(/'/g,'\'')}')"
+              style="flex:1;min-width:${isSolidAdj?'120px':'50px'};padding:11px 8px;border-radius:8px;
+                     font-size:${isSolidAdj?'12px':'13px'};font-weight:700;cursor:pointer;border:2px solid;
+                     text-align:center;line-height:1.3;
+                     border-color:${oi===0?'var(--accent)':'var(--border)'};
+                     background:${oi===0?'var(--accent)':'var(--surface)'};
+                     color:${oi===0?'#fff':'var(--text2)'}">${opt}</button>`).join('')}
         </div>
-        <div id="adj-result-${r.id}" style="font-size:12px;color:var(--accent);font-weight:700;margin-top:8px;min-height:16px"></div>
+        <div id="adj-result-${r.id}" style="font-size:13px;color:var(--accent);font-weight:700;margin-top:8px;min-height:18px"></div>
       </div>`;
   }
 
@@ -1324,9 +1150,8 @@ function renderResult(r, idx) {
       <!-- HEADER: Nombre + mg totales requeridos -->
       <div class="result-header">
         <div class="result-names">
-          <div class="result-generic">${r.generic}</div>
-          <div class="result-trade">${r.trade}</div>
-          ${mgRangeLabel ? `<div style="font-size:12px;color:var(--muted);margin-top:2px">Requerido: <b style="color:var(--text)">${mgRangeLabel}</b> · ${r.doseMin}${r.doseMin!==r.doseMax?'–'+r.doseMax:''} ${r.unit}</div>` : ''}
+          <div class="result-generic">${r.generic} <span style="font-weight:500;color:var(--muted)">(${r.trade})</span></div>
+          ${mgRangeLabel ? `<div style="font-size:14px;color:var(--muted);margin-top:2px;font-weight:600">Requerido: <span style="color:var(--text)">${mgRangeLabel}</span></div>` : ''}
         </div>
         <div class="result-dose" style="font-size:${isSolid||isFixed?'17px':'24px'}">${mainDisplay}</div>
       </div>
@@ -2817,6 +2642,25 @@ function calcNutricion() {
 
 
 // ─── PERFIL DE VETERINARIO ───────────────────────────────────────────────────
+
+function selectTabOption(drugId, optLabel) {
+  const card = document.getElementById('card-' + drugId);
+  if (!card) return;
+  // Update button styles
+  card.querySelectorAll('[onclick^="selectTabOption"]').forEach(btn => {
+    const active = btn.textContent.trim() === optLabel.trim();
+    btn.style.background  = active ? 'var(--accent)' : 'var(--surface)';
+    btn.style.color       = active ? '#fff' : 'var(--text2)';
+    btn.style.borderColor = active ? 'var(--accent)' : 'var(--border)';
+  });
+  // Update main dose display
+  const doseEl = card.querySelector('.result-dose');
+  if (doseEl) doseEl.textContent = optLabel;
+  // Show in result area
+  const resultEl = document.getElementById('adj-result-' + drugId);
+  if (resultEl) resultEl.textContent = '✓ ' + optLabel + ' seleccionado';
+}
+
 function updateAdjDose(drugId, newDose) {
   newDose = parseFloat(newDose);
   const wkg = getWeightKg();
