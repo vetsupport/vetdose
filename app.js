@@ -908,6 +908,72 @@ function toggleTableDrug(id) {
 }
 
 // ─── CALCULATE ────────────────────────────────────────────────────────────────
+const ANTAGONISTS = {
+  'dexmedetomidina': {
+    id: 'atipamezole', name: 'Atipamezole (Antisedan)',
+    rule: 'mismo_volumen',
+    note: 'Administrar el MISMO VOLUMEN que se usó de dexmedetomidina. Vía IM.',
+  },
+  'medetomidina': {
+    id: 'atipamezole', name: 'Atipamezole (Antisedan)',
+    rule: 'mismo_volumen',
+    note: 'Administrar el MISMO VOLUMEN que se usó de medetomidina. Vía IM.',
+  },
+  'xilacina': {
+    id: 'atipamezole', name: 'Atipamezole (Antisedan)',
+    rule: 'mismo_volumen',
+    note: 'Administrar el MISMO VOLUMEN que se usó de xilacina. Vía IM.',
+  },
+  'morfina': {
+    id: 'naloxona', name: 'Naloxona (Narcan)',
+    conc: 0.4, dose: 0.01, unit: 'mg/kg',
+    note: 'IV o IM. Duración corta — puede necesitar dosis repetidas. Monitorear.',
+  },
+  'hidromorfona': {
+    id: 'naloxona', name: 'Naloxona (Narcan)',
+    conc: 0.4, dose: 0.01, unit: 'mg/kg',
+    note: 'IV o IM. Reversión parcial si es necesario para preservar algo de analgesia.',
+  },
+  'butorfanol': {
+    id: 'naloxona', name: 'Naloxona (Narcan)',
+    conc: 0.4, dose: 0.01, unit: 'mg/kg',
+    note: 'IV o IM. Agonista-antagonista — reversión generalmente no necesaria.',
+  },
+  'buprenorfina': {
+    id: 'naloxona', name: 'Naloxona (Narcan)',
+    conc: 0.4, dose: 0.04, unit: 'mg/kg',
+    note: 'Dosis alta de naloxona necesaria por alta afinidad. Puede requerir infusión.',
+  },
+  'fentanilo': {
+    id: 'naloxona', name: 'Naloxona (Narcan)',
+    conc: 0.4, dose: 0.01, unit: 'mg/kg',
+    note: 'IV o IM. Duración de naloxona < fentanilo en infusión — monitoreo estricto.',
+  },
+  'metadona': {
+    id: 'naloxona', name: 'Naloxona (Narcan)',
+    conc: 0.4, dose: 0.04, unit: 'mg/kg',
+    note: 'Metadona dura más que naloxona — monitorear y repetir dosis si necesario.',
+  },
+  'midazolam': {
+    id: 'flumazenil', name: 'Flumazenil (Romazicon)',
+    conc: 0.1, dose: 0.01, unit: 'mg/kg',
+    note: 'IV lento. Duración corta 30-60 min — paciente puede re-sedarse.',
+  },
+  'diazepam': {
+    id: 'flumazenil', name: 'Flumazenil (Romazicon)',
+    conc: 0.1, dose: 0.01, unit: 'mg/kg',
+    note: 'IV lento. Diazepam dura más que flumazenil — monitorear.',
+  },
+  'propofol': {
+    id: null, name: 'Sin antagonista específico',
+    note: 'Soporte ventilatorio y cardiovascular. No hay reversor para propofol.',
+  },
+  'ketamina': {
+    id: null, name: 'Sin antagonista específico',
+    note: 'No hay reversor para ketamina. Manejo de soporte. Dexmed puede ayudar a suavizar emergencia.',
+  },
+};
+
 function calculate() {
   const name = document.getElementById('patient-name').value.trim() || 'Paciente';
   const weightKg = getWeightKg();
