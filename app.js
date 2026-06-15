@@ -1264,22 +1264,28 @@ function renderResult(r, idx) {
   const doseUsed = r.dosePref || r.doseMin;
   const mgPerKgUsed = isSolid && wkg > 0 ? (mgPref / wkg).toFixed(2) : null;
 
-  // ── Dose adjustment ──────────────────────────────────────────────────────
+  // ── Dose adjustment — tap buttons (mobile friendly) ───────────────────
   const canAdjust = !isFixed && (r.unit === 'mg/kg' || r.unit === 'mcg/kg') && r.doseMin !== r.doseMax;
   let adjustHTML = '';
   if (canAdjust) {
-    const adjId = `adj-${r.id}`;
+    const steps = [];
+    for (let i = 0; i <= 4; i++) {
+      const v = parseFloat((r.doseMin + (r.doseMax - r.doseMin) * i / 4).toFixed(2));
+      if (!steps.includes(v)) steps.push(v);
+    }
     adjustHTML = `
-      <div id="${adjId}" style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:8px 12px;margin-top:8px">
-        <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">Ajustar dosis</div>
-        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
-          <input type="range" min="${r.doseMin}" max="${r.doseMax}" step="${((r.doseMax-r.doseMin)/20).toFixed(3)}"
-            value="${doseUsed}"
-            style="flex:1;min-width:120px;accent-color:var(--accent)"
-            oninput="updateAdjDose('${r.id}',this.value,${idx})">
-          <span id="adj-val-${r.id}" style="font-family:var(--mono);font-size:14px;font-weight:700;color:var(--accent);min-width:80px">${doseUsed} ${r.unit}</span>
+      <div style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:10px 12px;margin-top:8px">
+        <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Ajustar dosis (mg/kg)</div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap">
+          ${steps.map(s => `
+            <button onclick="updateAdjDose('${r.id}',${s})"
+              style="flex:1;min-width:50px;padding:11px 4px;border-radius:8px;font-size:13px;
+                     font-weight:700;font-family:var(--mono);cursor:pointer;border:2px solid;
+                     border-color:${Math.abs(s-doseUsed)<0.001?'var(--accent)':'var(--border)'};
+                     background:${Math.abs(s-doseUsed)<0.001?'var(--accent)':'var(--surface)'};
+                     color:${Math.abs(s-doseUsed)<0.001?'#fff':'var(--text2)'}">${s}</button>`).join('')}
         </div>
-        <div id="adj-result-${r.id}" style="font-size:12px;color:var(--muted);margin-top:4px"></div>
+        <div id="adj-result-${r.id}" style="font-size:12px;color:var(--accent);font-weight:700;margin-top:8px;min-height:16px"></div>
       </div>`;
   }
 
@@ -2811,6 +2817,55 @@ function calcNutricion() {
 
 
 // ─── PERFIL DE VETERINARIO ───────────────────────────────────────────────────
+function updateAdjDose(drugId, newDose) {
+  newDose = parseFloat(newDose);
+  const wkg = getWeightKg();
+  const drugs = getDrugs();
+  const d = drugs.find(x => x.id === drugId);
+  if (!d || wkg <= 0) return;
+  const ft = d.formType || 'injection';
+  const isSolid = ft === 'tablet' || ft === 'capsule';
+  const totalMg = newDose * wkg;
+  const card = document.getElementById('card-' + drugId);
+  if (card) {
+    // Update button styles
+    card.querySelectorAll('[onclick^="updateAdjDose"]').forEach(btn => {
+      const bv = parseFloat(btn.textContent);
+      const active = Math.abs(bv - newDose) < 0.001;
+      btn.style.background  = active ? 'var(--accent)' : 'var(--surface)';
+      btn.style.color       = active ? '#fff' : 'var(--text2)';
+      btn.style.borderColor = active ? 'var(--accent)' : 'var(--border)';
+    });
+    // Update main dose display
+    const doseEl = card.querySelector('.result-dose');
+    if (doseEl) {
+      if (isSolid) {
+        doseEl.textContent = smartTabletOptions(totalMg, drugId, ft, d.tabSizes||null)[0];
+      } else {
+        doseEl.textContent = (totalMg / d.conc).toFixed(2) + ' cc';
+      }
+    }
+    // Update dosis real row
+    card.querySelectorAll('.result-row').forEach(row => {
+      const lbl = row.querySelector('.result-lbl');
+      if (lbl && lbl.textContent === 'Dosis real') {
+        const val = row.querySelector('.result-val');
+        if (val) val.textContent = newDose.toFixed(2) + ' mg/kg';
+      }
+    });
+  }
+  const resultEl = document.getElementById('adj-result-' + drugId);
+  if (resultEl) {
+    if (isSolid) {
+      const opt = smartTabletOptions(totalMg, drugId, ft, d.tabSizes||null)[0];
+      resultEl.textContent = '→ ' + opt + ' (' + totalMg.toFixed(1) + ' mg)';
+    } else {
+      resultEl.textContent = '→ ' + (totalMg/d.conc).toFixed(2) + ' cc (' + totalMg.toFixed(1) + ' mg)';
+    }
+  }
+}
+
+
 function loadProfiles() {
   try {
     const raw = JSON.parse(localStorage.getItem('vetdose_profiles_list') || '[]');
