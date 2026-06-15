@@ -460,56 +460,65 @@ const TABLET_SIZES = {
 
 // Smart tablet rounding: minimize number of units, prefer larger sizes
 // Only whole or half tablets. Capsules: whole only.
+
 function smartTabletOptions(totalMg, drugId, formType, tabSizesOverride, doseMin, doseMax, weightKg) {
-  const sizes = tabSizesOverride || TABLET_SIZES[drugId] || null;
-  const unit = formType === 'capsule' ? 'cáps.' : 'tab.';
+  var sizes = tabSizesOverride || TABLET_SIZES[drugId] || null;
+  var unit = formType === 'capsule' ? 'cáps.' : 'tab.';
   if (!sizes || !sizes.length) return [totalMg.toFixed(1) + ' mg'];
-  const sorted = [...sizes].sort((a,b)=>a-b);
-  const mults = [0.5, 1, 1.5, 2];
+  var sorted = sizes.slice().sort(function(a,b){return a-b;});
+  var mults = [0.5, 1, 1.5, 2];
+  var mgMin = (doseMin && weightKg) ? doseMin * weightKg : totalMg * 0.8;
+  var mgMax = (doseMax && weightKg) ? doseMax * weightKg : totalMg * 1.2;
 
   function sc(combo) {
-    let s=0;
-    for(const [m] of combo){if(m===1)s+=1;else if(m===2)s+=2;else if(m===0.5)s+=3;else s+=4;}
+    var s=0;
+    combo.forEach(function(p){var m=p[0];if(m===1)s+=1;else if(m===2)s+=2;else if(m===0.5)s+=3;else s+=4;});
     return s + combo.length*0.1;
   }
   function lb(m,sz) {
-    return(m===0.5?'0.5':m===1?'1':m===1.5?'1.5':'2')+' '+unit+' '+sz+'mg';
+    var prefix = m===0.5?'0.5':m===1?'1':m===1.5?'1.5':'2';
+    return prefix+' '+unit+' '+sz+'mg';
   }
 
-  const C = new Map();
-  for(const sz of sorted) for(const m of mults) {
-    const mg=parseFloat((sz*m).toFixed(4)), sv=sc([[m,sz]]);
-    if(!C.has(mg)||sv<C.get(mg).score) C.set(mg,{score:sv,label:lb(m,sz)});
-  }
-  for(let i=0;i<sorted.length;i++) for(let j=i;j<sorted.length;j++)
-    for(const m1 of mults) for(const m2 of mults) {
-      if(i===j&&m2<m1) continue;
-      const mg=parseFloat((sorted[i]*m1+sorted[j]*m2).toFixed(4));
-      const sv=sc([[m1,sorted[i]],[m2,sorted[j]]]);
-      if(!C.has(mg)||sv<C.get(mg).score) C.set(mg,{score:sv,label:lb(m1,sorted[i])+' + '+lb(m2,sorted[j])});
+  var C = new Map();
+  sorted.forEach(function(sz) {
+    mults.forEach(function(m) {
+      var mg=parseFloat((sz*m).toFixed(4)), sv=sc([[m,sz]]);
+      if(!C.has(mg)||sv<C.get(mg).score) C.set(mg,{score:sv,label:lb(m,sz)});
+    });
+  });
+  for(var i=0;i<sorted.length;i++) {
+    for(var j=i;j<sorted.length;j++) {
+      mults.forEach(function(m1) {
+        mults.forEach(function(m2) {
+          if(i===j&&m2<m1) return;
+          var mg=parseFloat((sorted[i]*m1+sorted[j]*m2).toFixed(4));
+          var sv=sc([[m1,sorted[i]],[m2,sorted[j]]]);
+          if(!C.has(mg)||sv<C.get(mg).score) C.set(mg,{score:sv,label:lb(m1,sorted[i])+' + '+lb(m2,sorted[j])});
+        });
+      });
     }
+  }
 
-  // Use dose range if provided, else ±25% of totalMg
-  const mgMin = (doseMin && weightKg) ? doseMin*weightKg : totalMg*0.75;
-  const mgMax = (doseMax && weightKg) ? doseMax*weightKg : totalMg*1.25;
-
-  const inRange = Array.from(C.entries())
-    .filter(([mg]) => mg >= mgMin*0.98 && mg <= mgMax*1.02)
-    .sort((a,b) => a[0]-b[0]);
+  var inRange = Array.from(C.entries())
+    .filter(function(e){return e[0]>=mgMin && e[0]<=mgMax;})
+    .sort(function(a,b){return a[0]-b[0];});
 
   if (!inRange.length) {
-    // Fallback: closest to totalMg
-    const best = Array.from(C.entries()).reduce((b,c)=>Math.abs(c[0]-totalMg)<Math.abs(b[0]-totalMg)?c:b);
-    return [best[1].label];
+    var above = Array.from(C.entries())
+      .filter(function(e){return e[0]>=mgMin;})
+      .sort(function(a,b){return a[0]-b[0];});
+    return above.length ? [above[0][1].label] : [totalMg.toFixed(1)+' mg'];
   }
 
-  // Pick best 5: always include min and max, fill middle with simplest
-  let picks = inRange.length<=5 ? inRange :
-    [inRange[0],
-     ...inRange.slice(1,-1).sort((a,b)=>a[1].score-b[1].score).slice(0,3).sort((a,b)=>a[0]-b[0]),
-     inRange[inRange.length-1]];
+  var picks = inRange.length<=5 ? inRange :
+    [inRange[0]].concat(
+      inRange.slice(1,-1).sort(function(a,b){return a[1].score-b[1].score;}).slice(0,3)
+        .sort(function(a,b){return a[0]-b[0];}),
+      [inRange[inRange.length-1]]
+    );
 
-  return picks.map(([mg,v]) => v.label);
+  return picks.map(function(e){return e[1].label;});
 }
 
 function calcBSA(weightKg, species) {
@@ -1159,7 +1168,7 @@ function renderResult(r, idx) {
     concLabel = 'BSA'; concValue = `${r.bsa.toFixed(3)} m²`;
   } else if (isSolid) {
     const totalMg = r.qty * r.conc; // qty = total tabs before rounding
-    const opts = smartTabletOptions(totalMg, r.id, ft, r.tabSizes || null);
+    const opts = smartTabletOptions(totalMg, r.id, ft, r.tabSizes || null, r.doseMin, r.doseMax, wkg);
     mainDisplay = opts[0]; // primary option
     concLabel = 'Presentación';
     concValue = `${r.conc} mg / ${isTablet ? 'comprimido' : 'cápsula'}`;
@@ -1189,20 +1198,41 @@ function renderResult(r, idx) {
        </div>` : '';
 
   // Dose adjustment - only for standard mg/kg injectable/oral
-  const canAdjust = !isFixed && (r.unit === 'mg/kg' || r.unit === 'mcg/kg') && r.doseMin !== r.doseMax;
-  const adjustHTML = canAdjust ? `
-    <div style="margin-top:10px;background:var(--surface2);border-radius:10px;padding:10px 12px">
-      <div style="font-size:11px;font-weight:700;color:var(--muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:.8px">Ajustar dosis (${r.doseMin}–${r.doseMax} ${r.unit})</div>
-      <div style="display:flex;align-items:center;gap:8px">
-        <input type="number" id="adj-dose-${idx}" value="${r._currentDose}" min="${r.doseMin}" max="${r.doseMax}" step="0.01"
-          style="width:90px;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-size:15px;font-family:var(--mono);color:var(--text);outline:none"
-          oninput="recalcDose(${idx}, this.value)">
-        <span style="font-size:12px;color:var(--muted);flex-shrink:0">${r.unit}</span>
-        <button onclick="recalcDose(${idx}, document.getElementById('adj-dose-${idx}').value)"
-          style="background:var(--accent);color:#fff;border:none;border-radius:8px;padding:8px 12px;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap">Recalcular</button>
-        <div id="adj-result-${idx}" style="font-size:14px;color:var(--accent);font-family:var(--mono);font-weight:600;min-width:80px;background:var(--accent-lt);border-radius:8px;padding:8px 10px;text-align:center"></div>
-      </div>
-    </div>` : '';
+  // Dose buttons
+  var canAdjust = !isFixed && !isBSA;
+  var tabOpts = [];
+  if (canAdjust && isSolid && r.tabSizes && r.tabSizes.length && wkg > 0) {
+    tabOpts = smartTabletOptions((r.dosePref||r.doseMin)*wkg, r.id, ft, r.tabSizes, r.doseMin, r.doseMax, wkg);
+  }
+  var adjustHTML = '';
+  if (canAdjust && isSolid && tabOpts.length > 0) {
+    window['_opts_'+r.id] = tabOpts;
+    var btnHTML = '';
+    for (var _oi=0; _oi<tabOpts.length; _oi++) {
+      var _active = _oi===0;
+      btnHTML += '<button onclick="selectTabOpt(\'' + r.id + '\',' + _oi + ')" ' +
+        'style="flex:1;min-width:100px;padding:11px 6px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;border:2px solid;text-align:center;line-height:1.3;' +
+        'border-color:' + (_active?'var(--accent)':'var(--border)') + ';' +
+        'background:' + (_active?'var(--accent)':'var(--surface)') + ';' +
+        'color:' + (_active?'#fff':'var(--text2)') + '">' + tabOpts[_oi] + '</button>';
+    }
+    adjustHTML = '<div style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:10px 12px;margin-top:8px">' +
+      '<div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;margin-bottom:8px">Opciones de dosificación</div>' +
+      '<div id="tbopts-' + r.id + '" style="display:flex;gap:6px;flex-wrap:wrap">' + btnHTML + '</div>' +
+      '<div id="tbres-' + r.id + '" style="font-size:13px;color:var(--accent);font-weight:700;margin-top:8px;min-height:18px"></div></div>';
+  } else if (canAdjust && (r.unit === 'mg/kg' || r.unit === 'mcg/kg') && r.doseMin !== r.doseMax) {
+    var steps = [], _n=4;
+    for (var _i=0;_i<=_n;_i++){var _v=parseFloat((r.doseMin+(r.doseMax-r.doseMin)*_i/_n).toFixed(2));if(steps.indexOf(_v)<0)steps.push(_v);}
+    var stepBtns = '';
+    steps.forEach(function(_s){
+      var _a = Math.abs(_s-doseUsed)<0.001;
+      stepBtns += '<button onclick="updateAdjDose(\'' + r.id + '\',' + _s + ')" style="flex:1;min-width:50px;padding:11px 4px;border-radius:8px;font-size:13px;font-weight:700;font-family:var(--mono);cursor:pointer;border:2px solid;border-color:' + (_a?'var(--accent)':'var(--border)') + ';background:' + (_a?'var(--accent)':'var(--surface)') + ';color:' + (_a?'#fff':'var(--text2)') + '">' + _s + '</button>';
+    });
+    adjustHTML = '<div style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:10px 12px;margin-top:8px">' +
+      '<div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;margin-bottom:8px">Ajustar dosis (mg/kg)</div>' +
+      '<div style="display:flex;gap:6px;flex-wrap:wrap">' + stepBtns + '</div>' +
+      '<div id="adj-result-' + r.id + '" style="font-size:12px;color:var(--accent);font-weight:700;margin-top:8px;min-height:16px"></div></div>';
+  }
 
   return `
     <div class="result-card" id="result-card-${idx}">
@@ -1984,7 +2014,30 @@ function checkProfile(){const p=loadProfiles();if(!p.length)return;if(p.length==
 function renderProfileModal(p){const l=document.getElementById('profile-list');if(!l)return;if(!p.length){l.innerHTML='<div style="text-align:center;padding:16px;color:var(--muted)">No hay perfiles.</div>';return;}l.innerHTML=p.map((x,i)=>`<div onclick="setActiveProfile(${JSON.stringify(JSON.stringify(x)).slice(1,-1)})" style="display:flex;align-items:center;gap:12px;padding:12px 14px;border:1.5px solid var(--border);border-radius:10px;margin-bottom:8px;cursor:pointer;background:var(--surface)"><div style="width:40px;height:40px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:800;color:#fff">${x.initials}</div><div style="flex:1"><div style="font-size:14px;font-weight:700">${x.name}</div><div style="font-size:11px;color:var(--muted)">${x.clinic||''}</div></div><button onclick="event.stopPropagation();deleteProfile(${i})" style="background:none;border:none;color:var(--muted);font-size:16px;cursor:pointer">✕</button></div>`).join('');}
 function createProfile(){const n=document.getElementById('new-profile-name')?.value.trim(),c=document.getElementById('new-profile-clinic')?.value.trim()||'';if(!n){alert('Ingresa nombre.');return;}const w=n.replace(/^Dr[a]?[.\s]*/i,'').trim().split(' '),i=w.length>=2?(w[0][0]+w[w.length-1][0]).toUpperCase():w[0].slice(0,2).toUpperCase();const p={initials:i,name:n,clinic:c,settings:{doctorName:n,clinicName:c,phone:''}};const ps=loadProfiles();ps.push(p);saveProfiles(ps);setActiveProfile(p);}
 function deleteProfile(i){if(!confirm('Eliminar?'))return;const p=loadProfiles();p.splice(i,1);saveProfiles(p);renderProfileModal(p);}
-function updateDrName(){const s=getSettings(),el=document.getElementById('header-dr-name');if(!el)return;if(s.doctorName?.trim()){const c=s.doctorName.trim(),tm=c.match(/^(Dr[a]?[.]?)\s*/i),ti=tm?tm[1]:(s.drTitle||'Dr.'),nt=c.replace(/^Dr[a]?[.]?\s*/i,'').trim(),pts=nt.split(' '),ap=pts[pts.length-1];el.innerHTML='<div style="font-size:10px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;text-align:right">'+ti+'</div><div style="font-size:18px;font-weight:800;color:var(--accent);text-align:right;line-height:1">'+ap+'</div>';el.style.display='block';}else el.style.display='none';}
+function updateDrName() {
+  var s = getSettings();
+  var el = document.getElementById('header-dr-name');
+  if (!el) return;
+  var name = s.doctorName && s.doctorName.trim() ? s.doctorName.trim() : '';
+  if (!name) {
+    // Try from localStorage directly
+    var reg = localStorage.getItem('vetdose_registered');
+    if (!reg) { el.style.display='none'; return; }
+  }
+  if (name) {
+    var tmatch = name.match(/^(Dr[a]?[.]?)\s*/i);
+    var title = tmatch ? tmatch[1] : (s.drTitle || 'Dr.');
+    var noTitle = name.replace(/^Dr[a]?[.]?\s*/i,'').trim();
+    var parts = noTitle.split(' ');
+    var apellido = parts[parts.length-1];
+    el.innerHTML =
+      '<div style="font-size:9px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;text-align:right;line-height:1.2">' + title + '</div>' +
+      '<div style="font-size:20px;font-weight:900;color:var(--accent);text-align:right;line-height:1;letter-spacing:-.5px">' + apellido + '</div>';
+    el.style.display = 'block';
+  } else {
+    el.style.display = 'none';
+  }
+}
 function openHelp(){document.getElementById('help-modal')?.classList.remove('hidden');}
 function closeHelp(){document.getElementById('help-modal')?.classList.add('hidden');}
 
@@ -2182,11 +2235,30 @@ function closeProtocolEdit() { document.getElementById('protocol-edit-modal').cl
 
 
 // ─── PRESCRIPCIÓN ────────────────────────────────────────────────────────────
-function openPrescription(){const dr=getDrugs(),sel=dr.filter(d=>state.selectedDrugs.has(d.id));if(!sel.length){alert('Calcula las dosis primero.');return;}const wkg=getWeightKg(),rows=sel.map(d=>{const ft=d.formType||'injection',is=ft==='tablet'||ft==='capsule',ad=state.species==='cat'&&d.doseCat?d.doseCat:state.species==='dog'&&d.doseDog?d.doseDog:d.dosePref;const dp=is?smartTabletOptions(ad*wkg,d.id,ft,d.tabSizes||null)[0]||'':((ad*wkg)/d.conc).toFixed(2)+' mL';const fr=state.selectedFrequency[d.id]||d.frequency||'SID';return{id:d.id,name:d.generic,trade:d.trade,dosePerAdmin:dp,freq:fr,unit:is?(ft==='tablet'?'tab.':'cáps.'):'mL'};});const c=document.getElementById('rx-drugs');if(!c)return;c.innerHTML=rows.map(r=>`<div style="border:1px solid var(--border);border-radius:10px;padding:12px;margin-bottom:10px;background:var(--surface2)"><div style="font-size:14px;font-weight:700;color:var(--accent);margin-bottom:8px">${r.name} <span style="font-size:11px;color:var(--muted)">(${r.trade})</span></div><div style="display:flex;gap:8px;flex-wrap:wrap"><div style="flex:1;min-width:90px"><div style="font-size:10px;color:var(--muted);text-transform:uppercase;margin-bottom:3px">Dosis</div><div style="font-size:13px;font-weight:700">${r.dosePerAdmin}</div></div><div style="flex:1;min-width:70px"><div style="font-size:10px;color:var(--muted);text-transform:uppercase;margin-bottom:3px">Frecuencia</div><select id="rx-freq-${r.id}" onchange="updateRxTotal('${r.id}')" style="width:100%;background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:6px 8px;font-size:12px;font-family:var(--sans);outline:none">${['SID','BID','TID','QID','q8h','q12h'].map(f=>`<option ${f===r.freq?'selected':''}>${f}</option>`).join('')}</select></div><div style="flex:1;min-width:50px"><div style="font-size:10px;color:var(--muted);text-transform:uppercase;margin-bottom:3px">Días</div><input type="number" id="rx-days-${r.id}" value="7" min="1" max="365" oninput="updateRxTotal('${r.id}')" style="width:100%;background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:6px 8px;font-size:13px;font-family:var(--mono);outline:none"></div><div style="flex:1;min-width:60px"><div style="font-size:10px;color:var(--muted);text-transform:uppercase;margin-bottom:3px">Total</div><div id="rx-total-${r.id}" style="font-size:15px;font-weight:800;color:var(--accent);padding-top:4px">—</div></div></div></div>`).join('');window._rxRows=rows;rows.forEach(r=>updateRxTotal(r.id));document.getElementById('rx-modal')?.classList.remove('hidden');}
+function openPrescription(){const dr=getDrugs(),sel=dr.filter(d=>state.selectedDrugs.has(d.id));if(!sel.length){alert('Calcula las dosis primero.');return;}const wkg=getWeightKg(),rows=sel.map(d=>{const ft=d.formType||'injection',is=ft==='tablet'||ft==='capsule',ad=state.species==='cat'&&d.doseCat?d.doseCat:state.species==='dog'&&d.doseDog?d.doseDog:d.dosePref;const dp=is?smartTabletOptions(ad*wkg,d.id,ft,d.tabSizes||null,d.doseMin,d.doseMax,wkg)[0]||'':((ad*wkg)/d.conc).toFixed(2)+' mL';const fr=state.selectedFrequency[d.id]||d.frequency||'SID';return{id:d.id,name:d.generic,trade:d.trade,dosePerAdmin:dp,freq:fr,unit:is?(ft==='tablet'?'tab.':'cáps.'):'mL'};});const c=document.getElementById('rx-drugs');if(!c)return;c.innerHTML=rows.map(r=>`<div style="border:1px solid var(--border);border-radius:10px;padding:12px;margin-bottom:10px;background:var(--surface2)"><div style="font-size:14px;font-weight:700;color:var(--accent);margin-bottom:8px">${r.name} <span style="font-size:11px;color:var(--muted)">(${r.trade})</span></div><div style="display:flex;gap:8px;flex-wrap:wrap"><div style="flex:1;min-width:90px"><div style="font-size:10px;color:var(--muted);text-transform:uppercase;margin-bottom:3px">Dosis</div><div style="font-size:13px;font-weight:700">${r.dosePerAdmin}</div></div><div style="flex:1;min-width:70px"><div style="font-size:10px;color:var(--muted);text-transform:uppercase;margin-bottom:3px">Frecuencia</div><select id="rx-freq-${r.id}" onchange="updateRxTotal('${r.id}')" style="width:100%;background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:6px 8px;font-size:12px;font-family:var(--sans);outline:none">${['SID','BID','TID','QID','q8h','q12h'].map(f=>`<option ${f===r.freq?'selected':''}>${f}</option>`).join('')}</select></div><div style="flex:1;min-width:50px"><div style="font-size:10px;color:var(--muted);text-transform:uppercase;margin-bottom:3px">Días</div><input type="number" id="rx-days-${r.id}" value="7" min="1" max="365" oninput="updateRxTotal('${r.id}')" style="width:100%;background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:6px 8px;font-size:13px;font-family:var(--mono);outline:none"></div><div style="flex:1;min-width:60px"><div style="font-size:10px;color:var(--muted);text-transform:uppercase;margin-bottom:3px">Total</div><div id="rx-total-${r.id}" style="font-size:15px;font-weight:800;color:var(--accent);padding-top:4px">—</div></div></div></div>`).join('');window._rxRows=rows;rows.forEach(r=>updateRxTotal(r.id));document.getElementById('rx-modal')?.classList.remove('hidden');}
 function updateRxTotal(id){const r=(window._rxRows||[]).find(x=>x.id===id);if(!r)return;const fe=document.getElementById('rx-freq-'+id),de=document.getElementById('rx-days-'+id),te=document.getElementById('rx-total-'+id);if(!fe||!de||!te)return;const fm={'SID':1,'BID':2,'TID':3,'QID':4,'q8h':3,'q12h':2,'q24h':1,'q6h':4};te.textContent=((fm[fe.value]||1)*(parseInt(de.value)||7))+' '+r.unit;}
 function closePrescription(){document.getElementById('rx-modal')?.classList.add('hidden');}
 function sharePrescription(){const n=document.getElementById('patient-name')?.value.trim()||'Paciente',w=getWeightKg(),s=getSettings(),d=new Date().toLocaleDateString('es-US'),r=window._rxRows||[];let t='PRESCRIPCION\n'+d+'\n'+(s.doctorName||'')+'\n\nPaciente: '+n+' ('+w.toFixed(1)+' kg)\n\n';r.forEach(x=>{const fe=document.getElementById('rx-freq-'+x.id),de=document.getElementById('rx-days-'+x.id),f=fe?fe.value:x.freq,dy=parseInt(de?de.value:7)||7,fm={'SID':1,'BID':2,'TID':3,'QID':4,'q8h':3,'q12h':2},tot=(fm[f]||1)*dy;t+='- '+x.name+' ('+x.trade+')\n  '+x.dosePerAdmin+' · '+f+' · '+dy+' dias\n  Total: '+tot+' '+x.unit+'\n\n';});if(navigator.share)navigator.share({title:'Prescripcion',text:t}).catch(()=>{});else navigator.clipboard.writeText(t).then(()=>alert('Copiado')).catch(()=>prompt('',t));}
 function printPrescription(){const n=document.getElementById('patient-name')?.value.trim()||'Paciente',w=getWeightKg(),s=getSettings(),d=new Date().toLocaleDateString('es-US'),r=window._rxRows||[];let ih='';r.forEach(x=>{const fe=document.getElementById('rx-freq-'+x.id),de=document.getElementById('rx-days-'+x.id),f=fe?fe.value:x.freq,dy=parseInt(de?de.value:7)||7,fm={'SID':1,'BID':2,'TID':3,'QID':4,'q8h':3,'q12h':2},tot=(fm[f]||1)*dy;ih+='<div style="border:1px solid #ccc;border-radius:6px;padding:10px;margin-bottom:8px"><div style="font-size:12pt;font-weight:700;color:#1a5c38">'+x.name+'</div><div style="font-size:9pt;margin-top:4px">'+x.dosePerAdmin+' · '+f+' · '+dy+' dias</div><div style="font-size:13pt;font-weight:800;color:#1a5c38;margin-top:4px">Total: '+tot+' '+x.unit+'</div></div>';});const win=window.open('','_blank');win.document.write('<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Rx</title><style>body{font-family:Arial;font-size:10pt;padding:20px}@page{margin:10mm;size:letter}</style></head><body><div style="display:flex;justify-content:space-between;margin-bottom:12px"><div><h2 style="color:#1a5c38;margin:0">Prescripcion</h2><div style="font-size:9pt">'+d+'</div></div><div style="text-align:right;font-size:9pt">'+(s.doctorName||'')+'<br>'+(s.clinicName||'')+'</div></div><div style="background:#1a5c38;color:#fff;border-radius:6px;padding:8px 12px;margin-bottom:12px">'+n+' ('+w.toFixed(1)+' kg)</div>'+ih+'</body></html>');win.document.close();setTimeout(()=>win.print(),400);}
+
+
+function selectTabOpt(drugId, idx) {
+  var opts = window['_opts_'+drugId] || [];
+  var label = opts[idx] || '';
+  var container = document.getElementById('tbopts-'+drugId);
+  if (container) {
+    Array.from(container.children).forEach(function(btn, i) {
+      var a = i===idx;
+      btn.style.background  = a ? 'var(--accent)' : 'var(--surface)';
+      btn.style.color       = a ? '#fff' : 'var(--text2)';
+      btn.style.borderColor = a ? 'var(--accent)' : 'var(--border)';
+    });
+  }
+  var card = document.getElementById('card-'+drugId);
+  if (card) { var de = card.querySelector('.result-dose'); if (de) de.textContent = label; }
+  var res = document.getElementById('tbres-'+drugId);
+  if (res) res.textContent = '✓ ' + label;
+}
 
 // ─── EXPORT / IMPORT ─────────────────────────────────────────────────────────
 function exportDrugs() {
