@@ -521,7 +521,7 @@ document.addEventListener('DOMContentLoaded', () => {
   checkRegistration();
   checkProfile();
   renderDrugList();
-  renderDrugsDB();
+  if (document.getElementById('drugs-db-list')) renderDrugsDB();
   populateCRISelect();
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('sw.js').catch(() => {});
@@ -1430,6 +1430,7 @@ function renderDrugsDB(filter = '') {
     : drugs);
 
   const container = document.getElementById('drugs-db-list');
+  if (!container) return;
   if (filtered.length === 0) {
     container.innerHTML = `<div class="empty-state"><div class="empty-icon">💊</div><p>No se encontraron drogas.</p></div>`;
     return;
@@ -1539,7 +1540,7 @@ function saveDrug() {
   loadFreqPrefs();
   loadSettings();
   renderDrugList();
-  renderDrugsDB();
+  if (document.getElementById('drugs-db-list')) renderDrugsDB();
   populateCRISelect();
   closeModal();
 }
@@ -1553,7 +1554,7 @@ function deleteDrug() {
   loadFreqPrefs();
   loadSettings();
   renderDrugList();
-  renderDrugsDB();
+  if (document.getElementById('drugs-db-list')) renderDrugsDB();
   populateCRISelect();
   closeModal();
 }
