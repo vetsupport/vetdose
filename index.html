@@ -175,67 +175,10 @@ input:focus{border-color:var(--accent-md);box-shadow:0 0 0 3px rgba(26,92,56,.1)
 
 /* PRINT */
 @media print{
-  /* Hide everything except results */
   .tab-bar,.sticky-btn,.btn-share,.btn-print,.btn-secondary,.btn-version,
-  .header,.search-box,.cat-filters,.species-row,.card,
-  #screen-calc,#screen-cri,#screen-drugs,#screen-fluidos,
-  #screen-nutricion,#screen-protocolos,
-  .btn,.warn-note .result-lbl,
-  #protocol-banner{display:none!important}
-
-  /* Show results full page */
-  body,html,.app,.content{
-    height:auto!important;overflow:visible!important;
-    background:#fff!important;padding:0!important;margin:0!important;
-  }
-  #screen-results{
-    display:block!important;padding:0!important;
-    height:auto!important;overflow:visible!important;
-  }
-
-  /* Patient bar compact */
-  .patient-bar{
-    background:#1a5c38!important;-webkit-print-color-adjust:exact;
-    print-color-adjust:exact;border-radius:6px!important;
-    padding:6px 10px!important;margin-bottom:8px!important;
-  }
-  .patient-bar-name{font-size:16pt!important;color:#fff!important}
-
-  /* Compact result cards */
-  .result-card{
-    break-inside:avoid;page-break-inside:avoid;
-    box-shadow:none!important;border:1px solid #ccc!important;
-    margin-bottom:6px!important;border-radius:4px!important;
-  }
-  .result-header{
-    padding:5px 10px!important;
-    background:#e8f5ee!important;-webkit-print-color-adjust:exact;
-    print-color-adjust:exact;
-  }
-  .result-generic{font-size:11pt!important;font-weight:700!important}
-  .result-trade{font-size:8pt!important}
-
-  /* BIG dose display */
-  .result-dose{font-size:18pt!important;font-weight:800!important;color:#1a5c38!important}
-
-  /* Small detail rows */
-  .result-body{padding:4px 10px!important}
-  .result-row{
-    display:flex!important;gap:6px!important;
-    padding:1px 0!important;border-bottom:none!important;
-  }
-  .result-lbl{
-    font-size:7pt!important;color:#666!important;
-    min-width:55px!important;font-weight:400!important;
-  }
-  .result-val{font-size:7.5pt!important;color:#222!important}
-  .route-badge{font-size:7pt!important;padding:1px 4px!important}
-
-  /* Adjustment panel hidden in print */
-  [id^="panel-"],[id^="adj-"]{display:none!important}
-
-  /* Page settings */
-  @page{margin:10mm;size:letter portrait}
+  #screen-calc,#screen-cri,#screen-drugs{display:none!important}
+  #screen-results{display:block!important;padding:0}
+  .result-card{break-inside:avoid;box-shadow:none}
 }
 </style>
 </head>
@@ -243,12 +186,8 @@ input:focus{border-color:var(--accent-md);box-shadow:0 0 0 3px rgba(26,92,56,.1)
 <div class="app">
   <div class="header">
     <img src="icon-logo.png" alt="VetDose">
-    <div class="header-pill" id="header-patient-info" style="flex:1;min-width:0"></div>
-    <div id="header-dr-name" style="display:none;text-align:right;flex-shrink:0;line-height:1.2;margin-right:2px"></div>
-    <div style="display:flex;gap:6px;flex-shrink:0">
-      <button onclick="openHelp()" style="background:var(--surface2);border:1px solid var(--border);border-radius:50%;width:32px;height:32px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:13px;font-weight:700;color:var(--accent)">?</button>
-      <button onclick="openSettings()" style="background:var(--accent);border:none;border-radius:50%;width:34px;height:34px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px">⚙️</button>
-    </div>
+    <div class="header-pill" id="header-patient-info"></div>
+    <button onclick="openSettings()" style="background:var(--accent);border:none;border-radius:50%;width:34px;height:34px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;flex-shrink:0">⚙️</button>
   </div>
   <div class="tab-bar">
     <div class="tab active" onclick="showTab('calc')">
@@ -330,126 +269,52 @@ input:focus{border-color:var(--accent-md);box-shadow:0 0 0 3px rgba(26,92,56,.1)
       <div id="results-container"></div>
       <div style="padding-bottom:16px">
         <button class="btn btn-share" onclick="shareResults()">Compartir resultado</button>
-        <button class="btn btn-primary" onclick="openPrescription()" style="background:#1d4ed8;margin-bottom:4px">📋 Prescripción</button>
-        <button class="btn btn-print" onclick="printResults()">🖨 Imprimir</button>
+        <button class="btn btn-print" onclick="window.print()">Imprimir</button>
         <button class="btn btn-secondary" style="margin-top:8px" onclick="backToCalc()">&#8592; Volver</button>
       </div>
     </div>
 
     <!-- CRI -->
     <div class="screen" id="screen-cri">
-
-      <!-- Instruction box -->
-      <div id="cri-instr"></div>
-
-      <!-- Mode selector -->
-      <div style="display:flex;gap:8px;margin-bottom:14px">
-        <button id="cri-mode-single" onclick="setCRIMode('single')"
-          style="flex:1;padding:10px;border-radius:10px;font-size:13px;font-weight:700;border:2px solid var(--accent);background:var(--accent);color:#fff;cursor:pointer;font-family:var(--sans)">
-          💉 Droga única
-        </button>
-        <button id="cri-mode-protocol" onclick="setCRIMode('protocol')"
-          style="flex:1;padding:10px;border-radius:10px;font-size:13px;font-weight:700;border:2px solid var(--border);background:var(--surface);color:var(--muted);cursor:pointer;font-family:var(--sans)">
-          📋 Protocolo CRI
-        </button>
-      </div>
-
-      <!-- SINGLE DRUG MODE -->
-      <div id="cri-single-mode">
-        <div class="section-label">Droga para CRI</div>
-        <div class="card">
-          <div class="mfield" style="margin-bottom:12px">
-            <label>Seleccionar droga</label>
-            <select id="cri-drug-select" onchange="onCRIDrugChange()"><option value="">-- seleccionar --</option></select>
-          </div>
-          <div style="display:flex;gap:8px">
-            <div class="mfield" style="flex:1;margin-bottom:0"><label>Tasa deseada</label><input type="number" id="cri-rate" placeholder="Ej: 5" step="0.01" min="0" oninput="updateCRI()"></div>
-            <div class="mfield" style="width:142px;margin-bottom:0"><label>Unidad</label>
-              <select id="cri-rate-unit" onchange="updateCRI()" style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-sm);padding:10px 12px;font-size:13px;font-family:var(--sans);outline:none">
-                <option value="mcg/kg/min">mcg/kg/min</option>
-                <option value="mcg/kg/h">mcg/kg/h</option>
-                <option value="mg/kg/h">mg/kg/h</option>
-                <option value="mg/kg/min">mg/kg/min</option>
-                <option value="U/kg/h">U/kg/h</option>
-                <option value="mU/kg/min">mU/kg/min</option>
-              </select>
-            </div>
-          </div>
+      <div class="section-label">Droga para CRI</div>
+      <div class="card">
+        <div class="mfield" style="margin-bottom:12px">
+          <label>Seleccionar droga</label>
+          <select id="cri-drug-select" onchange="updateCRI()"><option value="">-- seleccionar --</option></select>
         </div>
-        <div class="section-label">Preparación de jeringa</div>
-        <div class="card">
-          <div style="display:flex;gap:8px">
-            <div class="mfield" style="flex:1;margin-bottom:0"><label>Stock a tomar (cc)</label><input type="number" id="cri-stock-vol" placeholder="Ej: 1" step="0.1" min="0" oninput="updateCRI()"></div>
-            <div class="mfield" style="flex:1;margin-bottom:0"><label>Volumen final (cc)</label><input type="number" id="cri-dil-vol" value="50" step="1" min="1" oninput="updateCRI()"></div>
+        <div style="display:flex;gap:8px">
+          <div class="mfield" style="flex:1;margin-bottom:0"><label>Tasa deseada</label><input type="number" id="cri-rate" placeholder="Ej: 5" step="0.01" min="0" oninput="updateCRI()"></div>
+          <div class="mfield" style="width:142px;margin-bottom:0"><label>Unidad</label>
+            <select id="cri-rate-unit" onchange="updateCRI()">
+              <option value="mcg/kg/min">mcg/kg/min</option>
+              <option value="mg/kg/h">mg/kg/h</option>
+              <option value="mg/kg/min">mg/kg/min</option>
+            </select>
           </div>
-          <div style="font-size:11px;color:var(--muted);margin-top:8px">Peso del paciente se toma de la pantalla Calcular</div>
-        </div>
-        <div id="cri-result" style="display:none">
-          <div class="section-label">Resultado CRI &mdash; <span id="cri-drug-name" style="color:var(--accent)"></span></div>
-          <div class="cri-result-box">
-            <div class="cri-lbl">Velocidad de bomba</div>
-            <div class="cri-big" id="cri-ml-per-hour">&#8212;</div>
-          </div>
-          <div class="cri-grid">
-            <div class="cri-cell"><div class="cri-lbl">Conc. preparada</div><div style="font-family:var(--mono);font-size:17px;font-weight:500;margin-top:4px" id="cri-conc-prep">&#8212;</div></div>
-            <div class="cri-cell" id="cri-duration-row"><div class="cri-lbl">Duración aprox.</div><div style="font-family:var(--mono);font-size:17px;font-weight:500;color:var(--accent);margin-top:4px" id="cri-duration">&#8212;</div></div>
-          </div>
-          <div class="instr-box" id="cri-instruction"></div>
         </div>
       </div>
-
-      <!-- PROTOCOL MODE -->
-      <div id="cri-protocol-mode" style="display:none">
-        <div class="section-label">Protocolo analgésico</div>
-        <div style="display:flex;gap:8px;margin-bottom:12px">
-          <button onclick="selectCRIProtocol('blk')" id="proto-blk"
-            style="flex:1;padding:12px 8px;border-radius:12px;border:2px solid var(--accent);background:var(--accent);color:#fff;font-size:13px;font-weight:700;cursor:pointer;font-family:var(--sans);line-height:1.3">
-            🐾 BLK<br><span style="font-size:10px;font-weight:500">Bupre · Lido · Keta</span>
-          </button>
-          <button onclick="selectCRIProtocol('fentlido')" id="proto-fentlido"
-            style="flex:1;padding:12px 8px;border-radius:12px;border:2px solid var(--border);background:var(--surface);color:var(--muted);font-size:13px;font-weight:700;cursor:pointer;font-family:var(--sans);line-height:1.3">
-            💉 Fent/Lido<br><span style="font-size:10px;font-weight:500">Fentanilo · Lido</span>
-          </button>
+      <div class="section-label">Preparación de jeringa</div>
+      <div class="card">
+        <div style="display:flex;gap:8px">
+          <div class="mfield" style="flex:1;margin-bottom:0"><label>Stock a tomar (cc)</label><input type="number" id="cri-stock-vol" placeholder="Ej: 1" step="0.1" min="0" oninput="updateCRI()"></div>
+          <div class="mfield" style="flex:1;margin-bottom:0"><label>Volumen final (cc)</label><input type="number" id="cri-dil-vol" value="50" step="1" min="1" oninput="updateCRI()"></div>
         </div>
-
-        <div class="section-label">Datos del paciente y bolsa</div>
-        <div class="card">
-          <div style="display:flex;gap:8px;margin-bottom:10px">
-            <div style="flex:1"><div class="field-label">Peso (kg)</div>
-              <input type="number" id="blk-weight" placeholder="Ej: 8" step="0.1" min="0" oninput="calcBLK()">
-            </div>
-            <div style="flex:1"><div class="field-label">Especie</div>
-              <select id="blk-species" onchange="calcBLK()" style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-sm);padding:10px 12px;font-size:14px;font-family:var(--sans);outline:none">
-                <option value="dog">🐕 Perro</option>
-                <option value="cat">🐈 Gato</option>
-              </select>
-            </div>
-          </div>
-          <div style="display:flex;gap:8px">
-            <div style="flex:1"><div class="field-label">Bolsa IV (mL)</div>
-              <select id="blk-bag" onchange="calcBLK()" style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-sm);padding:10px 12px;font-size:14px;font-family:var(--sans);outline:none">
-                <option value="50">50 mL</option>
-                <option value="100" selected>100 mL</option>
-                <option value="250">250 mL</option>
-                <option value="500">500 mL</option>
-              </select>
-            </div>
-            <div style="flex:1"><div class="field-label">Tasa fluido (mL/kg/h)</div>
-              <input type="number" id="blk-rate" value="3" step="0.5" min="0.5" oninput="calcBLK()"
-                style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-sm);padding:10px 12px;font-size:16px;font-family:var(--mono);outline:none">
-            </div>
-          </div>
-        </div>
-
-        <div class="section-label">Dosis CRI <span style="font-size:10px;color:var(--muted);font-weight:400">(ajustable dentro del rango)</span></div>
-        <div class="card" id="blk-dose-inputs">
-          <!-- Populated by JS -->
-        </div>
-
-        <div id="blk-result" style="display:none;padding-bottom:16px"></div>
+        <div style="font-size:11px;color:var(--muted);margin-top:8px">Peso del paciente se toma de la pantalla Calcular</div>
       </div>
-
+      <div id="cri-result" style="display:none">
+        <div class="section-label">Resultado CRI &mdash; <span id="cri-drug-name" style="color:var(--accent)"></span></div>
+        <div class="cri-result-box">
+          <div class="cri-lbl">Velocidad de bomba</div>
+          <div class="cri-big" id="cri-ml-per-hour">&#8212;</div>
+        </div>
+        <div class="cri-grid">
+          <div class="cri-cell"><div class="cri-lbl">Conc. preparada</div><div style="font-family:var(--mono);font-size:17px;font-weight:500;margin-top:4px" id="cri-conc-prep">&#8212;</div></div>
+          <div class="cri-cell" id="cri-duration-row"><div class="cri-lbl">Duración aprox.</div><div style="font-family:var(--mono);font-size:17px;font-weight:500;color:var(--accent);margin-top:4px" id="cri-duration">&#8212;</div></div>
+        </div>
+        <div class="instr-box" id="cri-instruction"></div>
+      </div>
     </div>
+
 
     <!-- FLUIDOS -->
     <div class="screen" id="screen-fluidos">
@@ -516,16 +381,8 @@ input:focus{border-color:var(--accent-md);box-shadow:0 0 0 3px rgba(26,92,56,.1)
         </div>
         <div style="display:flex;gap:8px">
           <div style="flex:1">
-            <div class="field-label" style="display:flex;justify-content:space-between">
-              <span>Temperatura — opcional</span>
-              <span>
-                <button onclick="setFeverUnit('C')" id="fever-btn-c" style="padding:2px 7px;border-radius:4px;border:1px solid var(--accent);background:var(--accent);color:#fff;font-size:11px;cursor:pointer;font-family:var(--sans)">°C</button>
-                <button onclick="setFeverUnit('F')" id="fever-btn-f" style="padding:2px 7px;border-radius:4px;border:1px solid var(--border);background:var(--surface);color:var(--muted);font-size:11px;cursor:pointer;font-family:var(--sans)">°F</button>
-              </span>
-            </div>
-            <input type="number" id="fl-fever" placeholder="Ej: 40.5°C / 104.9°F" step="0.1"
-              style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-sm);padding:10px 12px;font-size:16px;font-family:var(--mono);outline:none">
-            <input type="hidden" id="fl-fever-unit" value="C">
+            <div class="field-label">Temperatura (°C) — opcional</div>
+            <input type="number" id="fl-fever" placeholder="Ej: 40.5" step="0.1" min="37" max="43" style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-sm);padding:10px 12px;font-size:16px;font-family:var(--mono);outline:none">
           </div>
           <div style="flex:1">
             <div class="field-label">Pérdidas activas (mL/h)</div>
@@ -540,151 +397,69 @@ input:focus{border-color:var(--accent-md);box-shadow:0 0 0 3px rgba(26,92,56,.1)
 
     <!-- NUTRICIÓN -->
     <div class="screen" id="screen-nutricion">
-
-      <!-- Instruction box -->
-      <div id="cri-instr"></div>
-
-      <!-- Mode selector -->
-      <div style="display:flex;gap:8px;margin-bottom:14px">
-        <button id="nut-mode-rer" onclick="setNutMode('rer')"
-          style="flex:1;padding:10px;border-radius:10px;font-size:13px;font-weight:700;border:2px solid var(--accent);background:var(--accent);color:#fff;cursor:pointer;font-family:var(--sans)">
-          🔢 Requerimiento Calórico
-        </button>
-        <button id="nut-mode-bcs" onclick="setNutMode('bcs')"
-          style="flex:1;padding:10px;border-radius:10px;font-size:13px;font-weight:700;border:2px solid var(--border);background:var(--surface);color:var(--muted);cursor:pointer;font-family:var(--sans)">
-          ⚖️ Plan de Reducción de Peso
-        </button>
-      </div>
-
-      <!-- Instruction box -->
-      <div id="nut-instr"></div>
-
-      <!-- RER/MER MODE -->
-      <div id="nut-rer-mode">
-        <div class="section-label">Paciente</div>
-        <div class="card">
-          <div style="display:flex;gap:8px;align-items:flex-end;margin-bottom:10px">
-            <div style="flex:1"><div class="field-label">Especie</div>
-              <select id="nut-species" onchange="populateNutFactors()" style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-sm);padding:10px 12px;font-size:15px;font-family:var(--sans);outline:none">
-                <option value="dog">🐕 Canino</option>
-                <option value="cat">🐈 Felino</option>
-              </select>
-            </div>
-            <div style="flex:1"><div class="field-label">¿Paciente obeso?</div>
-              <select id="nut-obese" style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-sm);padding:10px 12px;font-size:15px;font-family:var(--sans);outline:none">
-                <option value="no">No</option>
-                <option value="yes">Sí — usar peso ideal</option>
-              </select>
-            </div>
-          </div>
-          <div style="display:flex;gap:8px">
-            <div style="flex:1"><div class="field-label">Peso actual (kg)</div>
-              <input type="number" id="nut-weight-actual" placeholder="0.0" step="0.1" min="0"></div>
-            <div style="flex:1"><div class="field-label">Peso ideal (kg)</div>
-              <input type="number" id="nut-weight-ideal" placeholder="Si obeso..." step="0.1" min="0"></div>
-          </div>
-        </div>
-        <div class="section-label">Estado fisiológico</div>
-        <div class="card">
-          <select id="nut-factor" style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-sm);padding:11px 12px;font-size:14px;font-family:var(--sans);outline:none"></select>
-        </div>
-        <div class="section-label">Alimento — opcional</div>
-        <div class="card">
-          <div style="display:flex;gap:8px;align-items:flex-end">
-            <div style="flex:2"><div class="field-label">kcal del alimento</div>
-              <input type="number" id="nut-kcal-food" placeholder="Ej: 328" step="1" min="0"></div>
-            <div style="flex:1"><div class="field-label">Por unidad</div>
-              <select id="nut-food-unit" style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-sm);padding:10px 12px;font-size:14px;font-family:var(--sans);outline:none">
-                <option value="lata">lata</option>
-                <option value="taza">taza</option>
-                <option value="100g">100 g</option>
-                <option value="porción">porción</option>
-              </select>
-            </div>
-          </div>
-          <div style="font-size:11px;color:var(--muted);margin-top:8px">Busca las kcal en la etiqueta del alimento o en la web del fabricante</div>
-        </div>
-        <div class="sticky-btn"><button class="btn btn-primary" onclick="calcNutricion()">Calcular energía</button></div>
-        <div id="nut-result" style="display:none;padding-bottom:16px"></div>
-      </div>
-
-      <!-- WEIGHT MANAGEMENT BCS MODE -->
-      <div id="nut-bcs-mode" style="display:none">
-        <div class="section-label">Datos del paciente</div>
-        <div class="card">
-          <div style="display:flex;gap:8px;margin-bottom:10px">
-            <div style="flex:1"><div class="field-label">Especie</div>
-              <select id="bcs-species" style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-sm);padding:10px 12px;font-size:15px;font-family:var(--sans);outline:none">
-                <option value="dog">🐕 Canino</option>
-                <option value="cat">🐈 Felino</option>
-              </select>
-            </div>
-            <div style="flex:1"><div class="field-label">Peso actual (kg)</div>
-              <input type="number" id="bcs-weight" placeholder="Ej: 40" step="0.1" min="0" oninput="calcBCS()"></div>
-          </div>
-          <div><div class="field-label">BCS — Condición Corporal (1–9)</div>
-            <div style="display:grid;grid-template-columns:repeat(9,1fr);gap:4px;margin-top:6px" id="bcs-selector">
-              <!-- populated by JS -->
-            </div>
-            <div id="bcs-desc" style="font-size:11px;color:var(--muted);margin-top:6px;min-height:16px;font-style:italic"></div>
-          </div>
-        </div>
-
-        <div class="section-label">Dieta terapéutica — opcional</div>
-        <div class="card">
-          <div style="margin-bottom:8px"><div class="field-label">Seleccionar alimento</div>
-            <select id="bcs-food" onchange="calcBCS()" style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-sm);padding:10px 12px;font-size:13px;font-family:var(--sans);outline:none">
-              <option value="">-- Seleccionar o ingresar manualmente --</option>
-              <optgroup label="🐕 Perros">
-                <option value="248|taza">Royal Canin Satiety Support Canine (248 kcal/taza)</option>
-                <option value="259|taza">Hill's Metabolic Canine (259 kcal/taza)</option>
-                <option value="246|taza">Purina Pro Plan OM Canine (246 kcal/taza)</option>
-                <option value="243|taza">Hill's w/d Canine (243 kcal/taza)</option>
-                <option value="266|taza">Royal Canin Weight Control Canine (266 kcal/taza)</option>
-              </optgroup>
-              <optgroup label="🐈 Gatos">
-                <option value="299|taza">Royal Canin Satiety Support Feline (299 kcal/taza)</option>
-                <option value="305|taza">Hill's Metabolic Feline (305 kcal/taza)</option>
-                <option value="312|taza">Purina Pro Plan OM Feline (312 kcal/taza)</option>
-                <option value="249|taza">Hill's r/d Feline (249 kcal/taza)</option>
-                <option value="65|lata">Royal Canin Satiety Feline lata 85g (65 kcal/lata)</option>
-                <option value="137|lata">Hill's Metabolic Feline lata 156g (137 kcal/lata)</option>
-              </optgroup>
-              <option value="custom|taza">Otro alimento (ingresar kcal manualmente)</option>
+      <div class="section-label">Paciente</div>
+      <div class="card">
+        <div style="display:flex;gap:8px;align-items:flex-end;margin-bottom:10px">
+          <div style="flex:1">
+            <div class="field-label">Especie</div>
+            <select id="nut-species" onchange="populateNutFactors()" style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-sm);padding:10px 12px;font-size:15px;font-family:var(--sans);outline:none">
+              <option value="dog">&#128021; Canino</option>
+              <option value="cat">&#128008; Felino</option>
             </select>
           </div>
-          <div id="bcs-food-custom" style="display:none;display:flex;gap:8px">
-            <div style="flex:2"><div class="field-label">kcal del alimento</div>
-              <input type="number" id="bcs-kcal-custom" placeholder="Ej: 280" step="1" min="0" oninput="calcBCS()"></div>
-            <div style="flex:1"><div class="field-label">Por unidad</div>
-              <select id="bcs-unit-custom" onchange="calcBCS()" style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-sm);padding:10px 12px;font-size:13px;font-family:var(--sans);outline:none">
-                <option value="taza">taza</option>
-                <option value="lata">lata</option>
-                <option value="100g">100 g</option>
-              </select>
-            </div>
-          </div>
-          <div id="bcs-loss-pct-row" style="margin-top:10px">
-            <div class="field-label">% del RER para pérdida de peso (default: 80%)</div>
-            <input type="number" id="bcs-loss-pct" value="80" min="60" max="95" step="5" oninput="calcBCS()"
-              style="width:80px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-sm);padding:8px 10px;font-size:16px;font-family:var(--mono);outline:none">
-            <span style="font-size:12px;color:var(--muted);margin-left:6px">% (perros: 80%, gatos: 80–85%)</span>
+          <div style="flex:1">
+            <div class="field-label">¿Paciente obeso?</div>
+            <select id="nut-obese" style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-sm);padding:10px 12px;font-size:15px;font-family:var(--sans);outline:none">
+              <option value="no">No</option>
+              <option value="yes">Sí — usar peso ideal</option>
+            </select>
           </div>
         </div>
-
-        <div class="sticky-btn"><button class="btn btn-primary" onclick="calcBCS()">Calcular plan de peso</button></div>
-        <div id="bcs-result" style="display:none;padding-bottom:16px"></div>
+        <div style="display:flex;gap:8px">
+          <div style="flex:1">
+            <div class="field-label">Peso actual (kg)</div>
+            <input type="number" id="nut-weight-actual" placeholder="0.0" step="0.1" min="0">
+          </div>
+          <div style="flex:1">
+            <div class="field-label">Peso ideal (kg)</div>
+            <input type="number" id="nut-weight-ideal" placeholder="Si obeso..." step="0.1" min="0">
+          </div>
+        </div>
       </div>
 
-    </div>
+      <div class="section-label">Estado fisiológico</div>
+      <div class="card">
+        <select id="nut-factor" style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-sm);padding:11px 12px;font-size:14px;font-family:var(--sans);outline:none">
+        </select>
+      </div>
 
+      <div class="section-label">Alimento — opcional</div>
+      <div class="card">
+        <div style="display:flex;gap:8px;align-items:flex-end">
+          <div style="flex:2">
+            <div class="field-label">kcal del alimento</div>
+            <input type="number" id="nut-kcal-food" placeholder="Ej: 328" step="1" min="0">
+          </div>
+          <div style="flex:1">
+            <div class="field-label">Por unidad</div>
+            <select id="nut-food-unit" style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-sm);padding:10px 12px;font-size:14px;font-family:var(--sans);outline:none">
+              <option value="lata">lata</option>
+              <option value="taza">taza</option>
+              <option value="100g">100 g</option>
+              <option value="porción">porción</option>
+            </select>
+          </div>
+        </div>
+        <div style="font-size:11px;color:var(--muted);margin-top:8px">Busca las kcal en la etiqueta del alimento o en la web del fabricante</div>
+      </div>
+
+      <div class="sticky-btn"><button class="btn btn-primary" onclick="calcNutricion()">Calcular energía</button></div>
+      <div id="nut-result" style="display:none;padding-bottom:16px"></div>
+    </div>
 
     <!-- PROTOCOLOS -->
     <div class="screen" id="screen-protocolos">
-      <div style="background:#e8f5ee;border-left:3px solid var(--accent);border-radius:6px;padding:9px 12px;margin-bottom:12px;font-size:12px;color:#374151;line-height:1.6">
-        📋 Protocolos ajustables a tus preferencias clínicas. Crea tu lista de medicamentos para cada condición que manejas frecuentemente. Toca un protocolo para calcular las dosis de los medicamentos que necesitas.
-      </div>
-      <div class="section-label">Mis protocolos</div>
+      <div class="section-label">Mis protocolos clínicos</div>
       <div id="protocols-list" style="padding-bottom:80px"></div>
     </div>
 
@@ -798,7 +573,8 @@ input:focus{border-color:var(--accent-md);box-shadow:0 0 0 3px rgba(26,92,56,.1)
       <input type="text" id="set-doctor" placeholder="Ej: Dr. Yenen Villasmil-Ontiveros"></div>
     <div class="mfield"><label>Nombre de la clínica</label>
       <input type="text" id="set-clinic" placeholder="Ej: Pembroke Pines Animal Clinic"></div>
-
+    <div class="mfield"><label>Teléfono</label>
+      <input type="text" id="set-phone" placeholder="Ej: (305) 555-1234"></div>
     <button id="set-save-btn" class="btn btn-primary" onclick="saveSettings()" style="margin-bottom:16px">Guardar</button>
 
     <div style="border-top:1px solid var(--border);padding-top:14px;margin-top:4px">
@@ -840,145 +616,6 @@ input:focus{border-color:var(--accent-md);box-shadow:0 0 0 3px rgba(26,92,56,.1)
       <button class="btn btn-secondary" onclick="closeProtocolEdit()" style="flex:1">Cancelar</button>
       <button class="btn btn-primary" onclick="saveProtocolEdit()" style="flex:2">Guardar protocolo</button>
     </div>
-  </div>
-</div>
-
-
-<!-- REGISTRO PRIMER ACCESO -->
-<div id="reg-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:9999;align-items:center;justify-content:center;padding:20px">
-  <div style="background:#fff;border-radius:16px;padding:28px 24px;max-width:380px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,.3)">
-    <div style="text-align:center;margin-bottom:20px">
-      <img src="icon-logo.png" style="height:52px;margin-bottom:10px">
-      <div style="font-size:20px;font-weight:800;color:#1a5c38">Bienvenido a VetDose 2.0</div>
-      <div style="font-size:13px;color:#666;margin-top:4px">Calculadora de dosis veterinaria</div>
-    </div>
-    <div style="font-size:13px;color:#444;margin-bottom:16px;text-align:center;line-height:1.5">Gracias por probar esta aplicación — no hay una gran corporación detrás, solo un veterinario con muchos deseos de mejorar la clínica diaria.</div>
-    <div style="margin-bottom:12px">
-      <div style="font-size:12px;font-weight:700;color:#1a5c38;margin-bottom:6px">Título *</div>
-      <div style="display:flex;gap:8px">
-        <button id="reg-btn-dr" onclick="selectTitle('Dr.')"
-          style="flex:1;padding:10px;border-radius:8px;border:2px solid #1a5c38;background:#1a5c38;color:#fff;font-size:15px;font-weight:700;cursor:pointer;font-family:Arial">
-          Dr.
-        </button>
-        <button id="reg-btn-dra" onclick="selectTitle('Dra.')"
-          style="flex:1;padding:10px;border-radius:8px;border:2px solid #ddd;background:#fff;color:#666;font-size:15px;font-weight:700;cursor:pointer;font-family:Arial">
-          Dra.
-        </button>
-      </div>
-      <input type="hidden" id="reg-title" value="Dr.">
-    </div>
-    <div style="display:flex;gap:8px;margin-bottom:12px">
-      <div style="flex:1">
-        <div style="font-size:12px;font-weight:700;color:#1a5c38;margin-bottom:4px">Nombre *</div>
-        <input type="text" id="reg-nombre" placeholder="Juan"
-          style="width:100%;padding:10px 12px;border:1.5px solid #ddd;border-radius:8px;font-size:14px;outline:none;font-family:Arial;box-sizing:border-box">
-      </div>
-      <div style="flex:1">
-        <div style="font-size:12px;font-weight:700;color:#1a5c38;margin-bottom:4px">Apellido *</div>
-        <input type="text" id="reg-apellido" placeholder="Pérez"
-          style="width:100%;padding:10px 12px;border:1.5px solid #ddd;border-radius:8px;font-size:14px;outline:none;font-family:Arial;box-sizing:border-box">
-      </div>
-    </div>
-    <div style="margin-bottom:12px">
-      <div style="font-size:12px;font-weight:700;color:#1a5c38;margin-bottom:4px">Correo electrónico *</div>
-      <input type="email" id="reg-email" placeholder="dr@clinica.com"
-        style="width:100%;padding:10px 12px;border:1.5px solid #ddd;border-radius:8px;font-size:14px;outline:none;font-family:Arial;box-sizing:border-box">
-    </div>
-    <div style="margin-bottom:12px">
-      <div style="font-size:12px;font-weight:700;color:#1a5c38;margin-bottom:4px">País *</div>
-      <input type="text" id="reg-pais" placeholder="USA, Venezuela, Colombia..."
-        style="width:100%;padding:10px 12px;border:1.5px solid #ddd;border-radius:8px;font-size:14px;outline:none;font-family:Arial;box-sizing:border-box">
-    </div>
-    <div style="margin-bottom:12px">
-      <div style="font-size:12px;font-weight:700;color:#1a5c38;margin-bottom:4px">Clínica</div>
-      <input type="text" id="reg-clinica" placeholder="Banfield, VCA, clínica propia..."
-        style="width:100%;padding:10px 12px;border:1.5px solid #ddd;border-radius:8px;font-size:14px;outline:none;font-family:Arial;box-sizing:border-box">
-    </div>
-    <div style="margin-bottom:20px">
-      <div style="font-size:12px;font-weight:700;color:#1a5c38;margin-bottom:4px">Teléfono</div>
-      <input type="tel" id="reg-telefono" placeholder="(305) 555-1234"
-        style="width:100%;padding:10px 12px;border:1.5px solid #ddd;border-radius:8px;font-size:14px;outline:none;font-family:Arial;box-sizing:border-box">
-    </div>
-    <div id="reg-error" style="display:none;color:#dc2626;font-size:12px;margin-bottom:10px;text-align:center"></div>
-    <button onclick="submitRegistration()"
-      style="width:100%;background:#1a5c38;color:#fff;border:none;border-radius:10px;padding:14px;font-size:15px;font-weight:700;cursor:pointer;font-family:Arial">
-      Acceder a VetDose →
-    </button>
-    <div style="text-align:center;margin-top:14px;font-size:11px;color:#999">
-      Dr. Yenen Villasmil-Ontiveros · Pembroke Pines, Florida
-    </div>
-  </div>
-</div>
-
-
-<!-- PERFIL SELECTOR MODAL -->
-<div class="overlay hidden" id="profile-modal" onclick="if(event.target===this&&false){}">
-  <div class="modal" style="max-width:360px">
-    <div class="modal-hdr">
-      <div class="modal-title">👤 ¿Quién eres?</div>
-    </div>
-    <div id="profile-list" style="margin-bottom:14px"></div>
-    <div style="border-top:1px solid var(--border);padding-top:12px">
-      <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px">Crear nuevo perfil</div>
-      <div class="mfield"><label>Nombre completo</label>
-        <input type="text" id="new-profile-name" placeholder="Dr. Juan Pérez"></div>
-      <div class="mfield"><label>Clínica (opcional)</label>
-        <input type="text" id="new-profile-clinic" placeholder="Animal Clinic"></div>
-      <button class="btn btn-primary" onclick="createProfile()">Crear perfil y entrar</button>
-    </div>
-  </div>
-</div>
-
-<!-- PRESCRIPCIÓN MODAL -->
-<div class="overlay hidden" id="rx-modal" onclick="if(event.target===this)closePrescription()">
-  <div class="modal" style="max-height:90vh;overflow-y:auto">
-    <div class="modal-hdr">
-      <div class="modal-title">📋 Prescripción</div>
-      <button class="close-btn" onclick="closePrescription()">&#10005;</button>
-    </div>
-    <div id="rx-drugs" style="margin-bottom:12px"></div>
-    <div style="display:flex;gap:8px">
-      <button class="btn btn-share" style="margin-top:0;flex:1" onclick="sharePrescription()">📤 Compartir</button>
-      <button class="btn btn-print" style="flex:1;margin-top:0" onclick="printPrescription()">🖨 Imprimir</button>
-    </div>
-  </div>
-</div>
-
-<!-- AYUDA MODAL -->
-<div class="overlay hidden" id="help-modal" onclick="if(event.target===this)closeHelp()">
-  <div class="modal" style="max-height:90vh;overflow-y:auto">
-    <div class="modal-hdr">
-      <div class="modal-title">❓ Guía Rápida VetDose 2.0</div>
-      <button class="close-btn" onclick="closeHelp()">&#10005;</button>
-    </div>
-    <div style="font-size:13px;line-height:1.7;color:var(--text)">
-
-      <div style="background:var(--accentlt);border-radius:8px;padding:10px 12px;margin-bottom:12px;font-size:11px;color:var(--muted)">
-        VetDose 2.0 — Dr. Yenen Villasmil-Ontiveros · Pembroke Pines, Florida · 2026
-      </div>
-
-      <div style="font-weight:700;font-size:15px;color:var(--accent);margin-bottom:4px">💊 Calcular</div>
-      <p style="margin-bottom:12px">Pantalla principal. Ingresa el nombre del paciente, peso y especie. Selecciona los medicamentos que necesitas — la app calcula automáticamente la dosis, concentración y volumen. Usa los filtros de categoría para encontrar drogas rápidamente. El botón <b>Prescripción</b> genera la hoja de dispensación con total de tabletas o cc por número de días.</p>
-
-      <div style="font-weight:700;font-size:15px;color:var(--accent);margin-bottom:4px">💉 CRI</div>
-      <p style="margin-bottom:12px"><b>Droga única:</b> selecciona la droga, la app sugiere la dosis estándar y calcula los mL/h para la bomba incluyendo la dosis de carga (loading dose).<br>
-      <b>Protocolo:</b> calcula múltiples drogas en la misma bolsa IV, como el protocolo BLK (Buprenorfina + Lidocaína + Ketamina). Ingresa el tamaño de la bolsa y la tasa de fluido.</p>
-
-      <div style="font-weight:700;font-size:15px;color:var(--accent);margin-bottom:4px">💧 Fluidos</div>
-      <p style="margin-bottom:12px">Calcula el plan completo de fluidoterapia: déficit de deshidratación, tasa de reposición, tasa de mantenimiento y volumen total. Incluye bolos de emergencia para pacientes en shock. Tasas basadas en las Guías AAHA 2024 de Fluidoterapia.</p>
-
-      <div style="font-weight:700;font-size:15px;color:var(--accent);margin-bottom:4px">🥗 Nutrición</div>
-      <p style="margin-bottom:12px"><b>Requerimiento Calórico:</b> estima las calorías diarias y calcula el número de tazas o latas según el peso, especie y estado fisiológico. Si el alimento no está en la lista, ingresa las kcal desde la etiqueta del producto.<br>
-      <b>Plan de Reducción de Peso:</b> usa la Condición Corporal (BCS 1–9) para estimar el peso ideal, calcular las calorías para pérdida de peso segura, y convertir a cantidad de alimento. Incluye proyección de semanas para alcanzar el peso meta.</p>
-
-      <div style="font-weight:700;font-size:15px;color:var(--accent);margin-bottom:4px">📋 Protocolos</div>
-      <p style="margin-bottom:12px">Protocolos ajustables a tus preferencias clínicas. Crea listas de medicamentos para condiciones frecuentes. Toca un protocolo, selecciona los medicamentos que usarás en este paciente, y la app calcula todas las dosis automáticamente.</p>
-
-      <div style="font-weight:700;font-size:15px;color:var(--accent);margin-bottom:4px">⚙ Ajustes</div>
-      <p style="margin-bottom:4px">Personaliza nombre, clínica y teléfono (aparecen en hojas de indicaciones y prescripciones). Gestiona la base de datos de drogas: agrega nuevas drogas específicas a tu práctica, exporta o importa tu base de datos.</p>
-
-    </div>
-    <button class="btn btn-secondary" onclick="closeHelp()" style="margin-top:8px">Cerrar</button>
   </div>
 </div>
 
