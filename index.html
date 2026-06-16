@@ -187,7 +187,7 @@ input:focus{border-color:var(--accent-md);box-shadow:0 0 0 3px rgba(26,92,56,.1)
   <div class="header" style="display:flex;align-items:center;gap:8px;padding:10px 14px">
     <img src="icon-logo.png" alt="VetDose" style="height:36px;flex-shrink:0">
     <div class="header-pill" id="header-patient-info" style="flex:1;min-width:0"></div>
-    <div id="header-dr-name" style="display:none;flex-shrink:0"></div>
+    <div id="header-dr-name" style="display:none;flex-shrink:0;margin-right:4px"></div>
     <div style="display:flex;gap:6px;flex-shrink:0">
       <button onclick="openHelp()" style="background:var(--surface2);border:1.5px solid var(--border);border-radius:50%;width:32px;height:32px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:13px;font-weight:800;color:var(--accent)">?</button>
       <button onclick="openSettings()" style="background:var(--accent);border:none;border-radius:50%;width:34px;height:34px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px">⚙️</button>
@@ -272,7 +272,7 @@ input:focus{border-color:var(--accent-md);box-shadow:0 0 0 3px rgba(26,92,56,.1)
     <div class="screen" id="screen-results">
       <div id="results-container"></div>
       <div style="padding-bottom:16px">
-        <button class="btn btn-primary" onclick="openPrescription()" style="background:#1d4ed8">📋 Prescripción</button>
+        <button class="btn" style="background:#1d4ed8;color:#fff;flex:1" onclick="openPrescription()">📋 Prescripción</button>
         <button class="btn btn-share" onclick="shareResults()">Compartir resultado</button>
         <button class="btn btn-print" onclick="window.print()">Imprimir</button>
         <button class="btn btn-secondary" style="margin-top:8px" onclick="backToCalc()">&#8592; Volver</button>
@@ -323,7 +323,6 @@ input:focus{border-color:var(--accent-md);box-shadow:0 0 0 3px rgba(26,92,56,.1)
 
     <!-- FLUIDOS -->
     <div class="screen" id="screen-fluidos">
-    <div id="fl-instr"></div>
       <div class="section-label">Datos del paciente</div>
       <div class="card">
         <div style="display:flex;gap:8px;align-items:flex-end">
@@ -387,9 +386,14 @@ input:focus{border-color:var(--accent-md);box-shadow:0 0 0 3px rgba(26,92,56,.1)
         </div>
         <div style="display:flex;gap:8px">
           <div style="flex:1">
-            <div class="field-label">Temperatura (°C) — opcional<div style="display:flex;gap:6px;margin-top:6px"><button id="fl-fever-c" onclick="setFeverUnit('C')" style="flex:1;padding:6px;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer;border:1.5px solid var(--accent);background:var(--accent);color:#fff;font-family:var(--sans)">°C</button><button id="fl-fever-f" onclick="setFeverUnit('F')" style="flex:1;padding:6px;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer;border:1.5px solid var(--border);background:var(--surface);color:var(--muted);font-family:var(--sans)">°F</button></div></div>
-            <input type="number" id="fl-fever" oninput="convertFeverDisplay()" placeholder="Ej: 40.5" step="0.1" min="37" max="43" style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-sm);padding:10px 12px;font-size:16px;font-family:var(--mono);outline:none">
+            <div class="field-label">Temperatura (°C) — opcional</div>
+            <input type="number" id="fl-fever" oninput="calcFluidos && calcFluidos()" placeholder="Ej: 40.5" step="0.1" min="37" max="43" style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-sm);padding:10px 12px;font-size:16px;font-family:var(--mono);outline:none">
+          
+          <div style="display:flex;gap:6px;margin-top:6px">
+            <button id="fl-fever-c" onclick="setFeverUnit('C')" style="flex:1;padding:6px;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer;border:1.5px solid var(--accent);background:var(--accent);color:#fff;font-family:var(--sans)">°C</button>
+            <button id="fl-fever-f" onclick="setFeverUnit('F')" style="flex:1;padding:6px;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer;border:1.5px solid var(--border);background:var(--surface);color:var(--muted);font-family:var(--sans)">°F</button>
           </div>
+        </div>
           <div style="flex:1">
             <div class="field-label">Pérdidas activas (mL/h)</div>
             <input type="number" id="fl-losses" placeholder="Vómito, drenaje..." step="0.1" min="0" style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-sm);padding:10px 12px;font-size:16px;font-family:var(--mono);outline:none">
@@ -471,6 +475,9 @@ input:focus{border-color:var(--accent-md);box-shadow:0 0 0 3px rgba(26,92,56,.1)
     <!-- PROTOCOLOS -->
     </div>
     <div id="nut-bcs-mode" style="display:none">
+      <div style="background:#f0fdf4;border-left:3px solid var(--accent);border-radius:6px;padding:9px 12px;margin-bottom:12px;font-size:12px;color:#374151;line-height:1.6">
+        ℹ Estima el peso ideal según la Condición Corporal (BCS 1–9), calcula las calorías para pérdida de peso segura y convierte el resultado en cantidad de alimento. Incluye proyección de semanas para alcanzar el peso meta a un ritmo de 0.5–1% por semana.
+      </div>
       <div class="card">
         <div class="section-label">Especie</div>
         <select id="bcs-species" style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-sm);padding:10px 12px;font-size:14px;font-family:var(--sans);outline:none;margin-bottom:12px">
@@ -481,16 +488,18 @@ input:focus{border-color:var(--accent-md);box-shadow:0 0 0 3px rgba(26,92,56,.1)
         <input type="number" id="bcs-weight" placeholder="Ej: 15.5" step="0.1" style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-sm);padding:10px 12px;font-size:16px;font-family:var(--mono);outline:none;box-sizing:border-box;margin-bottom:12px">
         <div class="section-label">Condición Corporal (BCS 1–9)</div>
         <div id="bcs-selector" style="display:grid;grid-template-columns:repeat(9,1fr);gap:4px;margin-bottom:6px"></div>
-        <div id="bcs-desc" style="font-size:11px;color:var(--muted);margin-bottom:12px;min-height:16px"></div>
+        <div id="bcs-desc" style="font-size:11px;color:var(--muted);margin-bottom:12px;min-height:16px;font-style:italic"></div>
         <div class="section-label">Meta calórica (% del RER)</div>
-        <input type="number" id="bcs-loss-pct" value="80" min="60" max="100" step="5"
-          style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-sm);padding:10px 12px;font-size:16px;font-family:var(--mono);outline:none;box-sizing:border-box;margin-bottom:12px">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
+          <input type="number" id="bcs-loss-pct" value="80" min="60" max="100" step="5"
+            style="width:80px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-sm);padding:8px 12px;font-size:16px;font-family:var(--mono);outline:none">
+          <span style="font-size:12px;color:var(--muted)">% del RER (80% = pérdida segura; 60% = obesos severos)</span>
+        </div>
         <button class="btn btn-primary" onclick="calcBCS()">Calcular Plan de Peso</button>
       </div>
       <div id="bcs-result" style="display:none;margin-top:12px"></div>
     </div>
 <div class="screen" id="screen-protocolos">
-    <div id="pt-instr"></div>
       <div class="section-label">Mis protocolos clínicos</div>
       <div id="protocols-list" style="padding-bottom:80px"></div>
     </div>
@@ -653,26 +662,81 @@ input:focus{border-color:var(--accent-md);box-shadow:0 0 0 3px rgba(26,92,56,.1)
 
 <script src="app.js"></script>
 
-<!-- REGISTRO -->
+<!-- REGISTRO (MOD-037) -->
 <div id="reg-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:9999;align-items:center;justify-content:center;padding:16px;overflow-y:auto">
   <div style="background:#fff;border-radius:16px;padding:24px 20px;max-width:380px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,.3);margin:auto">
-    <div style="text-align:center;margin-bottom:14px"><img src="icon-logo.png" style="height:44px;margin-bottom:8px"><div style="font-size:20px;font-weight:800;color:#1a5c38">Bienvenido a VetDose 2.0</div><div style="font-size:11px;color:#666;margin-top:4px;line-height:1.4">No hay una gran corporación detrás — solo un veterinario con muchos deseos de mejorar la clínica diaria.</div></div>
-    <div style="margin-bottom:12px"><div style="font-size:11px;font-weight:700;color:#1a5c38;margin-bottom:6px">Título *</div><div style="display:flex;gap:8px"><button id="reg-btn-dr" onclick="selectTitle('Dr.')" style="flex:1;padding:10px;border-radius:8px;border:2px solid #1a5c38;background:#1a5c38;color:#fff;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit">Dr.</button><button id="reg-btn-dra" onclick="selectTitle('Dra.')" style="flex:1;padding:10px;border-radius:8px;border:2px solid #ddd;background:#fff;color:#666;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit">Dra.</button></div><input type="hidden" id="reg-title" value="Dr."></div>
-    <div style="display:flex;gap:8px;margin-bottom:12px"><div style="flex:1"><div style="font-size:11px;font-weight:700;color:#1a5c38;margin-bottom:4px">Nombre *</div><input type="text" id="reg-nombre" placeholder="Juan" style="width:100%;padding:10px 12px;border:1.5px solid #ddd;border-radius:8px;font-size:14px;outline:none;font-family:inherit;box-sizing:border-box"></div><div style="flex:1"><div style="font-size:11px;font-weight:700;color:#1a5c38;margin-bottom:4px">Apellido *</div><input type="text" id="reg-apellido" placeholder="Pérez" style="width:100%;padding:10px 12px;border:1.5px solid #ddd;border-radius:8px;font-size:14px;outline:none;font-family:inherit;box-sizing:border-box"></div></div>
-    <div style="margin-bottom:12px"><div style="font-size:11px;font-weight:700;color:#1a5c38;margin-bottom:4px">Correo *</div><input type="email" id="reg-email" placeholder="dr@clinica.com" style="width:100%;padding:10px 12px;border:1.5px solid #ddd;border-radius:8px;font-size:14px;outline:none;font-family:inherit;box-sizing:border-box"></div>
-    <div style="margin-bottom:12px"><div style="font-size:11px;font-weight:700;color:#1a5c38;margin-bottom:4px">País *</div><input type="text" id="reg-pais" placeholder="USA, Venezuela..." style="width:100%;padding:10px 12px;border:1.5px solid #ddd;border-radius:8px;font-size:14px;outline:none;font-family:inherit;box-sizing:border-box"></div>
-    <div style="margin-bottom:12px"><div style="font-size:11px;font-weight:700;color:#1a5c38;margin-bottom:4px">Clínica</div><input type="text" id="reg-clinica" placeholder="Banfield, VCA..." style="width:100%;padding:10px 12px;border:1.5px solid #ddd;border-radius:8px;font-size:14px;outline:none;font-family:inherit;box-sizing:border-box"></div>
-    <div style="margin-bottom:18px"><div style="font-size:11px;font-weight:700;color:#1a5c38;margin-bottom:4px">Teléfono</div><input type="tel" id="reg-telefono" placeholder="(305) 555-1234" style="width:100%;padding:10px 12px;border:1.5px solid #ddd;border-radius:8px;font-size:14px;outline:none;font-family:inherit;box-sizing:border-box"></div>
+    <div style="text-align:center;margin-bottom:14px">
+      <img src="icon-logo.png" style="height:44px;margin-bottom:8px">
+      <div style="font-size:20px;font-weight:800;color:#1a5c38">Bienvenido a VetDose 2.0</div>
+      <div style="font-size:11px;color:#666;margin-top:4px;line-height:1.5">No hay una gran corporación detrás — solo un veterinario con deseos de mejorar la clínica diaria.</div>
+    </div>
+    <div style="margin-bottom:12px">
+      <div style="font-size:11px;font-weight:700;color:#1a5c38;margin-bottom:6px">Título *</div>
+      <div style="display:flex;gap:8px">
+        <button id="reg-btn-dr" onclick="selectTitle('Dr.')" style="flex:1;padding:10px;border-radius:8px;border:2px solid #1a5c38;background:#1a5c38;color:#fff;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit">Dr.</button>
+        <button id="reg-btn-dra" onclick="selectTitle('Dra.')" style="flex:1;padding:10px;border-radius:8px;border:2px solid #ddd;background:#fff;color:#666;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit">Dra.</button>
+      </div>
+      <input type="hidden" id="reg-title" value="Dr.">
+    </div>
+    <div style="display:flex;gap:8px;margin-bottom:12px">
+      <div style="flex:1"><div style="font-size:11px;font-weight:700;color:#1a5c38;margin-bottom:4px">Nombre *</div>
+        <input type="text" id="reg-nombre" placeholder="Juan" style="width:100%;padding:10px 12px;border:1.5px solid #ddd;border-radius:8px;font-size:14px;outline:none;font-family:inherit;box-sizing:border-box"></div>
+      <div style="flex:1"><div style="font-size:11px;font-weight:700;color:#1a5c38;margin-bottom:4px">Apellido *</div>
+        <input type="text" id="reg-apellido" placeholder="Pérez" style="width:100%;padding:10px 12px;border:1.5px solid #ddd;border-radius:8px;font-size:14px;outline:none;font-family:inherit;box-sizing:border-box"></div>
+    </div>
+    <div style="margin-bottom:12px"><div style="font-size:11px;font-weight:700;color:#1a5c38;margin-bottom:4px">Correo electrónico *</div>
+      <input type="email" id="reg-email" placeholder="dr@clinica.com" style="width:100%;padding:10px 12px;border:1.5px solid #ddd;border-radius:8px;font-size:14px;outline:none;font-family:inherit;box-sizing:border-box"></div>
+    <div style="margin-bottom:12px"><div style="font-size:11px;font-weight:700;color:#1a5c38;margin-bottom:4px">País *</div>
+      <input type="text" id="reg-pais" placeholder="USA, Venezuela, Colombia..." style="width:100%;padding:10px 12px;border:1.5px solid #ddd;border-radius:8px;font-size:14px;outline:none;font-family:inherit;box-sizing:border-box"></div>
+    <div style="margin-bottom:12px"><div style="font-size:11px;font-weight:700;color:#1a5c38;margin-bottom:4px">Clínica</div>
+      <input type="text" id="reg-clinica" placeholder="Banfield, VCA..." style="width:100%;padding:10px 12px;border:1.5px solid #ddd;border-radius:8px;font-size:14px;outline:none;font-family:inherit;box-sizing:border-box"></div>
+    <div style="margin-bottom:18px"><div style="font-size:11px;font-weight:700;color:#1a5c38;margin-bottom:4px">Teléfono</div>
+      <input type="tel" id="reg-telefono" placeholder="(305) 555-1234" style="width:100%;padding:10px 12px;border:1.5px solid #ddd;border-radius:8px;font-size:14px;outline:none;font-family:inherit;box-sizing:border-box"></div>
     <div id="reg-error" style="display:none;color:#dc2626;font-size:12px;margin-bottom:10px;text-align:center"></div>
     <button onclick="submitRegistration()" style="width:100%;background:#1a5c38;color:#fff;border:none;border-radius:10px;padding:14px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit">Acceder a VetDose →</button>
     <div style="text-align:center;margin-top:10px;font-size:10px;color:#999">Dr. Yenen Villasmil-Ontiveros · Pembroke Pines, Florida</div>
   </div>
 </div>
+
 <!-- PERFIL -->
-<div class="overlay hidden" id="profile-modal"><div class="modal" style="max-width:360px"><div class="modal-hdr"><div class="modal-title">👤 ¿Quién eres?</div></div><div id="profile-list" style="margin-bottom:14px"></div><div style="border-top:1px solid var(--border);padding-top:12px"><div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;margin-bottom:8px">Nuevo perfil</div><div class="mfield"><label>Nombre completo</label><input type="text" id="new-profile-name" placeholder="Dr. Juan Pérez"></div><div class="mfield"><label>Clínica (opcional)</label><input type="text" id="new-profile-clinic" placeholder="Animal Clinic"></div><button class="btn btn-primary" onclick="createProfile()">Crear y entrar</button></div></div></div>
+<div class="overlay hidden" id="profile-modal">
+  <div class="modal" style="max-width:360px">
+    <div class="modal-hdr"><div class="modal-title">👤 ¿Quién eres?</div></div>
+    <div id="profile-list" style="margin-bottom:14px"></div>
+    <div style="border-top:1px solid var(--border);padding-top:12px">
+      <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;margin-bottom:8px">Nuevo perfil</div>
+      <div class="mfield"><label>Nombre completo</label><input type="text" id="new-profile-name" placeholder="Dr. Juan Pérez"></div>
+      <div class="mfield"><label>Clínica (opcional)</label><input type="text" id="new-profile-clinic" placeholder="Animal Clinic"></div>
+      <button class="btn btn-primary" onclick="createProfile()">Crear y entrar</button>
+    </div>
+  </div>
+</div>
+
 <!-- PRESCRIPCIÓN -->
-<div class="overlay hidden" id="rx-modal" onclick="if(event.target===this)closePrescription()"><div class="modal" style="max-height:90vh;overflow-y:auto"><div class="modal-hdr"><div class="modal-title">📋 Prescripción</div><button class="close-btn" onclick="closePrescription()">&#10005;</button></div><div id="rx-drugs" style="margin-bottom:12px"></div><div style="display:flex;gap:8px"><button class="btn btn-share" style="flex:1" onclick="sharePrescription()">📤 Compartir</button><button class="btn btn-print" style="flex:1" onclick="printPrescription()">🖨 Imprimir</button></div></div></div>
-<!-- AYUDA -->
-<div class="overlay hidden" id="help-modal" onclick="if(event.target===this)closeHelp()"><div class="modal" style="max-height:90vh;overflow-y:auto"><div class="modal-hdr"><div class="modal-title">❓ Guía Rápida</div><button class="close-btn" onclick="closeHelp()">&#10005;</button></div><div style="font-size:13px;line-height:1.7"><p><b style="color:var(--accent)">💊 Calcular</b> — Dosis por peso. Botón Prescripción genera hoja de dispensación.</p><p><b style="color:var(--accent)">💉 CRI</b> — Droga única con loading dose o protocolo BLK en bolsa IV.</p><p><b style="color:var(--accent)">💧 Fluidos</b> — Plan completo AAHA 2024: déficit, reposición, mantenimiento.</p><p><b style="color:var(--accent)">🥗 Nutrición</b> — Requerimiento calórico o plan de reducción por BCS.</p><p><b style="color:var(--accent)">📋 Protocolos</b> — Personalizables. Toca uno y calcula todas las dosis.</p></div><button class="btn btn-secondary" onclick="closeHelp()">Cerrar</button></div></div>
+<div class="overlay hidden" id="rx-modal" onclick="if(event.target===this)closePrescription()">
+  <div class="modal" style="max-height:90vh;overflow-y:auto">
+    <div class="modal-hdr"><div class="modal-title">📋 Prescripción</div><button class="close-btn" onclick="closePrescription()">&#10005;</button></div>
+    <div id="rx-drugs" style="margin-bottom:12px"></div>
+    <div style="display:flex;gap:8px">
+      <button class="btn btn-share" style="flex:1" onclick="sharePrescription()">📤 Compartir</button>
+      <button class="btn" style="flex:1;background:#1a5c38;color:#fff" onclick="printPrescription()">🖨 Imprimir</button>
+    </div>
+  </div>
+</div>
+
+<!-- AYUDA (MOD-040) -->
+<div class="overlay hidden" id="help-modal" onclick="if(event.target===this)closeHelp()">
+  <div class="modal" style="max-height:90vh;overflow-y:auto">
+    <div class="modal-hdr"><div class="modal-title">❓ Guía Rápida VetDose 2.0</div><button class="close-btn" onclick="closeHelp()">&#10005;</button></div>
+    <div style="font-size:13px;line-height:1.7;color:var(--text)">
+      <p><b style="color:var(--accent)">💊 Calcular</b> — Ingresa nombre, peso y especie. Selecciona medicamentos. El botón <b>Prescripción</b> genera la hoja de dispensación.</p>
+      <p><b style="color:var(--accent)">💉 CRI</b> — <b>Droga única:</b> dosis estándar + loading dose calculada. <b>Protocolo:</b> BLK (Buprenorfina/Lidocaína/Ketamina) en bolsa IV.</p>
+      <p><b style="color:var(--accent)">💧 Fluidos</b> — Plan completo según AAHA 2024: déficit, reposición, mantenimiento, bolos. Ajuste automático por cardiopatía y especie.</p>
+      <p><b style="color:var(--accent)">🥗 Nutrición</b> — <b>Requerimiento Calórico:</b> RER/MER y cantidad de alimento. <b>Plan de Reducción de Peso:</b> peso ideal por BCS + calorías + proyección.</p>
+      <p><b style="color:var(--accent)">📋 Protocolos</b> — Personalizables. Toca uno, selecciona medicamentos y calcula todas las dosis automáticamente.</p>
+    </div>
+    <button class="btn btn-secondary" onclick="closeHelp()" style="margin-top:8px">Cerrar</button>
+  </div>
+</div>
 </body>
 </html>

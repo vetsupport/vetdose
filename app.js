@@ -1,4 +1,4 @@
-const SEED_DRUGS = [
+var SEED_DRUGS = [
   { id: 'acepromazina', generic: 'Acepromazina', trade: 'PromAce', conc: 10, doseMin: 0.01, doseMax: 0.05, dosePref: 0.02, unit: 'mg/kg', route: 'IM, SQ, IV, PO', category: 'sedation', formType: 'injection', calcMode: 'standard', notes: 'No reversible; hipotensión. Evitar en pacientes inestables.', source: 'Plumb 2024; Papich 2020', frequency: 'única', frequencies: ['única'], validationStatus: 'Revisión preliminar; validar por usuario' },
   { id: 'adequan_polisulfato_de_glicosaminoglicano', generic: 'Adequan (Polisulfato de glicosaminoglicano)', trade: 'Adequan Canine', conc: 100, doseMin: 4.4, doseMax: 4.4, dosePref: 4.4, unit: 'mg/kg', route: 'IM', category: 'joint/disease-modifying', formType: 'injection', calcMode: 'standard', notes: 'Perros: protocolo label 2 veces/semana hasta 4 semanas. Gatos: uso extra-label, validar.', source: 'Plumb 2024; Papich 2020', frequency: '2x/semana x4sem, luego mensual', frequencies: ['2x/semana', 'mensual'], validationStatus: 'Revisión preliminar; validar por usuario' },
   { id: 'alfaxalona', generic: 'Alfaxalona', trade: 'Alfaxan', conc: 10, doseMin: 1.0, doseMax: 4.0, dosePref: 2.0, unit: 'mg/kg', route: 'IV, IM', category: 'anesthesia', formType: 'injection', calcMode: 'standard', notes: 'Titular a efecto; buen perfil cardiorrespiratorio.', source: 'Plumb 2024; Papich 2020', frequency: 'única', frequencies: ['única'], validationStatus: 'Revisión preliminar; validar por usuario' },
@@ -7,7 +7,6 @@ const SEED_DRUGS = [
   { id: 'amantadina', generic: 'Amantadina', trade: 'Symmetrel', conc: 10, doseMin: 3.0, doseMax: 5.0, dosePref: 3.0, unit: 'mg/kg', route: 'PO', category: 'analgesic/neurologic', formType: 'liquid_oral', calcMode: 'standard', notes: 'Antagonista NMDA; usar como adyuvante en dolor crónico. Ajustar en renal.', source: 'Plumb 2024; Papich 2020', frequency: 'SID', frequencies: ['SID'], validationStatus: 'Revisión preliminar; validar por usuario' },
   { id: 'amlodipino', generic: 'Amlodipino', trade: 'Norvasc', conc: 2.5, tabSizes: [2.5, 5, 10], doseDog: 0.1, doseCat: 0.0, doseMin: 0.1, doseMax: 0.5, dosePref: 0.1, unit: 'mg/kg', route: 'PO', category: 'cardiac/antihypertensive', formType: 'tablet', calcMode: 'standard', notes: 'Gatos: muy usado para hipertensión; dosis puede ser mg/gato.', source: 'Plumb 2024; Papich 2020', frequency: 'SID', frequencies: ['SID', 'BID'], validationStatus: 'Revisión preliminar; validar por usuario' },
   { id: 'amoxicilina_clavulanato', generic: 'Amoxicilina-Clavulanato', trade: 'Clavamox', conc: 62.5, doseMin: 12.5, doseMax: 25, tabSizes: [62.5, 125, 250, 375], dosePref: 12.5, unit: 'mg/kg', route: 'PO, SQ, IM', category: 'antibiotic', formType: 'tablet', calcMode: 'standard', notes: 'Tabletas: 62.5, 125, 250, 375 mg. Suspensión oral: 62.5 mg/mL. Dosis depende de infección. Diferenciar formulación oral vs inyectable.', source: 'Plumb 2024; Papich 2020', frequency: 'BID', frequencies: ['BID'], validationStatus: 'Revisión preliminar; validar por usuario' },
-    { id: 'atenolol', generic: 'Atenolol', trade: 'Tenormin', conc: 25, tabSizes: [25,50,100], doseMin: 0.2, doseMax: 2.5, dosePref: 0.5, unit: 'mg/kg', doseDog: 0.5, doseCat: 1.0, route: 'PO', category: 'cardiac', formType: 'tablet', calcMode: 'standard', notes: 'Dosis muy distinta por especie/indicación; gatos HCM suelen mg/gato, no solo mg/kg.', source: 'Plumb 2024; Papich 2020', frequency: 'BID', frequencies: ['SID', 'BID'], validationStatus: 'Revisión preliminar; validar por usuario' },
   { id: 'atipamezole', generic: 'Atipamezole', trade: 'Antisedan', conc: 5, doseMin: 1.0, doseMax: 1.0, dosePref: 1.0, unit: 'same volume/mg based', route: 'IM', category: 'reversal', formType: 'injection', calcMode: 'fixed', notes: 'Reversor alfa-2; dosis depende de dex/medetomidina usada. No calcular como mg/kg estándar.', source: 'Plumb 2024; Papich 2020', frequency: 'única', frequencies: ['única'], validationStatus: 'Revisión preliminar; validar por usuario' },
   { id: 'atropina', generic: 'Atropina', trade: 'Atropina', conc: 0.54, doseMin: 0.02, doseMax: 0.04, dosePref: 0.02, unit: 'mg/kg', route: 'IV, IM, IT', category: 'emergency', formType: 'injection', calcMode: 'standard', notes: 'Bradicardia sintomática, organofosforados, PCR.', source: 'Plumb 2024; Papich 2020', frequency: 'única', frequencies: ['única', 'PRN'], validationStatus: 'Revisión preliminar; validar por usuario' },
   { id: 'azitromicina', generic: 'Azitromicina', trade: 'Zithromax', conc: 250, tabSizes: [250], doseMin: 5.0, doseMax: 10.0, dosePref: 10.0, unit: 'mg/kg', route: 'PO', category: 'antibiotic', formType: 'tablet', calcMode: 'standard', notes: 'Dosis/frecuencia varía por indicación; uso extra-label en gatos/perros.', source: 'Plumb 2024; Papich 2020', frequency: 'SID', frequencies: ['SID', 'BID'], validationStatus: 'Revisión preliminar; validar por usuario' },
@@ -100,34 +99,27 @@ const SEED_DRUGS = [
   { id: 'morfina', generic: 'Morfina', trade: 'Morfina', conc: 10, doseMin: 0.5, doseMax: 1.0, dosePref: 0.5, unit: 'mg/kg', route: 'IM, SQ, IV lento', category: 'analgesic', formType: 'injection', calcMode: 'standard', notes: 'Evitar IV rápido por liberación de histamina.', source: 'Plumb 2024; Papich 2020', frequency: 'q4h', frequencies: ['q4h', 'q6h'], validationStatus: 'Revisión preliminar; validar por usuario' },
   { id: 'nacl_0_45_dextrosa_2_5', generic: 'NaCl 0.45% + Dextrosa 2.5%', trade: 'Hypotonic saline/dextrose', conc: 1, doseMin: 10.0, doseMax: 20.0, dosePref: 10.0, unit: 'mL/kg', route: 'IV', category: 'fluid', formType: 'injection', calcMode: 'standard', notes: 'Hipernatremia requiere corrección lenta y monitoreo Na.', source: 'Plumb 2024; Papich 2020', frequency: 'CRI', frequencies: ['CRI'], validationStatus: 'Revisión preliminar; validar por usuario' },
   { id: 'nacl_0_9', generic: 'NaCl 0.9%', trade: 'Solución salina', conc: 1, doseMin: 10.0, doseMax: 20.0, dosePref: 10.0, unit: 'mL/kg', route: 'IV, SQ', category: 'fluid', formType: 'injection', calcMode: 'standard', notes: 'Útil en hipercalemia/alcalosis; evitar exceso.', source: 'Plumb 2024; Papich 2020', frequency: 'CRI', frequencies: ['CRI'], validationStatus: 'Revisión preliminar; validar por usuario' },
-
-  // ── MOD-014 new drugs ──────────────────────────────────────────────────────
   { id: 'pantoprazol', generic: 'Pantoprazol', trade: 'Protonix', conc: 4, doseMin: 1.0, doseMax: 1.0, dosePref: 1.0, unit: 'mg/kg', route: 'IV lento', category: 'GI/PPI', formType: 'injection', calcMode: 'standard', notes: 'Perros: 1 mg/kg IV. Presentación: vial 40 mg diluido en 10 cc NaCl 0.9% = 4 mg/mL. Administrar IV lentamente. Inhibidor de bomba de protones parenteral.', source: 'Plumb 2024', frequency: 'SID', frequencies: ['SID', 'BID'], validationStatus: 'Revisión preliminar; validar por usuario' },
   { id: 'esomeprazol_iv', generic: 'Esomeprazol', trade: 'Nexium IV', conc: 4, doseMin: 0.5, doseMax: 1.0, dosePref: 0.5, unit: 'mg/kg', route: 'IV, PO', category: 'GI/PPI', formType: 'injection', calcMode: 'standard', notes: 'Perros: 0.5–1 mg/kg BID. Dosis >1 mg/kg puede causar vómitos y/o diarrea. IBP. Cápsulas orales: 20, 40 mg.', source: 'Plumb 2024', frequency: 'BID', frequencies: ['SID', 'BID'], validationStatus: 'Revisión preliminar; validar por usuario' },
   { id: 'bario_sulfato', generic: 'Sulfato de Bario', trade: 'Novopaque/E-Z Paque', conc: 1, doseMin: 5.0, doseMax: 20.0, dosePref: 10.0, unit: 'mL/kg', route: 'PO', category: 'other', formType: 'liquid_oral', calcMode: 'standard', notes: 'Estudio tránsito intestinal. Perros <20 kg: 8–12 mL/kg; >20 kg: 5–7 mL/kg. Gatos: 12–20 mL/kg. Radiografías a los 5, 15, 30 min, 1h y 2h. NO usar si hay sospecha de perforación.', source: 'Plumb 2024', frequency: 'única', frequencies: ['única'], validationStatus: 'Revisión preliminar; validar por usuario' },
   { id: 'dorzolamida_timolol', generic: 'Dorzolamida/Timolol', trade: 'Cosopt', conc: 1, doseMin: 1.0, doseMax: 1.0, dosePref: 1.0, unit: 'gota/ojo', route: 'Tópico ocular', category: 'ophthalmic', formType: 'injection', calcMode: 'fixed', notes: 'Glaucoma. PRECAUCIÓN: No usar Timolol en pacientes cardíacos (produce bradicardia). NO usar en gatos asmáticos (puede precipitar crisis broncoespástica). 1 gota en ojo afectado BID o TID.', source: 'Plumb 2024', frequency: 'BID', frequencies: ['BID', 'TID'], validationStatus: 'Revisión preliminar; validar por usuario' },
   { id: 'diltiazem_er', generic: 'Diltiazem ER', trade: 'Cardizem CD/LA', conc: 60, doseMin: 1.0, doseMax: 4.0, dosePref: 2.0, unit: 'mg/kg', route: 'PO', category: 'cardiac', formType: 'tablet', calcMode: 'standard', tabSizes: [60, 90, 120, 180, 240], doseCat: 0, notes: 'Extended Release — NO partir ni triturar. Perros: 1–4 mg/kg c/12h. Gatos: 30–60 mg/gato c/12–24h (dosis fija). HCM felina y fibrilación auricular. Alternativa c/12h vs IR c/8h.', source: 'Plumb 2024', frequency: 'BID', frequencies: ['SID', 'BID'], validationStatus: 'Revisión preliminar; validar por usuario' },
-
-  // ── MOD-012 additions ─────────────────────────────────────────────────────
   { id: 'ampicilina_sulbactam', generic: 'Ampicilina-Sulbactam', trade: 'Unasyn', conc: 30, doseMin: 11.0, doseMax: 22.0, dosePref: 20.0, unit: 'mg/kg', route: 'IV BID', category: 'antibiotic', formType: 'injection', calcMode: 'standard', notes: 'Presentación: vial 1.5 g (1 g ampicilina + 0.5 g sulbactam). Diluir en 50 cc NaCl 0.9% → concentración 30 mg/mL. Administrar BID IV. Espectro amplio incluyendo anaerobios.', source: 'Plumb 2024', frequency: 'BID', frequencies: ['BID'], validationStatus: 'Revisión preliminar; validar por usuario' },
   { id: 'carbonato_lantano', generic: 'Carbonato de Lantano', trade: 'Fosrenol', conc: 250, doseMin: 60.0, doseMax: 90.0, dosePref: 60.0, unit: 'mg/kg', route: 'PO con comida', category: 'renal/phosphate binder', formType: 'tablet', calcMode: 'standard', tabSizes: [250, 500, 750, 1000], notes: 'Quelante de fósforo. Administrar dividido en 2 comidas (BID). Indicado en enfermedad renal crónica con hiperfosfatemia.', source: 'Plumb 2024', frequency: 'BID con comida', frequencies: ['BID con comida', 'TID con comida'], validationStatus: 'Revisión preliminar; validar por usuario' },
   { id: 'calcio_carbonato', generic: 'Calcio Carbonato', trade: 'Tums/genérico', conc: 500, doseMin: 90.0, doseMax: 150.0, dosePref: 100.0, unit: 'mg/kg', route: 'PO con comida', category: 'renal/phosphate binder', formType: 'tablet', calcMode: 'standard', tabSizes: [500, 750, 1000], notes: 'Quelante de fósforo. Administrar dividido en 2 comidas. Enfermedad renal crónica con hiperfosfatemia.', source: 'Plumb 2024', frequency: 'BID con comida', frequencies: ['BID con comida', 'TID con comida'], validationStatus: 'Revisión preliminar; validar por usuario' },
   { id: 'dexametasona_sp', generic: 'Dexametasona SP', trade: 'Dexafort/Azium SP', conc: 4, doseMin: 0.1, doseMax: 0.5, dosePref: 0.1, unit: 'mg/kg', route: 'IV, IM, SQ', category: 'steroid', formType: 'injection', calcMode: 'standard', notes: 'Anafilaxis: 0.5 mg/kg IV una sola vez. Antiinflamatorio: 0.1–0.2 mg/kg SID. Inmunosupresor: 0.2–0.5 mg/kg SID. Crisis addisoniana: 0.1–0.5 mg/kg IV, mantenimiento <0.1 mg/kg PO PRN. IMPORTANTE: DexSP NO interfiere con la prueba de diagnóstico de Addison (estimulación con ACTH).', source: 'Plumb 2024', frequency: 'única/SID', frequencies: ['única', 'SID', 'BID'], validationStatus: 'Revisión preliminar; validar por usuario' },
-  // ── MOD-013 additions ─────────────────────────────────────────────────────
   { id: 'amitriptilina', generic: 'Amitriptilina', trade: 'Elavil', conc: 10, doseMin: 1.0, doseMax: 4.0, dosePref: 2.0, unit: 'mg/kg', route: 'PO', category: 'behavior', formType: 'tablet', calcMode: 'standard', tabSizes: [10, 25, 50, 75, 100, 150], notes: 'Antidepresivo tricíclico. Ansiedad, dermatitis psicodérmica. Extremadamente amargo — no partir el comprimido, administrar entero. Puede causar sedación, arritmias y efectos anticolinérgicos.', source: 'Plumb 2024', frequency: 'BID', frequencies: ['SID', 'BID'], validationStatus: 'Revisión preliminar; validar por usuario' },
   { id: 'clomipramina', generic: 'Clomipramina', trade: 'Clomicalm', conc: 5, doseMin: 1.0, doseMax: 4.0, dosePref: 2.0, unit: 'mg/kg', route: 'PO', category: 'behavior', formType: 'tablet', calcMode: 'standard', tabSizes: [5, 20, 80], notes: 'Clomicalm con sabor a carne — buena aceptación en perros y gatos. Inicio: 1–2 mg/kg c/12h x 2 semanas, luego 3 mg/kg c/24h. Hasta 4 mg/kg para trastorno obsesivo-compulsivo. Aprobado para uso veterinario en muchos países.', source: 'Plumb 2024', frequency: 'BID', frequencies: ['SID', 'BID'], validationStatus: 'Revisión preliminar; validar por usuario' },
   { id: 'atropina_oftalmica', generic: 'Atropina oftálmica', trade: 'Isopto Atropine', conc: 1, doseMin: 1.0, doseMax: 1.0, dosePref: 1.0, unit: 'gota/ojo', route: 'Tópico ocular', category: 'ophthalmic', formType: 'injection', calcMode: 'fixed', species: 'both', notes: 'Solución oftálmica 1%. Midriasis, cicloplexia, uveítis anterior. 1 gota por ojo afectado. Frecuencia según indicación (SID a TID). Puede causar taquicardia sistémica por absorción.', source: 'Plumb 2024', frequency: 'BID', frequencies: ['SID', 'BID', 'TID'], validationStatus: 'Revisión preliminar; validar por usuario' },
   { id: 'carprofen_inj', generic: 'Carprofen inyectable', trade: 'Rimadyl inj.', conc: 50, doseMin: 2.2, doseMax: 4.4, dosePref: 4.4, unit: 'mg/kg', route: 'SQ, IV', category: 'nsaid', formType: 'injection', calcMode: 'standard', species: 'dog', notes: 'Solo perros. Dosis perioperatoria única 4.4 mg/kg SQ antes de cirugía. No usar en gatos. No repetir sin evaluar función renal.', source: 'Plumb 2024; FDA label', frequency: 'única', frequencies: ['única'], validationStatus: 'Revisión preliminar; validar por usuario' },
   { id: 'carprofen_tab', generic: 'Carprofen tabletas', trade: 'Rimadyl tabs', conc: 25, doseMin: 2.2, doseMax: 4.4, dosePref: 2.2, unit: 'mg/kg', route: 'PO', category: 'nsaid', formType: 'tablet', calcMode: 'standard', tabSizes: [25, 75, 100], species: 'dog', notes: 'Solo perros. 2.2 mg/kg BID o 4.4 mg/kg SID. Monitorear función hepática en uso crónico (cada 6 meses). No usar en gatos.', source: 'Plumb 2024', frequency: 'BID', frequencies: ['SID', 'BID'], validationStatus: 'Revisión preliminar; validar por usuario' },
   { id: 'cefazolina_peri', generic: 'Cefazolina perioperatoria', trade: 'Ancef', conc: 100, doseMin: 20.0, doseMax: 22.0, dosePref: 22.0, unit: 'mg/kg', route: 'IV', category: 'antibiotic', formType: 'injection', calcMode: 'standard', notes: 'Profilaxis quirúrgica: 20–22 mg/kg IV al inicio de cirugía, repetir c/6h durante procedimiento. Sepsis: 20–22 mg/kg IV c/4–8h. Gram positivos principalmente.', source: 'Plumb 2024', frequency: 'q6h', frequencies: ['q6h'], validationStatus: 'Revisión preliminar; validar por usuario' },
-  // ── MOD-005 / MOD-006 additions ──────────────────────────────────────────────
   { id: 'levetiracetam_er', generic: 'Levetiracetam ER', trade: 'Keppra XR', conc: 500, doseMin: 20.0, doseMax: 60.0, dosePref: 30.0, unit: 'mg/kg', route: 'PO', category: 'neurologic/anticonvulsant', formType: 'tablet', calcMode: 'standard', tabSizes: [500, 750], notes: 'Extended Release — administrar c/12h (BID). NO partir ni triturar. Misma dosis total diaria que IR. Disponible en 500 y 750 mg.', source: 'Plumb 2024; Papich 2020', frequency: 'BID', frequencies: ['BID'], validationStatus: 'Revisión preliminar; validar por usuario' },
   { id: 'fenilpropanolamina', generic: 'Fenilpropanolamina', trade: 'Proin', conc: 25, doseMin: 1.0, doseMax: 2.0, dosePref: 1.5, unit: 'mg/kg', route: 'PO', category: 'urinary', formType: 'tablet', calcMode: 'standard', tabSizes: [25, 50, 75, 100], species: 'dog', notes: 'Solo perros. Incontinencia urinaria por incompetencia del esfínter. c/8-12h. No usar en hipertensión, cardiopatía o hipertiroidismo. Monitorear presión arterial.', source: 'Plumb 2024; FDA label', frequency: 'BID', frequencies: ['BID', 'TID'], validationStatus: 'Revisión preliminar; validar por usuario' },
   { id: 'capromorelin_dog', generic: 'Capromorelin (perros)', trade: 'Entyce', conc: 30, doseMin: 3.0, doseMax: 3.0, dosePref: 3.0, unit: 'mg/kg', route: 'PO', category: 'GI', formType: 'liquid_oral', calcMode: 'standard', species: 'dog', notes: 'Solo perros ≥ 9 meses. Estimulante del apetito. 30 mg/mL. Con o sin comida. Puede causar hipersalivación o vómito transitorio. NO confundir con Elura (gatos, 20 mg/mL).', source: 'Plumb 2024; FDA label', frequency: 'SID', frequencies: ['SID'], validationStatus: 'Revisión preliminar; validar por usuario' },
   { id: 'capromorelin_cat', generic: 'Capromorelin (gatos)', trade: 'Elura', conc: 20, doseMin: 2.0, doseMax: 2.0, dosePref: 2.0, unit: 'mg/kg', route: 'PO', category: 'GI', formType: 'liquid_oral', calcMode: 'standard', species: 'cat', notes: 'Solo gatos. Estimulante del apetito. 20 mg/mL. Con o sin comida. Concentración DIFERENTE a Entyce (20 vs 30 mg/mL). No intercambiar entre especies.', source: 'Plumb 2024; FDA label', frequency: 'SID', frequencies: ['SID'], validationStatus: 'Revisión preliminar; validar por usuario' },
   { id: 'mirtazapina_oral', generic: 'Mirtazapina oral', trade: 'Remeron', conc: 7.5, doseMin: 1.0, doseMax: 3.75, dosePref: 1.88, unit: 'mg/kg', route: 'PO', category: 'GI', formType: 'tablet', calcMode: 'standard', tabSizes: [7.5, 15, 30], notes: 'Estimulante del apetito y antiemético. Perros: 1.88–3.75 mg/perro c/24h. Gatos: 1.88 mg/gato c/48-72h — muy sensibles al síndrome serotoninérgico. Usar dosis mínima en felinos.', source: 'Plumb 2024; Papich 2020', frequency: 'q72h', frequencies: ['q48h', 'q72h'], validationStatus: 'Revisión preliminar; validar por usuario' },
   { id: 'mirataz', generic: 'Mirtazapina tópica', trade: 'Mirataz', conc: 1.88, doseMin: 1.88, doseMax: 1.88, dosePref: 1.88, unit: 'mg/gato', route: 'Tópico auricular', category: 'GI', formType: 'injection', calcMode: 'fixed', species: 'cat', notes: 'Solo gatos. Ungüento 2% — aplicar 1.5 cm en pabellón auricular interno c/24h. Rotar oreja cada aplicación. Usar guantes. Lavar manos. Alternativa cuando la vía oral no es posible.', source: 'Plumb 2024; FDA label', frequency: 'SID', frequencies: ['SID'], validationStatus: 'Revisión preliminar; validar por usuario' },
-  // ── MOD-027 new drugs ──────────────────────────────────────────────────────
   { id: 'naloxona', generic: 'Naloxona', trade: 'Narcan', conc: 0.4,
     doseMin: 0.01, doseMax: 0.04, dosePref: 0.01, unit: 'mg/kg',
     route: 'IV, IM, SQ', category: 'emergency/reversal', formType: 'injection',
@@ -135,7 +127,6 @@ const SEED_DRUGS = [
     frequency: 'PRN', frequencies: ['PRN','q20-40min'],
     notes: 'Reversor de opioides. Duración corta (20-40 min) — puede necesitar dosis repetidas. Reversión parcial si se quiere preservar analgesia residual. Buprenorfina requiere dosis más altas (0.04 mg/kg). Metadona puede necesitar infusión.',
     source: 'Papich 5th Ed. p.644', validationStatus: 'Revisión preliminar; validar por usuario' },
-
   { id: 'flumazenil', generic: 'Flumazenil', trade: 'Romazicon', conc: 0.1,
     doseMin: 0.01, doseMax: 0.02, dosePref: 0.01, unit: 'mg/kg',
     route: 'IV lento', category: 'emergency/reversal', formType: 'injection',
@@ -143,7 +134,6 @@ const SEED_DRUGS = [
     frequency: 'PRN', frequencies: ['PRN'],
     notes: 'Reversor de benzodiacepinas (midazolam, diazepam). IV lento. Duración muy corta (30-60 min) — paciente puede re-sedarse. Puede repetir PRN. No hay reversor para propofol o ketamina.',
     source: 'Papich 5th Ed. p.401', validationStatus: 'Revisión preliminar; validar por usuario' },
-
   { id: 'colchicina', generic: 'Colchicina', trade: 'Colcrys/genérico', conc: 0.5,
     doseMin: 0.01, doseMax: 0.03, dosePref: 0.01, unit: 'mg/kg',
     route: 'PO', category: 'other', formType: 'tablet',
@@ -151,7 +141,6 @@ const SEED_DRUGS = [
     frequency: 'SID', frequencies: ['SID'],
     notes: 'Solo perros. Pericarditis recurrente, amiloidosis hepática, fibrosis hepática crónica. Dar con comida. Puede causar vómitos y diarrea. Monitorear función hepática.',
     source: 'Papich 5th Ed. p.221', validationStatus: 'Revisión preliminar; validar por usuario' },
-
   { id: 'guaifenesina', generic: 'Guaifenesina', trade: 'Mucinex/genérico', conc: 100,
     doseMin: 3.0, doseMax: 5.0, dosePref: 3.0, unit: 'mg/kg',
     route: 'PO', category: 'respiratory', formType: 'tablet',
@@ -159,7 +148,6 @@ const SEED_DRUGS = [
     frequency: 'TID', frequencies: ['BID','TID'],
     notes: 'Solo perros — NO usar en gatos (puede causar anemia por cuerpos de Heinz). Expectorante para tos productiva. Syrup 100 mg/5 mL disponible. Dar con abundante agua.',
     source: 'Papich 5th Ed. p.435', validationStatus: 'Revisión preliminar; validar por usuario' },
-
   { id: 'paracetamol', generic: 'Paracetamol (Acetaminofén)', trade: 'Tylenol/genérico', conc: 325,
     doseMin: 10.0, doseMax: 15.0, dosePref: 10.0, unit: 'mg/kg',
     route: 'PO', category: 'analgesic', formType: 'tablet',
@@ -167,7 +155,6 @@ const SEED_DRUGS = [
     frequency: 'BID', frequencies: ['BID','TID'],
     notes: '⚠⚠⚠ SOLO PERROS — NUNCA EN GATOS (causa methemoglobinemia fatal). Uso extra-label. Analgesia leve. Máx 15 mg/kg. No exceder 3 dosis/día. Hepatotóxico en sobredosis. No combinar con AINEs.',
     source: 'Papich 5th Ed. p.695', validationStatus: 'Revisión preliminar; validar por usuario' },
-
   { id: 'welactin', generic: 'Ácidos Omega-3 (EPA/DHA)', trade: 'Welactin/Nordic Naturals', conc: 1000,
     doseMin: 20.0, doseMax: 55.0, dosePref: 30.0, unit: 'mg/kg',
     route: 'PO', category: 'dermatology', formType: 'capsule',
@@ -175,11 +162,6 @@ const SEED_DRUGS = [
     frequency: 'SID', frequencies: ['SID'],
     notes: 'Suplemento nutricional (EPA+DHA). Dermatitis atópica, articulaciones, cardiopatía, hipertrigliceridemia. Dosis varía según indicación. Puede causar heces blandas en dosis altas. Dar con comida.',
     source: 'Plumb 2024; WSAVA guidelines', validationStatus: 'Revisión preliminar; validar por usuario' },
-
-
-  // ── MOD-025 new drugs from Papich 5th Ed + FDA labels ──────────────────────
-
-  // Ondansetron
   { id: 'ondansetron', generic: 'Ondansetron', trade: 'Zofran', conc: 2,
     doseMin: 0.1, doseMax: 1.0, dosePref: 0.5, unit: 'mg/kg',
     route: 'IV lento, SQ, PO', category: 'antiemetic', formType: 'injection',
@@ -188,8 +170,6 @@ const SEED_DRUGS = [
     frequency: 'q8h', frequencies: ['q8h', 'q12h', 'CRI'],
     notes: 'Perros: 0.1-0.2 mg/kg IV lento q6-12h; oral <10% biodisponibilidad. Gatos: 0.5 mg/kg q8h SQ/IV/PO o 2 mg/gato q8h. CRI: 0.5 mg/kg loading luego 0.5 mg/kg/h. IV en 15-20 min.',
     source: 'Papich 5th Ed. p.672', validationStatus: 'Revisión preliminar; validar por usuario' },
-
-  // Trazodone
   { id: 'trazodone', generic: 'Trazodona', trade: 'Desyrel/genérico', conc: 50,
     doseMin: 5.0, doseMax: 10.0, dosePref: 7.0, unit: 'mg/kg',
     route: 'PO', category: 'behavior', formType: 'tablet',
@@ -198,8 +178,6 @@ const SEED_DRUGS = [
     frequency: 'q12h', frequencies: ['SID', 'q12h', 'q8h', 'PRN'],
     notes: 'Perros: 5-8 mg/kg q12h PO, titular. Dar 1h antes del evento estresante. Máx 300 mg/dosis. Gatos: 50-100 mg/gato PO PRN; pico sedación ~2h. NO IV en perros. Precaución con SSRIs, clomipramina, tramadol (serotonina).',
     source: 'Papich 5th Ed. p.927', validationStatus: 'Revisión preliminar; validar por usuario' },
-
-  // Tramadol
   { id: 'tramadol', generic: 'Tramadol', trade: 'Ultram/genérico', conc: 50,
     doseMin: 2.0, doseMax: 5.0, dosePref: 5.0, unit: 'mg/kg',
     route: 'PO', category: 'analgesic', formType: 'capsule',
@@ -208,8 +186,6 @@ const SEED_DRUGS = [
     frequency: 'q8h', frequencies: ['q8h', 'q12h'],
     notes: 'Perros: 5 mg/kg q6-8h PO; eficacia analgésica variable. Gatos: 2-4 mg/kg q8-12h PO; producen más metabolito activo. Controlado Schedule IV. No mezclar con IMAO.',
     source: 'Papich 5th Ed. p.922', validationStatus: 'Revisión preliminar; validar por usuario' },
-
-  // Pimobendan
   { id: 'pimobendan', generic: 'Pimobendan', trade: 'Vetmedin', conc: 1.25,
     doseMin: 0.1, doseMax: 0.3, dosePref: 0.25, unit: 'mg/kg',
     route: 'PO', category: 'cardiac', formType: 'tablet',
@@ -218,8 +194,6 @@ const SEED_DRUGS = [
     frequency: 'BID', frequencies: ['BID'],
     notes: 'Perros: 0.25-0.3 mg/kg q12h PO. DAR 30-60 MIN ANTES DE COMER. ICC por DCM y MVD. Gatos (no aprobado): 1.25 mg/gato q12h. No usar en cardiomiopatía hipertrófica obstructiva. No compuestos (absorción diferente).',
     source: 'Papich 5th Ed. p.738', validationStatus: 'Revisión preliminar; validar por usuario' },
-
-  // Robenacoxib
   { id: 'robenacoxib', generic: 'Robenacoxib', trade: 'Onsior', conc: 6,
     doseMin: 1.0, doseMax: 2.0, dosePref: 2.0, unit: 'mg/kg',
     route: 'PO, SQ', category: 'nsaid', formType: 'tablet',
@@ -228,8 +202,6 @@ const SEED_DRUGS = [
     frequency: 'SID', frequencies: ['SID'],
     notes: 'Perros: 2 mg/kg PO o SQ q24h. Gatos: 1 mg/kg PO SID o 2 mg/kg SQ x 3 días. GATOS: dar SIN comida (absorción oral 49% en ayunas vs 10% con comida). Inyectable 30 min antes de cirugía. No combinar con otros AINEs o corticoides.',
     source: 'Papich 5th Ed. p.821', validationStatus: 'Revisión preliminar; validar por usuario' },
-
-  // Telmisartan
   { id: 'telmisartan', generic: 'Telmisartán', trade: 'Semintra', conc: 4,
     doseMin: 1.0, doseMax: 3.0, dosePref: 1.5, unit: 'mg/kg',
     route: 'PO', category: 'cardiac/renal', formType: 'liquid_oral',
@@ -238,8 +210,6 @@ const SEED_DRUGS = [
     frequency: 'SID', frequencies: ['SID', 'BID'],
     notes: 'Gatos: 1.5 mg/kg q12h x 14 días, luego 2 mg/kg SID. 0.2 mL/kg de solución 4 mg/mL. Ajustar por TA. Perros: 1 mg/kg SID, aumentar hasta 3 mg/kg. HTA y proteinuria en ERC. Preferido sobre IECA en gatos.',
     source: 'Papich 5th Ed. p.876', validationStatus: 'Revisión preliminar; validar por usuario' },
-
-  // Pregabalin (Bonqat en gatos)
   { id: 'pregabalina', generic: 'Pregabalina', trade: 'Bonqat/Lyrica', conc: 75,
     doseMin: 2.0, doseMax: 5.0, dosePref: 2.0, unit: 'mg/kg',
     route: 'PO', category: 'analgesic', formType: 'liquid_oral',
@@ -248,8 +218,6 @@ const SEED_DRUGS = [
     frequency: 'BID', frequencies: ['BID', 'TID'],
     notes: 'Perros: anticonvulsivante 2 mg/kg q8h PO; dolor neuropático 4-5 mg/kg q12h. Gatos: 2 mg/kg q12h, aumentar a 4 mg/kg q12h. Bonqat = solución oral 75 mg/mL aprobada FDA 2023 para ansiedad en gatos. Sedación y ataxia posibles. No suspender abruptamente.',
     source: 'Papich 5th Ed. p.775; FDA Bonqat label 2023', validationStatus: 'Revisión preliminar; validar por usuario' },
-
-  // Molidustat
   { id: 'molidustat', generic: 'Molidustat', trade: 'Varenzin-CA1', conc: 5,
     doseMin: 5.0, doseMax: 5.0, dosePref: 5.0, unit: 'mg/kg',
     route: 'PO', category: 'renal/hematologic', formType: 'liquid_oral',
@@ -257,8 +225,6 @@ const SEED_DRUGS = [
     frequency: 'SID', frequencies: ['SID'],
     notes: 'SOLO GATOS. Anemia no regenerativa por ERC. 5 mg/kg PO SID. Agitar bien, dar directamente en boca con jeringa provista (NO mezclar con comida). Pausa ≥7 días entre ciclos según HCT. Monitorear HCT semanal. Aprobación condicional FDA 2024 (Elanco).',
     source: 'FDA Varenzin-CA1 label; JVIM 2024;38:197', validationStatus: 'Revisión preliminar; validar por usuario' },
-
-  // Panoquell (Fuzapladib)
   { id: 'fuzapladib', generic: 'Fuzapladib sódico', trade: 'Panoquell-CA1', conc: 4,
     doseMin: 0.4, doseMax: 0.4, dosePref: 0.4, unit: 'mg/kg',
     route: 'IV', category: 'GI', formType: 'injection',
@@ -266,26 +232,39 @@ const SEED_DRUGS = [
     frequency: 'SID x3d', frequencies: ['SID x3d'],
     notes: 'SOLO PERROS. Pancreatitis aguda canina. 0.4 mg/kg (0.1 mL/kg) IV SID x 3 días consecutivos. Solo hospitalización. Polvo liofilizado: reconstituir con 3.5 mL diluyente → 4 mg/mL. Vial estable 28 días refrigerado. Usar junto a cuidado de soporte. CI: cardiopatía, falla hepática/renal, cachorros <6 meses.',
     source: 'FDA NADA 141-567; Ceva/ISK label 2022', validationStatus: 'Revisión preliminar; validar por usuario' },
-
-,
-
-  // ── New after v13 ────────────────────────────────────────────────
-  { id:'famotidina_inj', generic:'Famotidina inyectable', trade:'Pepcid IV', conc:10, doseMin:0.5, doseMax:1.0, dosePref:0.5, unit:'mg/kg', route:'IV lento, SQ, IM', category:'gastrointestinal', formType:'injection', calcMode:'standard', frequency:'BID', frequencies:['SID','BID'], notes:'IV lento 15 min.', source:'Plumb 2024' },
-  { id:'metronidazol_inj', generic:'Metronidazol inyectable', trade:'Flagyl IV', conc:5, doseMin:10.0, doseMax:15.0, dosePref:15.0, unit:'mg/kg', route:'IV lento', category:'antibiotic', formType:'injection', calcMode:'standard', frequency:'BID', frequencies:['BID','TID'], notes:'IV lento mínimo 30 min.', source:'Plumb 2024' },
-  { id:'vasopresina', generic:'Vasopresina', trade:'Pitressin', conc:20, doseMin:0.5, doseMax:2.0, dosePref:1.0, unit:'mU/kg/min', route:'IV CRI', category:'emergency', formType:'injection', calcMode:'standard', frequency:'CRI', frequencies:['CRI'], notes:'Vasopresor no adrenérgico.', source:'Plumb 2024' },
-  { id:'propofol', generic:'Propofol', trade:'PropoFlo', conc:10, doseMin:2.0, doseMax:6.0, dosePref:4.0, unit:'mg/kg', route:'IV lento', category:'sedation', formType:'injection', calcMode:'standard', frequency:'PRN', frequencies:['PRN','CRI'], notes:'Inducción titulada. Apnea posible.', source:'Plumb 2024' },
-  { id:'dobutamina', generic:'Dobutamina', trade:'Dobutrex', conc:12.5, doseMin:2.0, doseMax:20.0, dosePref:5.0, unit:'mcg/kg/min', route:'IV CRI', category:'emergency/cardiac', formType:'injection', calcMode:'standard', frequency:'CRI', frequencies:['CRI'], notes:'Inotrópico ICC.', source:'Plumb 2024' },
-  { id:'norepinefrina', generic:'Norepinefrina', trade:'Levophed', conc:1, doseMin:0.05, doseMax:1.0, dosePref:0.1, unit:'mcg/kg/min', route:'IV CRI', category:'emergency', formType:'injection', calcMode:'standard', frequency:'CRI', frequencies:['CRI'], notes:'Vasopresor shock séptico.', source:'Plumb 2024' }
-,
-  { id:'famotidina_inj', generic:'Famotidina inyectable', trade:'Pepcid IV', conc:10, doseMin:0.5, doseMax:1.0, dosePref:0.5, unit:'mg/kg', route:'IV lento, SQ, IM', category:'gastrointestinal', formType:'injection', calcMode:'standard', frequency:'BID', frequencies:['SID','BID'], notes:'IV lento 15 min.', source:'Plumb 2024' },
-  { id:'metronidazol_inj', generic:'Metronidazol inyectable', trade:'Flagyl IV', conc:5, doseMin:10.0, doseMax:15.0, dosePref:15.0, unit:'mg/kg', route:'IV lento', category:'antibiotic', formType:'injection', calcMode:'standard', frequency:'BID', frequencies:['BID','TID'], notes:'IV lento mínimo 30 min.', source:'Plumb 2024' },
-  { id:'vasopresina', generic:'Vasopresina', trade:'Pitressin', conc:20, doseMin:0.5, doseMax:2.0, dosePref:1.0, unit:'mU/kg/min', route:'IV CRI', category:'emergency', formType:'injection', calcMode:'standard', frequency:'CRI', frequencies:['CRI'], notes:'Vasopresor no adrenérgico.', source:'Plumb 2024' },
-  { id:'propofol', generic:'Propofol', trade:'PropoFlo', conc:10, doseMin:2.0, doseMax:6.0, dosePref:4.0, unit:'mg/kg', route:'IV lento', category:'sedation', formType:'injection', calcMode:'standard', frequency:'PRN', frequencies:['PRN','CRI'], notes:'Inducción titulada. Apnea posible.', source:'Plumb 2024' },
-  { id:'dobutamina', generic:'Dobutamina', trade:'Dobutrex', conc:12.5, doseMin:2.0, doseMax:20.0, dosePref:5.0, unit:'mcg/kg/min', route:'IV CRI', category:'emergency/cardiac', formType:'injection', calcMode:'standard', frequency:'CRI', frequencies:['CRI'], notes:'Inotrópico ICC.', source:'Plumb 2024' },
-  { id:'norepinefrina', generic:'Norepinefrina', trade:'Levophed', conc:1, doseMin:0.05, doseMax:1.0, dosePref:0.1, unit:'mcg/kg/min', route:'IV CRI', category:'emergency', formType:'injection', calcMode:'standard', frequency:'CRI', frequencies:['CRI'], notes:'Vasopresor shock séptico.', source:'Plumb 2024' }
+  { id:'famotidina_inj', generic:'Famotidina inyectable', trade:'Pepcid IV',
+    conc:10, doseMin:0.5, doseMax:1.0, dosePref:0.5, unit:'mg/kg',
+    route:'IV lento, SQ, IM', category:'gastrointestinal', formType:'injection',
+    calcMode:'standard', frequency:'BID', frequencies:['SID','BID'],
+    notes:'IV lento 15 min. Reducir dosis en falla renal.', source:'Plumb 2024' },
+  { id:'metronidazol_inj', generic:'Metronidazol inyectable', trade:'Flagyl IV',
+    conc:5, doseMin:10.0, doseMax:15.0, dosePref:15.0, unit:'mg/kg',
+    route:'IV lento', category:'antibiotic', formType:'injection',
+    calcMode:'standard', frequency:'BID', frequencies:['BID','TID'],
+    notes:'IV lento mínimo 30 min. 500 mg/100 mL.', source:'Plumb 2024' },
+  { id:'vasopresina', generic:'Vasopresina', trade:'Pitressin',
+    conc:20, doseMin:0.5, doseMax:2.0, dosePref:1.0, unit:'mU/kg/min',
+    route:'IV CRI', category:'emergency', formType:'injection',
+    calcMode:'standard', frequency:'CRI', frequencies:['CRI'],
+    notes:'Vasopresor no adrenérgico. PCR refractaria.', source:'Plumb 2024' },
+  { id:'propofol', generic:'Propofol', trade:'PropoFlo',
+    conc:10, doseMin:2.0, doseMax:6.0, dosePref:4.0, unit:'mg/kg',
+    route:'IV lento', category:'sedation', formType:'injection',
+    calcMode:'standard', frequency:'PRN', frequencies:['PRN','CRI'],
+    notes:'Inducción titulada lentamente. Apnea posible.', source:'Plumb 2024' },
+  { id:'dobutamina', generic:'Dobutamina', trade:'Dobutrex',
+    conc:12.5, doseMin:2.0, doseMax:20.0, dosePref:5.0, unit:'mcg/kg/min',
+    route:'IV CRI', category:'emergency/cardiac', formType:'injection',
+    calcMode:'standard', frequency:'CRI', frequencies:['CRI'],
+    notes:'Inotrópico positivo. ICC descompensada.', source:'Plumb 2024' },
+  { id:'norepinefrina', generic:'Norepinefrina', trade:'Levophed',
+    conc:1, doseMin:0.05, doseMax:1.0, dosePref:0.1, unit:'mcg/kg/min',
+    route:'IV CRI', category:'emergency', formType:'injection',
+    calcMode:'standard', frequency:'CRI', frequencies:['CRI'],
+    notes:'Vasopresor. Shock séptico.', source:'Plumb 2024' }
 ];
 
-const TABLE_DRUGS = [
+var TABLE_DRUGS = [
   // ── APOQUEL (Oclacitinib) ── Zoetis label verified ──────────────────────────
   {
     id: 'apoquel_table', generic: 'Oclacitinib (tabla)', trade: 'Apoquel',
@@ -454,10 +433,7 @@ const TABLE_DRUGS = [
   },
 ];
 
-
-// ─── TABLET SIZES MAP ────────────────────────────────────────────────────────
-// Available tablet strengths per drug id (mg). Used for smart rounding.
-const TABLET_SIZES = {
+var TABLET_SIZES = {
   levotiroxina:        [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 1.0],
   fenobarbital:        [15, 30, 60, 100],
   atenolol:            [25, 50, 100],
@@ -517,15 +493,57 @@ function smartTabletOptions(totalMg, drugId, formType, tabSizesOverride, doseMin
   var mults = [0.5, 1, 1.5, 2];
   var mgMin = (doseMin && weightKg) ? doseMin * weightKg : totalMg * 0.8;
   var mgMax = (doseMax && weightKg) ? doseMax * weightKg : totalMg * 1.2;
-  function sc(combo){var s=0;combo.forEach(function(p){var m=p[0];if(m===1)s+=1;else if(m===2)s+=2;else if(m===0.5)s+=3;else s+=4;});return s+combo.length*0.1;}
-  function lb(m,sz){return(m===0.5?'0.5':m===1?'1':m===1.5?'1.5':'2')+' '+unit+' '+sz+'mg';}
-  var C=new Map();
-  sorted.forEach(function(sz){mults.forEach(function(m){var mg=parseFloat((sz*m).toFixed(4)),sv=sc([[m,sz]]);if(!C.has(mg)||sv<C.get(mg).score)C.set(mg,{score:sv,label:lb(m,sz)});});});
-  for(var i=0;i<sorted.length;i++){for(var j=i;j<sorted.length;j++){mults.forEach(function(m1){mults.forEach(function(m2){if(i===j&&m2<m1)return;var mg=parseFloat((sorted[i]*m1+sorted[j]*m2).toFixed(4)),sv=sc([[m1,sorted[i]],[m2,sorted[j]]]);if(!C.has(mg)||sv<C.get(mg).score)C.set(mg,{score:sv,label:lb(m1,sorted[i])+' + '+lb(m2,sorted[j])});});});}}
-  var inRange=Array.from(C.entries()).filter(function(e){return e[0]>=mgMin&&e[0]<=mgMax;}).sort(function(a,b){return a[0]-b[0];});
-  if(!inRange.length){var above=Array.from(C.entries()).filter(function(e){return e[0]>=mgMin;}).sort(function(a,b){return a[0]-b[0];});return above.length?[above[0][1].label]:[totalMg.toFixed(1)+' mg'];}
-  var picks=inRange.length<=5?inRange:[inRange[0]].concat(inRange.slice(1,-1).sort(function(a,b){return a[1].score-b[1].score;}).slice(0,3).sort(function(a,b){return a[0]-b[0];})).concat([inRange[inRange.length-1]]);
-  return picks.map(function(e){return e[1].label;});
+
+  function sc(combo) {
+    var s=0;
+    combo.forEach(function(p){var m=p[0];if(m===1)s+=1;else if(m===2)s+=2;else if(m===0.5)s+=3;else s+=4;});
+    return s + combo.length * 0.1;
+  }
+  function lb(m, sz) {
+    return (m===0.5?'0.5':m===1?'1':m===1.5?'1.5':'2') + ' ' + unit + ' ' + sz + 'mg';
+  }
+
+  var C = new Map();
+  sorted.forEach(function(sz) {
+    mults.forEach(function(m) {
+      var mg = parseFloat((sz*m).toFixed(4)), sv = sc([[m,sz]]);
+      if (!C.has(mg)||sv<C.get(mg).score) C.set(mg,{score:sv,label:lb(m,sz)});
+    });
+  });
+  for (var i=0; i<sorted.length; i++) {
+    for (var j=i; j<sorted.length; j++) {
+      mults.forEach(function(m1) {
+        mults.forEach(function(m2) {
+          if (i===j && m2<m1) return;
+          var mg = parseFloat((sorted[i]*m1+sorted[j]*m2).toFixed(4));
+          var sv = sc([[m1,sorted[i]],[m2,sorted[j]]]);
+          if (!C.has(mg)||sv<C.get(mg).score) C.set(mg,{score:sv,label:lb(m1,sorted[i])+' + '+lb(m2,sorted[j])});
+        });
+      });
+    }
+  }
+
+  // STRICT: only options within [mgMin, mgMax]
+  var inRange = Array.from(C.entries())
+    .filter(function(e){ return e[0]>=mgMin && e[0]<=mgMax; })
+    .sort(function(a,b){ return a[0]-b[0]; });
+
+  if (!inRange.length) {
+    // Fallback: closest option AT OR ABOVE mgMin
+    var above = Array.from(C.entries())
+      .filter(function(e){ return e[0]>=mgMin; })
+      .sort(function(a,b){ return a[0]-b[0]; });
+    return above.length ? [above[0][1].label] : [totalMg.toFixed(1)+' mg'];
+  }
+
+  // Pick best 5: min, max, and 3 simplest in middle
+  var picks = inRange.length<=5 ? inRange :
+    [inRange[0]].concat(
+      inRange.slice(1,-1).sort(function(a,b){return a[1].score-b[1].score;}).slice(0,3)
+        .sort(function(a,b){return a[0]-b[0];}),
+      [inRange[inRange.length-1]]
+    );
+  return picks.map(function(e){ return e[1].label; });
 }
 
 function calcBSA(weightKg, species) {
@@ -534,7 +552,7 @@ function calcBSA(weightKg, species) {
 }
 
 // ─── STATE ────────────────────────────────────────────────────────────────────
-let state = {
+var state = {
   unit: 'lb',
   species: 'dog',
   selectedDrugs: new Set(),
@@ -553,7 +571,7 @@ function loadDrugs() {
     const saved = localStorage.getItem('vetdose_drugs');
     if (!saved) return JSON.parse(JSON.stringify(SEED_DRUGS));
     const parsed = JSON.parse(saved);
-    // Ensure species field is preserved from SEED for each drug
+    // Restore species field from SEED (fix for felino filter)
     const seedMap = {};
     SEED_DRUGS.forEach(function(d){ seedMap[d.id] = d; });
     return parsed.map(function(d) {
@@ -573,12 +591,12 @@ document.addEventListener('DOMContentLoaded', () => {
   }
   loadFreqPrefs();
   loadSettings();
+  // Restore species field in localStorage drugs (fix felino filter)
+  var _storedDrugs = loadDrugs();
+  saveDrugs(_storedDrugs);
   updateDrName();
   checkRegistration();
   checkProfile();
-  // Ensure localStorage drugs have species field synced from SEED
-  const storedDrugs = loadDrugs();
-  saveDrugs(storedDrugs); // re-save with species fields restored
   renderDrugList();
   renderDrugsDB();
   populateCRISelect();
@@ -589,7 +607,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // ─── TABS ────────────────────────────────────────────────────────────────────
 function showTab(tab) {
-  setTimeout(function(){ showModuleInstructions(tab); }, 50);
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   const tabs = ['calc','cri','fluidos','nutricion','protocolos'];
@@ -609,10 +626,9 @@ function setSpecies(sp) {
   document.getElementById('sp-cat').classList.toggle('active', sp === 'cat');
   state.selectedDrugs.clear();
   state.selectedTableDrugs.clear();
-  // Reset search when switching species
   searchQuery = '';
-  const searchEl = document.getElementById('drug-search');
-  if (searchEl) searchEl.value = '';
+  const se = document.getElementById('drug-search');
+  if (se) se.value = '';
   renderDrugList();
 }
 
@@ -632,8 +648,8 @@ function getWeightLb() {
 }
 
 // ─── CATEGORY / SEARCH FILTER ────────────────────────────────────────────────
-let activeCategory = 'all';
-let searchQuery = '';
+var activeCategory = 'all';
+var searchQuery = '';
 
 function setCategory(cat) {
   activeCategory = cat;
@@ -649,7 +665,7 @@ function onSearchInput(val) {
 }
 
 // ─── DRUG LIST (calc screen) ──────────────────────────────────────────────────
-const CAT_LABELS = {
+var CAT_LABELS = {
   antiemetic: 'Antiemético', 'antiemetic/prokinetic': 'Antiemético/Procinético',
   'antiemetic/vestibular': 'Antiemético/Vestibular',
   analgesic: 'Analgésico', 'analgesic/neurologic': 'Analgésico/Neurológico',
@@ -694,7 +710,7 @@ const CAT_LABELS = {
   other: 'Otros',
 };
 
-const CAT_CLASS = (cat) => {
+var CAT_CLASS = (cat) => {
   if (!cat) return 'cat-other';
   if (cat.startsWith('antiemetic')) return 'cat-antiemetic';
   if (cat.startsWith('analgesic') || cat === 'antitussive/analgesic') return 'cat-analgesic';
@@ -973,7 +989,7 @@ function toggleTableDrug(id) {
 
 // ─── CALCULATE ────────────────────────────────────────────────────────────────
 
-const ANTAGONISTS = {
+var ANTAGONISTS = {
   'dexmedetomidina': {
     id: 'atipamezole', name: 'Atipamezole (Antisedan)',
     rule: 'mismo_volumen',
@@ -1038,34 +1054,6 @@ const ANTAGONISTS = {
     note: 'No hay reversor para ketamina. Manejo de soporte. Dexmed puede ayudar a suavizar emergencia.',
   },
 };
-function calcBLK() {
-  var wkg = getWeightKg();
-  if (wkg <= 0) { alert('Ingresa el peso del paciente en la pantalla Calcular.'); return; }
-  var bagVol = parseFloat(document.getElementById('blk-bag') ? document.getElementById('blk-bag').value : 250) || 250;
-  var rate = parseFloat(document.getElementById('blk-rate') ? document.getElementById('blk-rate').value : 10) || 10;
-  var drugs = getDrugs();
-  var bupre = drugs.find(function(d){return d.id==='buprenorfina';});
-  var lido = drugs.find(function(d){return d.id==='lidocaina';});
-  var keta = drugs.find(function(d){return d.id==='ketamina';});
-  if (!bupre||!lido||!keta) { alert('Drogas BLK no encontradas en la base de datos.'); return; }
-  var bupreMg = 0.02 * wkg, lidoMg = 3.0 * wkg, ketaMg = 0.6 * wkg;
-  var bupreMl = bupreMg/bupre.conc, lidoMl = lidoMg/lido.conc, ketaMl = ketaMg/keta.conc;
-  var resDiv = document.getElementById('cri-protocol-result');
-  if (!resDiv) return;
-  resDiv.innerHTML = '<div style="background:#1a5c38;border-radius:12px;padding:13px 16px;margin-bottom:12px;color:#fff"><div style="font-size:17px;font-weight:800">Protocolo BLK — '+wkg+' kg</div><div style="font-size:12px;color:#a7f3d0">Buprenorfina + Lidocaína + Ketamina en '+bagVol+' mL · '+rate+' mL/h</div></div>'+
-    '<div class="result-card"><div class="result-body">'+
-    '<div class="result-row"><div class="result-lbl">Buprenorfina ('+bupre.conc+' mg/mL)</div><div class="result-val"><b style="color:var(--accent)">'+bupreMl.toFixed(2)+' mL</b> ('+bupreMg.toFixed(3)+' mg)</div></div>'+
-    '<div class="result-row"><div class="result-lbl">Lidocaína ('+lido.conc+' mg/mL)</div><div class="result-val"><b style="color:var(--accent)">'+lidoMl.toFixed(2)+' mL</b> ('+lidoMg.toFixed(1)+' mg)</div></div>'+
-    '<div class="result-row"><div class="result-lbl">Ketamina ('+keta.conc+' mg/mL)</div><div class="result-val"><b style="color:var(--accent)">'+ketaMl.toFixed(2)+' mL</b> ('+ketaMg.toFixed(1)+' mg)</div></div>'+
-    '<div class="result-row"><div class="result-lbl">Completar con NaCl 0.9% hasta</div><div class="result-val"><b>'+bagVol+' mL</b></div></div>'+
-    '<div class="result-row"><div class="result-lbl">Tasa de infusión</div><div class="result-val" style="font-weight:800;color:var(--accent)">'+rate+' mL/h</div></div>'+
-    '</div></div>'+
-    '<div class="warn-note"><span>ℹ</span><span>Loading dose antes de iniciar CRI. Monitorear sedación, FR y FC. Fuente: Dr. Stein ACVAA.</span></div>';
-  resDiv.style.display = 'block';
-}
-
-function selectCRIProtocol(name) {}
-
 function calculate() {
   const name = document.getElementById('patient-name').value.trim() || 'Paciente';
   const weightKg = getWeightKg();
@@ -1422,8 +1410,123 @@ function shareResults() {
   }
 }
 
+
+// ─── CRI DOSE REFERENCE (MOD-032) ────────────────────────────────────────────
+var CRI_DOSE_REF = {
+  lidocaina:       {unit:'mg/kg/h',  min:0.6,    max:3.0,    def:1.5,  defCat:0.9,  maxCat:1.5,  loading:[{dose:1.0,  label:'1 mg/kg IV perros; 0.25 mg/kg IV gatos'}], note:'Antiarrítmico y analgésico. Gatos: máx 1.5 mg/kg/h.'},
+  fentanilo:       {unit:'mcg/kg/h', min:1.0,    max:10.0,   def:3.0,  defCat:1.0,               loading:[{dose:0.002,label:'2 mcg/kg IV (0.002 mg/kg)'}],               note:'CRI analgesia. Monitorear frecuencia respiratoria.'},
+  morfina:         {unit:'mg/kg/h',  min:0.1,    max:0.5,    def:0.2,                             loading:[{dose:0.1,  label:'0.1–0.5 mg/kg IV lento'}],                  note:'IV rápido causa histaminólisis. Dar lentamente.'},
+  hidromorfona:    {unit:'mg/kg/h',  min:0.01,   max:0.05,   def:0.02,                            loading:[{dose:0.05, label:'0.05–0.1 mg/kg IV'}],                        note:'Opioide potente. Monitorear FR y PO2.'},
+  ketamina:        {unit:'mg/kg/h',  min:0.12,   max:1.2,    def:0.6,                             loading:[{dose:0.25, label:'0.25–0.5 mg/kg IV'}],                        note:'Analgesia subanestésica. Cautela en cardiopatía.'},
+  dexmedetomidina: {unit:'mcg/kg/h', min:0.5,    max:3.0,    def:1.0,  defCat:0.5,  maxCat:1.0,  loading:[{dose:0.005,label:'5 mcg/kg IV/IM (0.005 mg/kg)'}],             note:'Bradicardia esperada. Revertir con atipamezole.'},
+  buprenorfina:    {unit:'mg/kg/h',  min:0.0025, max:0.0075, def:0.003,                           loading:[{dose:0.01, label:'0.01–0.02 mg/kg IV/IM'}],                    note:'Inicio lento incluso IV — esperar 20–30 min.'},
+  butorfanol:      {unit:'mg/kg/h',  min:0.1,    max:0.4,    def:0.2,                             loading:[{dose:0.2,  label:'0.2–0.4 mg/kg IV'}],                         note:'Sedación y analgesia leve.'},
+  propofol:        {unit:'mg/kg/h',  min:0.5,    max:8.0,    def:3.0,                             loading:[{dose:2.0,  label:'2–6 mg/kg IV titulado'}],                    note:'TIVA. Apnea posible. Tener O2 listo.'},
+  midazolam:       {unit:'mg/kg/h',  min:0.1,    max:0.4,    def:0.2,                             loading:[{dose:0.2,  label:'0.1–0.3 mg/kg IV'}],                         note:'Revertir con flumazenil 0.01 mg/kg IV.'},
+  dopamina:        {unit:'mcg/kg/min',min:2.0,   max:15.0,   def:5.0,                                                                                                      note:'2–5: efecto renal. 5–10: inotrópico. >10: vasopresor.'},
+  dobutamina:      {unit:'mcg/kg/min',min:2.0,   max:20.0,   def:5.0,                                                                                                      note:'Inotrópico positivo. ICC descompensada.'},
+  epinefrina:      {unit:'mcg/kg/min',min:0.05,  max:0.5,    def:0.1,                             loading:[{dose:0.01, label:'0.01 mg/kg IV en PCR'}],                     note:'PCR: 0.01 mg/kg IV. CRI para shock refractario.'},
+  norepinefrina:   {unit:'mcg/kg/min',min:0.05,  max:1.0,    def:0.1,                                                                                                      note:'Vasopresor. Shock séptico. Monitorear TA.'},
+  vasopresina:     {unit:'mU/kg/min', min:0.5,   max:2.0,    def:1.0,                                                                                                      note:'PCR refractaria a epinefrina.'},
+  maropitant:      {unit:'mg/kg/h',  min:0.04,   max:0.08,   def:0.042,                                                                                                    note:'Diluir 1 mg/kg en 15–20 mL, pasar en 15–20 min.'},
+  ondansetron:     {unit:'mg/kg/h',  min:0.05,   max:0.1,    def:0.05,                            loading:[{dose:0.1,  label:'0.1 mg/kg IV lento (15–20 min)'}],           note:'IV lento — riesgo de arritmia si rápido.'},
+  metoclopramida:  {unit:'mg/kg/h',  min:0.01,   max:0.06,   def:0.02,                                                                                                     note:'Procinético y antiemético. CRI: 1–2 mg/kg/día.'},
+  furosemida:      {unit:'mg/kg/h',  min:0.1,    max:1.0,    def:0.25,                            loading:[{dose:1.0,  label:'1–2 mg/kg IV'}],                             note:'Crisis cardiaca. Monitorear electrolitos.'},
+  naloxona:        {unit:'mcg/kg/h', min:1.0,    max:5.0,    def:2.0,                             loading:[{dose:0.01, label:'0.01–0.04 mg/kg IV'}],                       note:'CRI si reversión prolongada necesaria.'}
+};
+
+function onCRIDrugChange() {
+  var id = document.getElementById('cri-drug-select').value;
+  var ref = CRI_DOSE_REF[id];
+  if (!ref) return;
+  var d = (state.species==='cat'&&ref.defCat) ? ref.defCat : ref.def;
+  document.getElementById('cri-rate').value = d;
+  var us = document.getElementById('cri-rate-unit');
+  if (us) for(var i=0;i<us.options.length;i++){if(us.options[i].value===ref.unit){us.selectedIndex=i;break;}}
+  showCRIRef(id, ref);
+  updateCRI();
+}
+
+function showCRIRef(drugId, ref) {
+  var p = document.getElementById('cri-ref-panel');
+  if (!p) {
+    p = document.createElement('div'); p.id='cri-ref-panel';
+    var s = document.getElementById('cri-drug-select');
+    if (s&&s.parentNode) s.parentNode.insertBefore(p, s.nextSibling);
+  }
+  var maxD=(state.species==='cat'&&ref.maxCat)?ref.maxCat:ref.max;
+  var defD=(state.species==='cat'&&ref.defCat)?ref.defCat:ref.def;
+  var wkg=getWeightKg(), drugs=getDrugs(), drug=drugs.find(function(x){return x.id===drugId;});
+  var lh='';
+  if(ref.loading&&wkg>0&&drug){
+    lh='<div style="border-top:1px solid var(--border);margin-top:8px;padding-top:8px"><div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;margin-bottom:4px">Loading dose</div>'+
+    ref.loading.map(function(l){return '<div style="font-size:12px;padding:2px 0">'+l.label+' <b style="color:var(--accent)">→ '+((l.dose*wkg)/drug.conc).toFixed(2)+' mL</b></div>';}).join('')+'</div>';
+  }
+  p.innerHTML='<div style="background:var(--accentlt);border:1px solid var(--border2);border-radius:10px;padding:10px 12px;margin:8px 0">'+
+    '<div style="font-size:10px;font-weight:700;color:var(--accent);text-transform:uppercase;margin-bottom:6px">📋 Referencia clínica</div>'+
+    '<div style="display:flex;gap:16px;margin-bottom:6px;flex-wrap:wrap">'+
+    '<div><div style="font-size:10px;color:var(--muted)">Rango</div><div style="font-size:13px;font-weight:700">'+ref.min+'–'+maxD+' '+ref.unit+'</div></div>'+
+    '<div><div style="font-size:10px;color:var(--muted)">⭐ Sugerida</div><div style="font-size:13px;font-weight:700;color:var(--accent)">'+defD+' '+ref.unit+'</div></div>'+
+    '</div>'+(ref.note?'<div style="font-size:11px;color:var(--muted);font-style:italic">'+ref.note+'</div>':'')+lh+'</div>';
+}
+
+// ─── PROTOCOLO BLK ───────────────────────────────────────────────────────────
+function calcBLK() {
+  var wkg = getWeightKg();
+  if (wkg <= 0) { alert('Ingresa el peso del paciente en la pantalla Calcular.'); return; }
+  var bagVol = parseFloat((document.getElementById('blk-bag')||{value:250}).value)||250;
+  var rate   = parseFloat((document.getElementById('blk-rate')||{value:10}).value)||10;
+  var drugs  = getDrugs();
+  var bupre  = drugs.find(function(d){return d.id==='buprenorfina';});
+  var lido   = drugs.find(function(d){return d.id==='lidocaina';});
+  var keta   = drugs.find(function(d){return d.id==='ketamina';});
+  if (!bupre||!lido||!keta) { alert('Drogas BLK no encontradas en la base de datos.'); return; }
+  // CRI doses: Bupre 0.003 mg/kg/h, Lido 1.5 mg/kg/h, Keta 0.6 mg/kg/h
+  var bupreCRI=0.003, lidoCRI=state.species==='cat'?1.0:1.5, ketaCRI=0.6;
+  // Formula: mL to add = (dose mg/kg/h × wkg × bagVol) / (conc mg/mL × rate mL/h)
+  var bupreMl = (bupreCRI * wkg * bagVol) / (bupre.conc * rate);
+  var lidoMl  = (lidoCRI  * wkg * bagVol) / (lido.conc  * rate);
+  var ketaMl  = (ketaCRI  * wkg * bagVol) / (keta.conc  * rate);
+  // Loading doses
+  var bupreLoad = (0.015 * wkg / bupre.conc).toFixed(2);
+  var lidoLoad  = state.species==='cat' ? (0.25*wkg/lido.conc).toFixed(2) : (1.0*wkg/lido.conc).toFixed(2);
+  var ketaLoad  = (0.25*wkg/keta.conc).toFixed(2);
+  var resDiv = document.getElementById('cri-protocol-result');
+  if (!resDiv) return;
+  resDiv.innerHTML =
+    '<div style="background:#1a5c38;border-radius:12px;padding:13px 16px;margin-bottom:12px;color:#fff">'+
+    '<div style="font-size:17px;font-weight:800">💉 Protocolo BLK — '+wkg.toFixed(1)+' kg</div>'+
+    '<div style="font-size:12px;color:#a7f3d0">'+bagVol+' mL · '+rate+' mL/h</div></div>'+
+    '<div class="result-card"><div class="result-body">'+
+    '<div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;margin-bottom:8px">Agregar a la bolsa</div>'+
+    '<div class="result-row"><div class="result-lbl">Buprenorfina ('+bupre.conc+' mg/mL)</div><div class="result-val"><b style="color:var(--accent)">'+bupreMl.toFixed(2)+' mL</b></div></div>'+
+    '<div class="result-row"><div class="result-lbl">Lidocaína ('+lido.conc+' mg/mL)</div><div class="result-val"><b style="color:var(--accent)">'+lidoMl.toFixed(2)+' mL</b></div></div>'+
+    '<div class="result-row"><div class="result-lbl">Ketamina ('+keta.conc+' mg/mL)</div><div class="result-val"><b style="color:var(--accent)">'+ketaMl.toFixed(2)+' mL</b></div></div>'+
+    '<div class="result-row"><div class="result-lbl">Completar con NaCl 0.9%</div><div class="result-val"><b>'+bagVol+' mL total</b></div></div>'+
+    '<div style="border-top:1px solid var(--border);margin-top:8px;padding-top:8px">'+
+    '<div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;margin-bottom:6px">Loading dose (antes de iniciar CRI)</div>'+
+    '<div class="result-row"><div class="result-lbl">Buprenorfina</div><div class="result-val">'+bupreLoad+' mL IV/IM</div></div>'+
+    '<div class="result-row"><div class="result-lbl">Lidocaína</div><div class="result-val">'+lidoLoad+' mL IV lento</div></div>'+
+    '<div class="result-row"><div class="result-lbl">Ketamina</div><div class="result-val">'+ketaLoad+' mL IV</div></div>'+
+    '</div></div></div>'+
+    '<div class="warn-note"><span>ℹ</span><span>Gatos: lidocaína máx 1.0 mg/kg/h. Buprenorfina: inicio lento aunque IV — esperar 20–30 min efecto. Fuente: Dr. R. Stein ACVAA.</span></div>';
+  resDiv.style.display='block';
+}
+function selectCRIProtocol(name) {}
+
 // ─── CRI SCREEN ──────────────────────────────────────────────────────────────
-function populateCRISelect(){var sel=document.getElementById('cri-drug-select');if(!sel)return;var drugs=getDrugs(),current=sel.value,criDrugs=drugs.filter(function(d){return CRI_DOSE_REF.hasOwnProperty(d.id)&&(d.formType==='injection'||d.formType==='liquid_oral');}).sort(function(a,b){return a.generic.localeCompare(b.generic,'es');});sel.innerHTML='<option value="">-- seleccionar droga --</option>'+criDrugs.map(function(d){return '<option value="'+d.id+'"'+(d.id===current?' selected':'')+'>'+d.generic+' ('+d.trade+') — '+d.conc+' mg/mL</option>';}).join('');sel.onchange=function(){onCRIDrugChange();};if(current)onCRIDrugChange();}
+function populateCRISelect() {
+  var sel = document.getElementById('cri-drug-select');
+  if (!sel) return;
+  var drugs = getDrugs(), current = sel.value;
+  var criDrugs = drugs.filter(function(d){
+    return CRI_DOSE_REF.hasOwnProperty(d.id) && (d.formType==='injection'||d.formType==='liquid_oral');
+  }).sort(function(a,b){return a.generic.localeCompare(b.generic,'es');});
+  sel.innerHTML = '<option value="">-- seleccionar droga --</option>' +
+    criDrugs.map(function(d){return '<option value="'+d.id+'"'+(d.id===current?' selected':'')+'>'+d.generic+' ('+d.trade+') — '+d.conc+' mg/mL</option>';}).join('');
+  sel.onchange = function(){ onCRIDrugChange(); };
+  if (current) onCRIDrugChange();
+}
 
 function updateCRI() {
   const drugId = document.getElementById('cri-drug-select').value;
@@ -1651,8 +1754,8 @@ function validateDrug(drugId, resultIdx) {
 }
 
 // ─── CHANGELOG ───────────────────────────────────────────────────────────────
-const APP_VERSION = 'VetDose 2.0';
-const CHANGELOG = [
+var APP_VERSION = 'VetDose 2.0';
+var CHANGELOG = [
   { v: 'v6', date: 'Mayo 2026', changes: [
     'Redondeo inteligente de comprimidos: entero o medio, con opciones prácticas',
     'Dosis canina vs felina: usa doseCat/doseDog cuando están definidas',
@@ -1713,20 +1816,27 @@ function showChangelog() {
 function closeChangelog() { document.getElementById('changelog-modal').classList.add('hidden'); }
 
 
-// ─── CRI DOSE REF ────────────────────────────────────────────────────────────
-const CRI_DOSE_REF={lidocaina:{unit:'mg/kg/h',min:0.6,max:3.0,def:1.5,defCat:0.9,maxCat:1.5,loading:[{dose:1.0,label:'1 mg/kg IV'}],note:'Antiarrítmico. Gatos máx 1.5 mg/kg/h.'},fentanilo:{unit:'mcg/kg/h',min:1.0,max:10.0,def:3.0,defCat:1.0,loading:[{dose:0.002,label:'2 mcg/kg IV'}],note:'CRI analgesia.'},morfina:{unit:'mg/kg/h',min:0.1,max:0.5,def:0.2,loading:[{dose:0.1,label:'0.1-0.5 mg/kg IV lento'}],note:'IV rápido=histaminólisis.'},hidromorfona:{unit:'mg/kg/h',min:0.01,max:0.05,def:0.02,loading:[{dose:0.05,label:'0.05-0.1 mg/kg IV'}],note:'Opioide potente.'},ketamina:{unit:'mg/kg/h',min:0.12,max:1.2,def:0.6,loading:[{dose:0.25,label:'0.25-0.5 mg/kg IV'}],note:'Analgesia subanestésica.'},dexmedetomidina:{unit:'mcg/kg/h',min:0.5,max:3.0,def:1.0,defCat:0.5,maxCat:1.0,loading:[{dose:0.005,label:'5 mcg/kg IV/IM'}],note:'Bradicardia esperada.'},buprenorfina:{unit:'mg/kg/h',min:0.0025,max:0.0075,def:0.003,loading:[{dose:0.01,label:'0.01-0.02 mg/kg IV/IM'}],note:'Inicio lento 20-30 min.'},butorfanol:{unit:'mg/kg/h',min:0.1,max:0.4,def:0.2,loading:[{dose:0.2,label:'0.2-0.4 mg/kg IV'}],note:'Analgesia leve.'},midazolam:{unit:'mg/kg/h',min:0.1,max:0.4,def:0.2,loading:[{dose:0.2,label:'0.1-0.3 mg/kg IV'}],note:'Revertir con flumazenil.'},dopamina:{unit:'mcg/kg/min',min:2.0,max:15.0,def:5.0,note:'2-5:renal,5-10:inot,>10:vasopr.'},dobutamina:{unit:'mcg/kg/min',min:2.0,max:20.0,def:5.0,note:'Inotrópico ICC.'},norepinefrina:{unit:'mcg/kg/min',min:0.05,max:1.0,def:0.1,note:'Vasopresor shock séptico.'},vasopresina:{unit:'mU/kg/min',min:0.5,max:2.0,def:1.0,note:'PCR refractaria.'},maropitant:{unit:'mg/kg/h',min:0.04,max:0.08,def:0.042,note:'1 mg/kg en 15-20 mL.'},ondansetron:{unit:'mg/kg/h',min:0.05,max:0.1,def:0.05,loading:[{dose:0.1,label:'0.1 mg/kg IV lento'}],note:'IV lento 15-20 min.'},furosemida:{unit:'mg/kg/h',min:0.1,max:1.0,def:0.25,loading:[{dose:1.0,label:'1-2 mg/kg IV'}],note:'Crisis cardiaca.'},naloxona:{unit:'mcg/kg/h',min:1.0,max:5.0,def:2.0,loading:[{dose:0.01,label:'0.01-0.04 mg/kg IV'}],note:'Duración corta.'}};
+// ─── TEMPERATURA °C / °F ─────────────────────────────────────────────────────
+var _feverUnit = 'C';
+function setFeverUnit(unit) {
+  var inp = document.getElementById('fl-fever');
+  if (!inp) return;
+  var val = parseFloat(inp.value) || 0;
+  if (unit === 'F' && _feverUnit === 'C' && val > 0) inp.value = ((val*9/5)+32).toFixed(1);
+  else if (unit === 'C' && _feverUnit === 'F' && val > 0) inp.value = ((val-32)*5/9).toFixed(1);
+  _feverUnit = unit;
+  var btnC = document.getElementById('fl-fever-c');
+  var btnF = document.getElementById('fl-fever-f');
+  if (btnC) { btnC.style.background=unit==='C'?'var(--accent)':'var(--surface)'; btnC.style.color=unit==='C'?'#fff':'var(--muted)'; btnC.style.borderColor=unit==='C'?'var(--accent)':'var(--border)'; }
+  if (btnF) { btnF.style.background=unit==='F'?'var(--accent)':'var(--surface)'; btnF.style.color=unit==='F'?'#fff':'var(--muted)'; btnF.style.borderColor=unit==='F'?'var(--accent)':'var(--border)'; }
+}
+function getFeverCelsius() {
+  var val = parseFloat((document.getElementById('fl-fever')||{value:0}).value) || 0;
+  return _feverUnit === 'F' ? (val - 32) * 5/9 : val;
+}
 
-function onCRIDrugChange(){var id=document.getElementById('cri-drug-select').value,ref=CRI_DOSE_REF[id];if(!ref)return;var d=(state.species==='cat'&&ref.defCat)?ref.defCat:ref.def;document.getElementById('cri-rate').value=d;var us=document.getElementById('cri-rate-unit');if(us)for(var i=0;i<us.options.length;i++){if(us.options[i].value===ref.unit){us.selectedIndex=i;break;}}showCRIRef(id,ref);updateCRI();}
-function showCRIRef(drugId,ref){var p=document.getElementById('cri-ref-panel');if(!p){p=document.createElement('div');p.id='cri-ref-panel';var s=document.getElementById('cri-drug-select');if(s&&s.parentNode)s.parentNode.insertBefore(p,s.nextSibling);}var maxD=(state.species==='cat'&&ref.maxCat)?ref.maxCat:ref.max,defD=(state.species==='cat'&&ref.defCat)?ref.defCat:ref.def,wkg=getWeightKg(),drugs=getDrugs(),drug=drugs.find(function(x){return x.id===drugId;});var lh='';if(ref.loading&&wkg>0&&drug){lh='<div style="border-top:1px solid var(--border);margin-top:8px;padding-top:8px">'+ref.loading.map(function(l){return '<div style="font-size:12px">'+l.label+' <b style="color:var(--accent)">→ '+((l.dose*wkg)/drug.conc).toFixed(2)+' mL</b></div>';}).join('')+'</div>';}p.innerHTML='<div style="background:var(--accentlt);border:1px solid var(--border2);border-radius:10px;padding:10px 12px;margin:8px 0"><div style="font-size:10px;font-weight:700;color:var(--accent);text-transform:uppercase;margin-bottom:6px">Referencia clínica</div><div style="display:flex;gap:16px;margin-bottom:6px"><div><div style="font-size:10px;color:var(--muted)">Rango</div><div style="font-size:13px;font-weight:700">'+ref.min+'–'+maxD+' '+ref.unit+'</div></div><div><div style="font-size:10px;color:var(--muted)">Sugerida</div><div style="font-size:13px;font-weight:700;color:var(--accent)">'+defD+' '+ref.unit+'</div></div></div>'+(ref.note?'<div style="font-size:11px;color:var(--muted);font-style:italic">'+ref.note+'</div>':'')+lh+'</div>';}
 
-// ─── BCS ─────────────────────────────────────────────────────────────────────
-var BCS_DATA={1:{factor:null,color:'#dc2626',desc:'Caquéctico.'},2:{factor:null,color:'#ea580c',desc:'Muy delgado.'},3:{factor:null,color:'#d97706',desc:'Delgado.'},4:{factor:null,color:'#ca8a04',desc:'Bajo ideal.'},5:{factor:1.00,color:'#16a34a',desc:'Ideal.'},6:{factor:0.91,color:'#65a30d',desc:'Sobrepeso leve.'},7:{factor:0.83,color:'#ca8a04',desc:'Sobrepeso.'},8:{factor:0.77,color:'#dc2626',desc:'Obeso.'},9:{factor:0.71,color:'#991b1b',desc:'Obeso severo.'}};
-var selectedBCS=5;
-function renderBCSSelector(){var c=document.getElementById('bcs-selector');if(!c)return;c.innerHTML=Array.from({length:9},function(_,i){var n=i+1;return '<button onclick="selectBCS('+n+')" style="padding:8px 0;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;font-family:var(--sans);border:2px solid '+(n===selectedBCS?BCS_DATA[n].color:'var(--border)')+';background:'+(n===selectedBCS?BCS_DATA[n].color:'var(--surface2)')+';color:'+(n===selectedBCS?'#fff':'var(--text2)')+'">'+n+'</button>';}).join('');var d=document.getElementById('bcs-desc');if(d)d.textContent=BCS_DATA[selectedBCS]?BCS_DATA[selectedBCS].desc:'';}
-function selectBCS(n){selectedBCS=n;renderBCSSelector();calcBCS();}
-function calcBCS(){var wA=parseFloat((document.getElementById('bcs-weight')||{value:0}).value)||0,sp=(document.getElementById('bcs-species')||{value:'dog'}).value,lp=parseFloat((document.getElementById('bcs-loss-pct')||{value:80}).value)||80,bd=BCS_DATA[selectedBCS];if(wA<=0||!bd)return;var res=document.getElementById('bcs-result');if(!res)return;var wI=bd.factor?wA*bd.factor:wA,exc=wA-wI,pct=wI>0?((wA-wI)/wI)*100:0,rer=70*Math.pow(wI,0.75),wlc=rer*(lp/100),wkMin=exc>0?Math.ceil(exc/(wA*0.01)):0,wkMax=exc>0?Math.ceil(exc/(wA*0.005)):0,ic=sp==='dog'?'🐕':'🐈',isU=selectedBCS<=4,isI=selectedBCS===5;var h='<div style="background:#1a5c38;border-radius:12px;padding:13px 16px;margin-bottom:12px;color:#fff"><div style="font-size:17px;font-weight:800">'+ic+' Plan Peso - BCS '+selectedBCS+'/9</div><div style="font-size:12px;color:#a7f3d0">'+wA+' kg</div></div>';if(isU){h+='<div class="warn-note"><span>⚠</span><span>Bajo peso — no restringir calorías.</span></div>';res.innerHTML=h;res.style.display='block';return;}h+='<div class="result-card"><div class="result-body"><div class="result-row"><div class="result-lbl">Peso actual</div><div class="result-val">'+wA+' kg</div></div>'+(!isI?'<div class="result-row"><div class="result-lbl">Peso ideal</div><div class="result-val" style="font-weight:700;color:var(--accent)">'+wI.toFixed(1)+' kg</div></div><div class="result-row"><div class="result-lbl">Exceso</div><div class="result-val">'+exc.toFixed(1)+' kg · '+pct.toFixed(1)+'%</div></div>':'')+'<div class="result-row"><div class="result-lbl">RER</div><div class="result-val">'+rer.toFixed(0)+' kcal/día</div></div><div class="result-row"><div class="result-lbl">Meta calórica</div><div class="result-val" style="font-weight:700;color:var(--accent)">'+wlc.toFixed(0)+' kcal/día ('+lp+'% RER)</div></div>'+(!isI&&exc>0?'<div class="result-row"><div class="result-lbl">Proyección</div><div class="result-val">'+wkMin+'–'+wkMax+' sem</div></div>':'')+'</div></div>';if(sp==='cat'&&!isI)h+='<div class="warn-note"><span>ℹ</span><span>Gatos: NO restricción severa — riesgo lipidosis hepática.</span></div>';res.innerHTML=h;res.style.display='block';}
-
-
+// ─── NUTRICIÓN — MODO SELECTOR ───────────────────────────────────────────────
 function setNutMode(mode) {
   var isRer = mode === 'rer';
   var rerEl = document.getElementById('nut-rer-mode');
@@ -1735,36 +1845,80 @@ function setNutMode(mode) {
   if (bcsEl) bcsEl.style.display = isRer ? 'none' : 'block';
   var btnRer = document.getElementById('nut-mode-rer');
   var btnBcs = document.getElementById('nut-mode-bcs');
-  if (btnRer) { btnRer.style.background = isRer ? 'var(--accent)' : 'var(--surface)'; btnRer.style.color = isRer ? '#fff' : 'var(--muted)'; btnRer.style.borderColor = isRer ? 'var(--accent)' : 'var(--border)'; }
-  if (btnBcs) { btnBcs.style.background = !isRer ? 'var(--accent)' : 'var(--surface)'; btnBcs.style.color = !isRer ? '#fff' : 'var(--muted)'; btnBcs.style.borderColor = !isRer ? 'var(--accent)' : 'var(--border)'; }
+  if (btnRer) { btnRer.style.background=isRer?'var(--accent)':'var(--surface)'; btnRer.style.color=isRer?'#fff':'var(--muted)'; btnRer.style.borderColor=isRer?'var(--accent)':'var(--border)'; }
+  if (btnBcs) { btnBcs.style.background=!isRer?'var(--accent)':'var(--surface)'; btnBcs.style.color=!isRer?'#fff':'var(--muted)'; btnBcs.style.borderColor=!isRer?'var(--accent)':'var(--border)'; }
   if (!isRer) renderBCSSelector();
 }
 
+// ─── BCS WEIGHT MANAGEMENT ───────────────────────────────────────────────────
+var BCS_DATA = {
+  1:{factor:null,color:'#dc2626',desc:'Caquéctico. Sin grasa palpable. Pérdida severa de masa muscular.'},
+  2:{factor:null,color:'#ea580c',desc:'Muy delgado. Costillas muy visibles. Sin grasa palpable.'},
+  3:{factor:null,color:'#d97706',desc:'Delgado. Costillas fácilmente palpables con leve cobertura.'},
+  4:{factor:null,color:'#ca8a04',desc:'Bajo ideal. Costillas palpables con leve cobertura de grasa.'},
+  5:{factor:1.00,color:'#16a34a',desc:'Ideal. Costillas palpables sin exceso de grasa. Cintura visible.'},
+  6:{factor:0.91,color:'#65a30d',desc:'Sobrepeso leve. Cintura visible pero no marcada.'},
+  7:{factor:0.83,color:'#ca8a04',desc:'Sobrepeso. Costillas difíciles de palpar. Sin cintura.'},
+  8:{factor:0.77,color:'#dc2626',desc:'Obeso. Sin cintura visible. Depósitos de grasa marcados.'},
+  9:{factor:0.71,color:'#991b1b',desc:'Obeso severo. Depósitos de grasa masivos. Abdomen distendido.'}
+};
+var selectedBCS = 5;
 
-// ─── TEMPERATURA °C / °F ─────────────────────────────────────────────────────
-var _feverUnit = 'C';
-function setFeverUnit(unit) {
-  var inp = document.getElementById('fl-fever');
-  var val = parseFloat(inp.value) || 0;
-  if (unit === 'F' && _feverUnit === 'C' && val > 0) {
-    inp.value = ((val * 9/5) + 32).toFixed(1);
-  } else if (unit === 'C' && _feverUnit === 'F' && val > 0) {
-    inp.value = ((val - 32) * 5/9).toFixed(1);
-  }
-  _feverUnit = unit;
-  var btnC = document.getElementById('fl-fever-c');
-  var btnF = document.getElementById('fl-fever-f');
-  if (btnC) { btnC.style.background = unit==='C'?'var(--accent)':'var(--surface)'; btnC.style.color = unit==='C'?'#fff':'var(--muted)'; btnC.style.borderColor = unit==='C'?'var(--accent)':'var(--border)'; }
-  if (btnF) { btnF.style.background = unit==='F'?'var(--accent)':'var(--surface)'; btnF.style.color = unit==='F'?'#fff':'var(--muted)'; btnF.style.borderColor = unit==='F'?'var(--accent)':'var(--border)'; }
+function renderBCSSelector() {
+  var c = document.getElementById('bcs-selector');
+  if (!c) return;
+  c.innerHTML = Array.from({length:9}, function(_,i) {
+    var n = i+1;
+    return '<button onclick="selectBCS('+n+')" style="padding:8px 0;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;font-family:var(--sans);border:2px solid '+(n===selectedBCS?BCS_DATA[n].color:'var(--border)')+';background:'+(n===selectedBCS?BCS_DATA[n].color:'var(--surface2)')+';color:'+(n===selectedBCS?'#fff':'var(--text2)')+'">'+n+'</button>';
+  }).join('');
+  var d = document.getElementById('bcs-desc');
+  if (d) d.textContent = BCS_DATA[selectedBCS] ? BCS_DATA[selectedBCS].desc : '';
 }
-function getFeverCelsius() {
-  var val = parseFloat(document.getElementById('fl-fever').value) || 0;
-  return _feverUnit === 'F' ? (val - 32) * 5/9 : val;
+
+function selectBCS(n) { selectedBCS = n; renderBCSSelector(); calcBCS(); }
+
+function calcBCS() {
+  var wA = parseFloat((document.getElementById('bcs-weight')||{value:0}).value)||0;
+  var sp = (document.getElementById('bcs-species')||{value:'dog'}).value;
+  var lp = parseFloat((document.getElementById('bcs-loss-pct')||{value:80}).value)||80;
+  var bd = BCS_DATA[selectedBCS];
+  if (wA <= 0 || !bd) return;
+  var res = document.getElementById('bcs-result');
+  if (!res) return;
+  var wI = bd.factor ? wA*bd.factor : wA;
+  var exc = wA - wI;
+  var pct = wI>0 ? ((wA-wI)/wI)*100 : 0;
+  var rer = 70 * Math.pow(wI, 0.75);
+  var wlc = rer * (lp/100);
+  var wkMin = exc>0 ? Math.ceil(exc/(wA*0.01)) : 0;
+  var wkMax = exc>0 ? Math.ceil(exc/(wA*0.005)) : 0;
+  var ic = sp==='dog' ? '🐕' : '🐈';
+  var isU = selectedBCS<=4, isI = selectedBCS===5;
+  var h = '<div style="background:#1a5c38;border-radius:12px;padding:13px 16px;margin-bottom:12px;color:#fff"><div style="font-size:17px;font-weight:800">'+ic+' Plan de Manejo de Peso · BCS '+selectedBCS+'/9</div><div style="font-size:12px;color:#a7f3d0">'+wA+' kg</div></div>';
+  if (isU) {
+    h += '<div class="warn-note"><span>⚠</span><span>BCS '+selectedBCS+'/9 indica bajo peso. No se recomienda restricción calórica. Aumentar ingesta progresivamente.</span></div>';
+    res.innerHTML = h; res.style.display = 'block'; return;
+  }
+  h += '<div class="result-card"><div class="result-body">';
+  h += '<div class="result-row"><div class="result-lbl">Peso actual</div><div class="result-val">'+wA+' kg</div></div>';
+  if (!isI) {
+    h += '<div class="result-row"><div class="result-lbl">Peso ideal (BCS 5)</div><div class="result-val" style="font-weight:700;color:var(--accent)">'+wI.toFixed(1)+' kg</div></div>';
+    h += '<div class="result-row"><div class="result-lbl">Exceso de peso</div><div class="result-val">'+exc.toFixed(1)+' kg · '+pct.toFixed(1)+'% sobrepeso</div></div>';
+  }
+  h += '<div class="result-row"><div class="result-lbl">RER (peso ideal)</div><div class="result-val">'+rer.toFixed(0)+' kcal/día</div></div>';
+  h += '<div class="result-row"><div class="result-lbl">Calorías para pérdida</div><div class="result-val" style="font-weight:800;color:var(--accent)">'+wlc.toFixed(0)+' kcal/día ('+lp+'% del RER)</div></div>';
+  if (!isI && exc>0) h += '<div class="result-row"><div class="result-lbl">Meta estimada (0.5–1%/sem)</div><div class="result-val">'+wkMin+'–'+wkMax+' semanas</div></div>';
+  h += '<div class="result-row"><div class="result-lbl">Recheck</div><div class="result-val">Cada 2–4 semanas</div></div>';
+  h += '</div></div>';
+  if (sp==='cat'&&!isI) h += '<div class="warn-note"><span>ℹ</span><span>Gatos: NUNCA restricción calórica severa — alto riesgo de lipidosis hepática. Pérdida máxima 0.5%/semana.</span></div>';
+  h += '<div class="warn-note"><span>ℹ</span><span>Resultado es punto de partida clínico. Ajustar según respuesta individual, BCS y masa muscular.</span></div>';
+  res.innerHTML = h;
+  res.style.display = 'block';
 }
 
 // ─── MÓDULO FLUIDOS ──────────────────────────────────────────────────────────
 
-const FLUID_DATA = {
+var FLUID_DATA = {
   lr:       { name: 'Lactato de Ringer (LR)',        uso: 'Reposición general, mantenimiento. Isotónico.' },
   nacl09:   { name: 'NaCl 0.9% (Salina normal)',     uso: 'Hipercalemia, alcalosis metabólica, bloqueo urinario.' },
   normosol: { name: 'Normosol-R / PlasmaLyte',       uso: 'Similar LR. Sin calcio — compatible con transfusiones.' },
@@ -1775,35 +1929,13 @@ const FLUID_DATA = {
   nacl72:   { name: 'NaCl 7.2% (hipertónico)',       uso: 'Solo bolo emergencia: 3-5 mL/kg IV rápido. NO mantenimiento.' },
 };
 
-const DEHYDRATION_LEVELS = [
+var DEHYDRATION_LEVELS = [
   { value: 0,    label: '< 5% — No detectable',             desc: 'Historia de pérdidas leves. Sin signos físicos.' },
   { value: 5.5,  label: '5–6% — Leve',                      desc: 'Mucosas ligeramente secas. Pliegue cutáneo normal.' },
   { value: 7.5,  label: '7–8% — Moderado',                  desc: 'Mucosas secas, pliegue lento, ojos levemente hundidos.' },
   { value: 11,   label: '10–12% — Severo',                   desc: 'Mucosas muy secas, pliegue persiste, taquicardia.' },
   { value: 13,   label: '> 12% — Crítico (shock)',           desc: 'Extremidades frías, colapso. Requiere bolo urgente.' },
 ];
-
-
-  // ── COLOIDE: solo mostrar dosis bolus ────────────────────────────────────
-  if (isColloid) {
-    const bolusColloid = species === 'cat' ? 10 : 20;
-    const bolusColloidMl = bolusColloid * wkg;
-    resDiv.innerHTML = '<div style="background:#1a5c38;border-radius:12px;padding:13px 16px;margin-bottom:12px;color:#fff">' +
-      '<div style="font-size:17px;font-weight:800">🩸 ' + fluidInfo.name + ' — Coloide</div>' +
-      '<div style="font-size:12px;color:#a7f3d0">' + speciesIcon + ' ' + wkg.toFixed(1) + ' kg</div></div>' +
-      '<div class="result-card"><div class="result-header" style="background:#7c3aed15;border-bottom:2px solid #7c3aed44"><div class="result-names"><div class="result-generic" style="color:#7c3aed">Dosis de bolo IV</div><div class="result-trade">5–' + bolusColloid + ' mL/kg — titulado</div></div>' +
-      '<div class="result-dose" style="color:#7c3aed">' + (5*wkg).toFixed(0) + '–' + bolusColloidMl.toFixed(0) + ' mL</div></div>' +
-      '<div class="result-body">' +
-      '<div class="result-row"><div class="result-lbl">Bolo mínimo (5 mL/kg)</div><div class="result-val">' + (5*wkg).toFixed(1) + ' mL IV</div></div>' +
-      '<div class="result-row"><div class="result-lbl">Bolo máximo (' + bolusColloid + ' mL/kg/día)</div><div class="result-val" style="font-weight:800;color:#7c3aed">' + bolusColloidMl.toFixed(1) + ' mL IV</div></div>' +
-      '<div class="result-row"><div class="result-lbl">Tasa recomendada</div><div class="result-val">10–20 mL/kg/h (bolus)</div></div>' +
-      '<div class="result-row"><div class="result-lbl">Uso con cristaloide</div><div class="result-val">SÍ — combinar con LR o NaCl 0.9%</div></div>' +
-      '</div></div>' +
-      warnings.map(w => '<div class="warn-note"><span>⚠</span><span>' + w.replace('⚠ ','') + '</span></div>').join('');
-    resDiv.style.display = 'block';
-    return;
-  }
-
 
 function calcFluidos() {
   const wkg = parseFloat(document.getElementById('fl-weight').value) || 0;
@@ -1823,20 +1955,16 @@ function calcFluidos() {
   let maintMax = species === 'cat' ? 3 : 5;
   let maintPref = species === 'cat' ? 2.5 : 3;
 
-  // Cardiac adjustment — AAHA 2024
+  // Cardiac adjustment — MAX 2 mL/kg/h both species (AAHA 2024 / MOD-022)
   if (cardiac) {
-    if (species === 'cat') {
-      maintMin = 1; maintMax = 2; maintPref = 1.5;
-    } else {
-      maintMin = 2; maintMax = 4; maintPref = 3;
-    }
+    maintMin = 0.5; maintMax = 2; maintPref = 1.5;
   }
 
   // Deficit
   const deficitMl = (dehyd / 100) * wkg * 1000;
 
   // Reposition time
-  const repHours = cardiac ? 24 : (repTime === 'fast' ? 6 : 24);
+  const repHours = cardiac ? 24 : (repTime === 'fast' ? 6 : 24); // cardiac always 24h
 
   // Rates
   const maintRateMlH = maintPref * wkg;
@@ -1853,7 +1981,8 @@ function calcFluidos() {
   // Bolus emergency
   const bolusMin = cardiac ? 2 : (species === 'cat' ? 5 : 10);
   const bolusMax = cardiac ? 5 : (species === 'cat' ? 10 : 20);
-  const showBolus = dehyd >= 8;
+  const bolusTime = cardiac ? 20 : 15; // minutes
+  const showBolus = dehyd >= 8 || isHypertonic || isColloid;
 
   // NaCl 7.2% special
   const isHypertonic = fluid === 'nacl72';
@@ -1865,12 +1994,31 @@ function calcFluidos() {
   let warnings = [];
   if (cardiac) warnings.push('⚠ CARDIOPATÍA: tasa máxima 2 mL/kg/h. Sin bolos rápidos. Reposición siempre en 24h.');
   if (isHypertonic) warnings.push('⚠ NaCl 7.2%: SOLO bolo emergencia 3-5 mL/kg IV rápido. NO usar para mantenimiento.');
-  if (isColloid) {
-    warnings.push('⚠ Hetastarch: COLOIDE — NO usar como cristaloide ni para mantenimiento. Solo shock refractario.');
-    warnings.push('⚠ Dosis máxima: ' + (species==='cat'?'10':'20') + ' mL/kg/día. Monitorear coagulación.');
-  }
+  if (isColloid) warnings.push(`⚠ Hetastarch: máx ${species==='cat'?10:20} mL/kg/día. Solo shock refractario a cristaloides.`);
   if (fluid === 'd5w') warnings.push('⚠ D5W: NO usar SQ. Solo IV. Monitorear electrolitos — puede causar hiponatremia.');
   if (fever > 39.5) warnings.push(`🌡 Fiebre ${fever}°C: +${feverExtra.toFixed(1)} mL/h adicionales.`);
+
+
+  // C2: COLOIDE — solo bolus, NO mantenimiento
+  if (isColloid) {
+    const colloidMax = species === 'cat' ? 10 : 20;
+    const colloidMl  = colloidMax * wkg;
+    const colloidMin = 5 * wkg;
+    document.getElementById('fl-result').innerHTML =
+      '<div style="background:#1a5c38;border-radius:12px;padding:13px 16px;margin-bottom:12px;color:#fff">' +
+      '<div style="font-size:17px;font-weight:800">🩸 ' + fluidInfo.name + ' — Coloide</div>' +
+      '<div style="font-size:12px;color:#a7f3d0">' + speciesIcon + ' ' + wkg.toFixed(1) + ' kg</div></div>' +
+      '<div class="result-card"><div class="result-body">' +
+      '<div class="result-row"><div class="result-lbl">Bolo mínimo (5 mL/kg)</div><div class="result-val">' + colloidMin.toFixed(1) + ' mL IV</div></div>' +
+      '<div class="result-row"><div class="result-lbl">Dosis máxima (' + colloidMax + ' mL/kg/día)</div><div class="result-val" style="font-weight:800;color:#7c3aed">' + colloidMl.toFixed(1) + ' mL</div></div>' +
+      '<div class="result-row"><div class="result-lbl">Tasa</div><div class="result-val">10–20 mL/kg/h (bolus lento)</div></div>' +
+      '<div class="result-row"><div class="result-lbl">Combinar con cristaloide</div><div class="result-val">✅ LR o NaCl 0.9%</div></div>' +
+      '</div></div>' +
+      warnings.map(function(w){return '<div class="warn-note"><span>⚠</span><span>' + w.replace('⚠ ','') + '</span></div>';}).join('');
+    document.getElementById('fl-result').style.display = 'block';
+    return;
+  }
+
 
   document.getElementById('fl-result').innerHTML = `
     <div style="background:#1a5c38;border-radius:12px;padding:13px 16px;margin-bottom:12px;color:#fff">
@@ -2062,22 +2210,128 @@ function calcNutricion() {
 
 
 
-// ─── REGISTRO + PERFILES ─────────────────────────────────────────────────────
+// ─── REGISTRO GOOGLE FORMS (MOD-037) ─────────────────────────────────────────
 var GFORM_URL='https://docs.google.com/forms/d/e/1FAIpQLScfxoHRgjGSETTkhecKEU6aEDbd7KxuiD29yqes095g_XTmFA/formResponse';
-var GFORM_ENTRY_NOMBRE='entry.1496369334',GFORM_ENTRY_APELLIDO='entry.155769268',GFORM_ENTRY_EMAIL='entry.1867744646',GFORM_ENTRY_PAIS='entry.266488990',GFORM_ENTRY_CLINICA='entry.701960939',GFORM_ENTRY_TELEFONO='entry.1296988385';
-function checkRegistration(){if(!localStorage.getItem('vetdose_registered')){var o=document.getElementById('reg-overlay');if(o)o.style.display='flex';}}
-function selectTitle(t){document.getElementById('reg-title').value=t;var a=t==='Dr.',b=document.getElementById('reg-btn-dr'),c=document.getElementById('reg-btn-dra');if(!b||!c)return;b.style.background=a?'#1a5c38':'#fff';b.style.color=a?'#fff':'#666';b.style.borderColor=a?'#1a5c38':'#ddd';c.style.background=!a?'#1a5c38':'#fff';c.style.color=!a?'#fff':'#666';c.style.borderColor=!a?'#1a5c38':'#ddd';}
-function submitRegistration(){var ti=(document.getElementById('reg-title')||{value:'Dr.'}).value,no=document.getElementById('reg-nombre').value.trim(),ap=document.getElementById('reg-apellido').value.trim(),em=document.getElementById('reg-email').value.trim(),pa=document.getElementById('reg-pais').value.trim(),cl=(document.getElementById('reg-clinica')||{value:''}).value.trim(),te=(document.getElementById('reg-telefono')||{value:''}).value.trim(),er=document.getElementById('reg-error');if(!no){er.textContent='Ingresa nombre.';er.style.display='block';return;}if(!ap){er.textContent='Ingresa apellido.';er.style.display='block';return;}if(!em||!em.includes('@')){er.textContent='Email inválido.';er.style.display='block';return;}if(!pa){er.textContent='Ingresa país.';er.style.display='block';return;}er.style.display='none';var fd=new FormData();fd.append(GFORM_ENTRY_NOMBRE,no);fd.append(GFORM_ENTRY_APELLIDO,ap);fd.append(GFORM_ENTRY_EMAIL,em);fd.append(GFORM_ENTRY_PAIS,pa);fd.append(GFORM_ENTRY_CLINICA,cl||'No especificada');fd.append(GFORM_ENTRY_TELEFONO,te||'No especificado');fetch(GFORM_URL,{method:'POST',body:fd,mode:'no-cors'}).catch(function(){});var now=new Date().toLocaleString('es-US');localStorage.setItem('vetdose_registered',now);var fn=ti+' '+no+' '+ap,s=getSettings();s.doctorName=fn;s.clinicName=cl;s.drTitle=ti;localStorage.setItem('vetdose_settings',JSON.stringify(s));var init=(no[0]+ap[0]).toUpperCase(),pr={initials:init,name:fn,clinic:cl,email:em,settings:{doctorName:fn,clinicName:cl,drTitle:ti}};var prs=loadProfiles();if(!prs.find(function(p){return p.email===em||p.name===fn;})){prs.push(pr);saveProfiles(prs);}document.getElementById('reg-overlay').style.display='none';updateDrName();}
-function loadProfiles(){try{var r=JSON.parse(localStorage.getItem('vetdose_profiles_list')||'[]'),s=new Set();return r.filter(function(p){var k=p.name+'|'+(p.clinic||'');if(s.has(k))return false;s.add(k);return true;});}catch(e){return[];}}
-function saveProfiles(p){localStorage.setItem('vetdose_profiles_list',JSON.stringify(p));}
-function setActiveProfile(p){localStorage.setItem('vetdose_active_profile',JSON.stringify(p));if(p&&p.settings)localStorage.setItem('vetdose_settings',JSON.stringify(p.settings));loadSettings();updateDrName();var m=document.getElementById('profile-modal');if(m)m.classList.add('hidden');}
-function checkProfile(){var p=loadProfiles();if(!p.length)return;if(p.length===1){setActiveProfile(p[0]);return;}renderProfileModal(p);var m=document.getElementById('profile-modal');if(m)m.classList.remove('hidden');}
-function renderProfileModal(p){var l=document.getElementById('profile-list');if(!l)return;if(!p.length){l.innerHTML='<div style="text-align:center;padding:16px;color:var(--muted)">No hay perfiles.</div>';return;}l.innerHTML=p.map(function(x,i){return '<div onclick="setActiveProfile('+JSON.stringify(JSON.stringify(x)).slice(1,-1)+')" style="display:flex;align-items:center;gap:12px;padding:12px 14px;border:1.5px solid var(--border);border-radius:10px;margin-bottom:8px;cursor:pointer;background:var(--surface)"><div style="width:40px;height:40px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:800;color:#fff">'+x.initials+'</div><div style="flex:1"><div style="font-size:14px;font-weight:700">'+x.name+'</div><div style="font-size:11px;color:var(--muted)">'+(x.clinic||'')+'</div></div><button onclick="event.stopPropagation();deleteProfile('+i+')" style="background:none;border:none;color:var(--muted);font-size:16px;cursor:pointer">✕</button></div>';}).join('');}
-function createProfile(){var n=(document.getElementById('new-profile-name')||{value:''}).value.trim(),c=(document.getElementById('new-profile-clinic')||{value:''}).value.trim();if(!n){alert('Ingresa nombre.');return;}var w=n.replace(/^Dr[a]?[. ]*/i,'').trim().split(' '),i=w.length>=2?(w[0][0]+w[w.length-1][0]).toUpperCase():w[0].slice(0,2).toUpperCase(),p={initials:i,name:n,clinic:c,settings:{doctorName:n,clinicName:c,drTitle:'Dr.'}};var ps=loadProfiles();ps.push(p);saveProfiles(ps);setActiveProfile(p);}
-function deleteProfile(i){if(!confirm('Eliminar?'))return;var p=loadProfiles();p.splice(i,1);saveProfiles(p);renderProfileModal(p);}
-function updateDrName(){var s=getSettings(),el=document.getElementById('header-dr-name');if(!el)return;if(s.doctorName&&s.doctorName.trim()){var c=s.doctorName.trim(),tm=c.match(/^(Dr[a]?[.]?)\s*/i),ti=tm?tm[1]:(s.drTitle||'Dr.'),nt=c.replace(/^Dr[a]?[.]?\s*/i,'').trim(),pts=nt.split(' '),ap=pts[pts.length-1];el.innerHTML='<div style="font-size:16px;font-weight:800;color:var(--accent);white-space:nowrap">'+ti+' '+ap+'</div>';el.style.display='block';}else el.style.display='none';}
-function openHelp(){var m=document.getElementById('help-modal');if(m)m.classList.remove('hidden');}
-function closeHelp(){var m=document.getElementById('help-modal');if(m)m.classList.add('hidden');}
+var GFORM_NOMBRE='entry.1496369334', GFORM_APELLIDO='entry.155769268';
+var GFORM_EMAIL='entry.1867744646', GFORM_PAIS='entry.266488990';
+var GFORM_CLINICA='entry.701960939', GFORM_TELEFONO='entry.1296988385';
+
+function checkRegistration() {
+  if (!localStorage.getItem('vetdose_registered')) {
+    var o = document.getElementById('reg-overlay');
+    if (o) o.style.display = 'flex';
+  }
+}
+
+function selectTitle(t) {
+  var h = document.getElementById('reg-title');
+  if (h) h.value = t;
+  var a = t==='Dr.';
+  var b = document.getElementById('reg-btn-dr');
+  var c = document.getElementById('reg-btn-dra');
+  if (!b||!c) return;
+  b.style.background=a?'#1a5c38':'#fff'; b.style.color=a?'#fff':'#666'; b.style.borderColor=a?'#1a5c38':'#ddd';
+  c.style.background=!a?'#1a5c38':'#fff'; c.style.color=!a?'#fff':'#666'; c.style.borderColor=!a?'#1a5c38':'#ddd';
+}
+
+function submitRegistration() {
+  var ti=(document.getElementById('reg-title')||{value:'Dr.'}).value;
+  var no=document.getElementById('reg-nombre').value.trim();
+  var ap=document.getElementById('reg-apellido').value.trim();
+  var em=document.getElementById('reg-email').value.trim();
+  var pa=document.getElementById('reg-pais').value.trim();
+  var cl=(document.getElementById('reg-clinica')||{value:''}).value.trim();
+  var te=(document.getElementById('reg-telefono')||{value:''}).value.trim();
+  var er=document.getElementById('reg-error');
+  if(!no){er.textContent='Ingresa tu nombre.';er.style.display='block';return;}
+  if(!ap){er.textContent='Ingresa tu apellido.';er.style.display='block';return;}
+  if(!em||!em.includes('@')){er.textContent='Email inválido.';er.style.display='block';return;}
+  if(!pa){er.textContent='Ingresa tu país.';er.style.display='block';return;}
+  er.style.display='none';
+  var fd=new FormData();
+  fd.append(GFORM_NOMBRE,no); fd.append(GFORM_APELLIDO,ap); fd.append(GFORM_EMAIL,em);
+  fd.append(GFORM_PAIS,pa); fd.append(GFORM_CLINICA,cl||'No especificada'); fd.append(GFORM_TELEFONO,te||'No especificado');
+  fetch(GFORM_URL,{method:'POST',body:fd,mode:'no-cors'}).catch(function(){});
+  var now=new Date().toLocaleString('es-US');
+  localStorage.setItem('vetdose_registered',now);
+  var fn=ti+' '+no+' '+ap, s=getSettings();
+  s.doctorName=fn; s.clinicName=cl; s.drTitle=ti;
+  localStorage.setItem('vetdose_settings',JSON.stringify(s));
+  var init=(no[0]+ap[0]).toUpperCase();
+  var pr={initials:init,name:fn,clinic:cl,email:em,settings:{doctorName:fn,clinicName:cl,drTitle:ti}};
+  var prs=loadProfiles();
+  if(!prs.find(function(p){return p.email===em||p.name===fn;})){prs.push(pr);saveProfiles(prs);}
+  var o=document.getElementById('reg-overlay');
+  if(o) o.style.display='none';
+  updateDrName();
+}
+
+// ─── PERFILES ─────────────────────────────────────────────────────────────────
+function loadProfiles() {
+  try {
+    var r=JSON.parse(localStorage.getItem('vetdose_profiles_list')||'[]');
+    var s=new Set();
+    return r.filter(function(p){var k=p.name+'|'+(p.clinic||'');if(s.has(k))return false;s.add(k);return true;});
+  } catch(e){return [];}
+}
+function saveProfiles(p){ localStorage.setItem('vetdose_profiles_list',JSON.stringify(p)); }
+function setActiveProfile(p) {
+  localStorage.setItem('vetdose_active_profile',JSON.stringify(p));
+  if(p&&p.settings) localStorage.setItem('vetdose_settings',JSON.stringify(p.settings));
+  loadSettings(); updateDrName();
+  var m=document.getElementById('profile-modal'); if(m) m.classList.add('hidden');
+}
+function checkProfile() {
+  var p=loadProfiles();
+  if(!p.length) return;
+  if(p.length===1){setActiveProfile(p[0]);return;}
+  renderProfileModal(p);
+  var m=document.getElementById('profile-modal'); if(m) m.classList.remove('hidden');
+}
+function renderProfileModal(p) {
+  var l=document.getElementById('profile-list'); if(!l) return;
+  if(!p.length){l.innerHTML='<div style="text-align:center;padding:16px;color:var(--muted)">No hay perfiles.</div>';return;}
+  l.innerHTML=p.map(function(x,i){
+    return '<div onclick="setActiveProfile('+JSON.stringify(JSON.stringify(x)).slice(1,-1)+')" style="display:flex;align-items:center;gap:12px;padding:12px 14px;border:1.5px solid var(--border);border-radius:10px;margin-bottom:8px;cursor:pointer;background:var(--surface)">'+
+    '<div style="width:40px;height:40px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:800;color:#fff">'+x.initials+'</div>'+
+    '<div style="flex:1"><div style="font-size:14px;font-weight:700">'+x.name+'</div><div style="font-size:11px;color:var(--muted)">'+(x.clinic||'')+'</div></div>'+
+    '<button onclick="event.stopPropagation();deleteProfile('+i+')" style="background:none;border:none;color:var(--muted);font-size:16px;cursor:pointer">✕</button></div>';
+  }).join('');
+}
+function createProfile() {
+  var n=(document.getElementById('new-profile-name')||{value:''}).value.trim();
+  var c=(document.getElementById('new-profile-clinic')||{value:''}).value.trim();
+  if(!n){alert('Ingresa nombre.');return;}
+  var w=n.replace(/^Dr[a]?[. ]*/i,'').trim().split(' ');
+  var i=w.length>=2?(w[0][0]+w[w.length-1][0]).toUpperCase():w[0].slice(0,2).toUpperCase();
+  var p={initials:i,name:n,clinic:c,settings:{doctorName:n,clinicName:c,drTitle:'Dr.'}};
+  var ps=loadProfiles(); ps.push(p); saveProfiles(ps); setActiveProfile(p);
+}
+function deleteProfile(i) {
+  if(!confirm('¿Eliminar perfil?'))return;
+  var p=loadProfiles(); p.splice(i,1); saveProfiles(p); renderProfileModal(p);
+}
+
+// ─── DR. NAME IN HEADER (MOD-041: una sola línea, mismo tamaño, bold) ─────────
+function updateDrName() {
+  var s=getSettings(), el=document.getElementById('header-dr-name');
+  if(!el) return;
+  if(s.doctorName&&s.doctorName.trim()){
+    var c=s.doctorName.trim();
+    var tm=c.match(/^(Dr[a]?\.?)\s*/i);
+    var ti=tm?tm[1]:(s.drTitle||'Dr.');
+    var nt=c.replace(/^Dr[a]?\.?\s*/i,'').trim();
+    var pts=nt.split(' ');
+    var ap=pts[pts.length-1];
+    // MOD-041: Dr. Apellido — ONE LINE, SAME SIZE, BOLD
+    el.innerHTML='<span style="font-size:15px;font-weight:800;color:var(--accent);white-space:nowrap">'+ti+' '+ap+'</span>';
+    el.style.display='inline-flex';
+    el.style.alignItems='center';
+  } else { el.style.display='none'; }
+}
+
+function openHelp(){ var m=document.getElementById('help-modal'); if(m) m.classList.remove('hidden'); }
+function closeHelp(){ var m=document.getElementById('help-modal'); if(m) m.classList.add('hidden'); }
 
 // ─── SETTINGS ─────────────────────────────────────────────────────────────────
 function loadSettings() {
@@ -2114,7 +2368,7 @@ function openSettings() {
 function closeSettings() { document.getElementById('settings-modal').classList.add('hidden'); }
 
 // ─── PROTOCOLS ────────────────────────────────────────────────────────────────
-const DEFAULT_PROTOCOLS = [
+var DEFAULT_PROTOCOLS = [
   { id: 'pancreatitis', name: 'Pancreatitis aguda', icon: '🔥',
     drugIds: ['fuzapladib','maropitant','ondansetron','pantoprazol','famotidina','gabapentina','buprenorfina','metronidazol','sucralfato'] },
   { id: 'preanest_dog', name: 'Pre-anestésico canino', icon: '💉',
@@ -2272,42 +2526,88 @@ function closeProtocolEdit() { document.getElementById('protocol-edit-modal').cl
 
 
 
-// ─── PRESCRIPCIÓN ────────────────────────────────────────────────────────────
-function openPrescription(){var dr=getDrugs(),sel=dr.filter(function(d){return state.selectedDrugs.has(d.id);});if(!sel.length){alert('Calcula las dosis primero.');return;}var wkg=getWeightKg(),rows=sel.map(function(d){var ft=d.formType||'injection',isSolid=ft==='tablet'||ft==='capsule',ad=state.species==='cat'&&d.doseCat?d.doseCat:state.species==='dog'&&d.doseDog?d.doseDog:d.dosePref,dp=isSolid?smartTabletOptions(ad*wkg,d.id,ft,d.tabSizes||null,d.doseMin,d.doseMax,wkg)[0]||'':((ad*wkg)/d.conc).toFixed(2)+' mL',fr=state.selectedFrequency[d.id]||d.frequency||'SID';return{id:d.id,name:d.generic,trade:d.trade,dosePerAdmin:dp,freq:fr,unit:isSolid?(ft==='tablet'?'tab.':'cáps.'):'mL'};});var c=document.getElementById('rx-drugs');if(!c)return;var rhtml='';rows.forEach(function(r){var fo=['SID','BID','TID','QID','q8h','q12h'].map(function(f){return '<option'+(f===r.freq?' selected':'')+'>'+f+'</option>';}).join('');rhtml+='<div style="border:1px solid var(--border);border-radius:10px;padding:12px;margin-bottom:10px;background:var(--surface2)"><div style="font-size:14px;font-weight:700;color:var(--accent);margin-bottom:8px">'+r.name+' <span style="font-size:11px;color:var(--muted)">('+r.trade+')</span></div><div style="display:flex;gap:8px;flex-wrap:wrap"><div style="flex:1;min-width:90px"><div style="font-size:10px;color:var(--muted);text-transform:uppercase;margin-bottom:3px">Dosis</div><div style="font-size:13px;font-weight:700">'+r.dosePerAdmin+'</div></div><div style="flex:1;min-width:70px"><div style="font-size:10px;color:var(--muted);text-transform:uppercase;margin-bottom:3px">Frecuencia</div><select id="rx-freq-'+r.id+'" style="width:100%;background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:6px 8px;font-size:12px;font-family:var(--sans);outline:none">'+fo+'</select></div><div style="flex:1;min-width:50px"><div style="font-size:10px;color:var(--muted);text-transform:uppercase;margin-bottom:3px">Días</div><input type="number" id="rx-days-'+r.id+'" value="7" min="1" max="365" style="width:100%;background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:6px 8px;font-size:13px;font-family:var(--mono);outline:none"></div><div style="flex:1;min-width:60px"><div style="font-size:10px;color:var(--muted);text-transform:uppercase;margin-bottom:3px">Total</div><div id="rx-total-'+r.id+'" style="font-size:15px;font-weight:800;color:var(--accent);padding-top:4px">—</div></div></div></div>';});c.innerHTML=rhtml;window._rxRows=rows;rows.forEach(function(r){updateRxTotal(r.id);});var m=document.getElementById('rx-modal');if(m)m.classList.remove('hidden');}
-function updateRxTotal(id){var r=(window._rxRows||[]).find(function(x){return x.id===id;});if(!r)return;var fe=document.getElementById('rx-freq-'+id),de=document.getElementById('rx-days-'+id),te=document.getElementById('rx-total-'+id);if(!fe||!de||!te)return;var fm={SID:1,BID:2,TID:3,QID:4,'q8h':3,'q12h':2,'q24h':1,'q6h':4};te.textContent=((fm[fe.value]||1)*(parseInt(de.value)||7))+' '+r.unit;}
-function closePrescription(){var m=document.getElementById('rx-modal');if(m)m.classList.add('hidden');}
-function sharePrescription(){var n=(document.getElementById('patient-name')||{value:'Paciente'}).value.trim()||'Paciente',w=getWeightKg(),s=getSettings(),d=new Date().toLocaleDateString('es-US'),rows=window._rxRows||[],nl=String.fromCharCode(10),lines=['PRESCRIPCION',d,s.doctorName||'','','Paciente: '+n+' ('+w.toFixed(1)+' kg)',''];rows.forEach(function(r){var fe=document.getElementById('rx-freq-'+r.id),de=document.getElementById('rx-days-'+r.id),f=fe?fe.value:r.freq,dy=parseInt(de?de.value:7)||7,fm={SID:1,BID:2,TID:3,QID:4,'q8h':3,'q12h':2};lines.push('- '+r.name+' ('+r.trade+')','  '+r.dosePerAdmin+' · '+f+' · '+dy+' dias','  Total: '+((fm[f]||1)*dy)+' '+r.unit,'');});var t=lines.join(nl);if(navigator.share)navigator.share({title:'Prescripcion',text:t}).catch(function(){});else navigator.clipboard.writeText(t).then(function(){alert('Copiado');}).catch(function(){prompt('',t);});}
-function printPrescription(){var n=(document.getElementById('patient-name')||{value:'Paciente'}).value.trim()||'Paciente',w=getWeightKg(),s=getSettings(),d=new Date().toLocaleDateString('es-US'),rows=window._rxRows||[],ih='';rows.forEach(function(r){var fe=document.getElementById('rx-freq-'+r.id),de=document.getElementById('rx-days-'+r.id),f=fe?fe.value:r.freq,dy=parseInt(de?de.value:7)||7,fm={SID:1,BID:2,TID:3,QID:4,'q8h':3,'q12h':2};ih+='<div style="border:1px solid #ccc;border-radius:6px;padding:10px;margin-bottom:8px"><div style="font-size:12pt;font-weight:700;color:#1a5c38">'+r.name+'</div><div style="font-size:9pt;margin-top:4px">'+r.dosePerAdmin+' · '+f+' · '+dy+' dias</div><div style="font-size:13pt;font-weight:800;color:#1a5c38;margin-top:4px">Total: '+((fm[f]||1)*dy)+' '+r.unit+'</div></div>';});var win=window.open('','_blank');win.document.write('<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Rx</title><style>body{font-family:Arial;font-size:10pt;padding:20px}@page{margin:10mm;size:letter}</style></head><body><div style="display:flex;justify-content:space-between;margin-bottom:12px"><div><h2 style="color:#1a5c38;margin:0">Prescripcion</h2><div style="font-size:9pt">'+d+'</div></div><div style="text-align:right;font-size:9pt">'+(s.doctorName||'')+'<br>'+(s.clinicName||'')+'</div></div><div style="background:#1a5c38;color:#fff;border-radius:6px;padding:8px 12px;margin-bottom:12px">'+n+' ('+w.toFixed(1)+' kg)</div>'+ih+'</body></html>');win.document.close();setTimeout(function(){win.print();},400);}
-
-
-// ─── MODULE INSTRUCTIONS ─────────────────────────────────────────────────────
-function showModuleInstructions(tabName) {
-  var msgs = {
-    'cri': {
-      single: 'Selecciona la droga — el peso del paciente se toma de la pantalla Calcular. La app sugiere la dosis estándar y calcula los mL/h para la bomba. Ingresa el volumen a diluir si preparas una jeringa.',
-      protocol: 'Protocolo de analgesia multimodal en bolsa IV. Ingresa el peso, tamaño de la bolsa y tasa de fluido. La app calcula los mL de cada droga y la dosis de carga (loading dose).'
-    },
-    'fluidos': 'Las tasas de administración son recomendaciones basadas en las Guías AAHA 2024 de Fluidoterapia. Cada paciente debe evaluarse individualmente y la dosis ajustarse según sus condiciones clínicas específicas.',
-    'nutricion': {
-      rer: 'Estima las calorías diarias y la cantidad de alimento según el peso y estado fisiológico del paciente. Si el alimento no está en la lista, ingresa las kcal directamente desde la etiqueta del producto.',
-      bcs: 'Estima el peso ideal según la Condición Corporal (BCS 1–9), calcula las calorías para pérdida de peso segura y convierte el resultado en cantidad de alimento. Incluye proyección de semanas para alcanzar el peso meta.'
-    },
-    'protocolos': 'Protocolos ajustables a tus preferencias clínicas. Crea listas de medicamentos para condiciones frecuentes. Toca un protocolo, selecciona los medicamentos y la app calcula todas las dosis automáticamente.'
-  };
-
-  // Show instruction for fluidos
-  var flInstr = document.getElementById('fl-instr');
-  if (flInstr && tabName === 'fluidos') {
-    flInstr.innerHTML = '<div style="background:#f0fdf4;border-left:3px solid var(--accent);border-radius:6px;padding:9px 12px;margin-bottom:12px;font-size:12px;color:#374151;line-height:1.6">ℹ ' + msgs.fluidos + '</div>';
-  }
-
-  // Show instruction for protocolos
-  var ptInstr = document.getElementById('pt-instr');
-  if (ptInstr && tabName === 'protocolos') {
-    ptInstr.innerHTML = '<div style="background:#f0fdf4;border-left:3px solid var(--accent);border-radius:6px;padding:9px 12px;margin-bottom:12px;font-size:12px;color:#374151;line-height:1.6">📋 ' + msgs.protocolos + '</div>';
-  }
+// ─── PRESCRIPCIÓN (MOD-039) ──────────────────────────────────────────────────
+function openPrescription() {
+  var dr=getDrugs(), sel=dr.filter(function(d){return state.selectedDrugs.has(d.id);});
+  if(!sel.length){alert('Calcula las dosis primero.');return;}
+  var wkg=getWeightKg();
+  var rows=sel.map(function(d){
+    var ft=d.formType||'injection';
+    var isSolid=ft==='tablet'||ft==='capsule';
+    var ad=state.species==='cat'&&d.doseCat?d.doseCat:state.species==='dog'&&d.doseDog?d.doseDog:d.dosePref;
+    var dp=isSolid?smartTabletOptions(ad*wkg,d.id,ft,d.tabSizes||null,d.doseMin,d.doseMax,wkg)[0]||'':((ad*wkg)/d.conc).toFixed(2)+' mL';
+    var fr=state.selectedFrequency[d.id]||d.frequency||'SID';
+    return {id:d.id,name:d.generic,trade:d.trade,dosePerAdmin:dp,freq:fr,unit:isSolid?(ft==='tablet'?'tab.':'cáps.'):'mL'};
+  });
+  var c=document.getElementById('rx-drugs'); if(!c)return;
+  var rhtml='';
+  rows.forEach(function(r){
+    var fo=['SID','BID','TID','QID','q8h','q12h'].map(function(f){return '<option'+(f===r.freq?' selected':'')+'>'+f+'</option>';}).join('');
+    rhtml+='<div style="border:1px solid var(--border);border-radius:10px;padding:12px;margin-bottom:10px;background:var(--surface2)">'+
+      '<div style="font-size:14px;font-weight:700;color:var(--accent);margin-bottom:8px">'+r.name+' <span style="font-size:11px;color:var(--muted)">('+r.trade+')</span></div>'+
+      '<div style="display:flex;gap:8px;flex-wrap:wrap">'+
+      '<div style="flex:1;min-width:90px"><div style="font-size:10px;color:var(--muted);text-transform:uppercase;margin-bottom:3px">Dosis</div><div style="font-size:13px;font-weight:700">'+r.dosePerAdmin+'</div></div>'+
+      '<div style="flex:1;min-width:70px"><div style="font-size:10px;color:var(--muted);text-transform:uppercase;margin-bottom:3px">Frecuencia</div><select id="rx-freq-'+r.id+'" style="width:100%;background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:6px 8px;font-size:12px;font-family:var(--sans);outline:none">'+fo+'</select></div>'+
+      '<div style="flex:1;min-width:50px"><div style="font-size:10px;color:var(--muted);text-transform:uppercase;margin-bottom:3px">Días</div><input type="number" id="rx-days-'+r.id+'" value="7" min="1" max="365" style="width:100%;background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:6px 8px;font-size:13px;font-family:var(--mono);outline:none"></div>'+
+      '<div style="flex:1;min-width:60px"><div style="font-size:10px;color:var(--muted);text-transform:uppercase;margin-bottom:3px">Total</div><div id="rx-total-'+r.id+'" style="font-size:15px;font-weight:800;color:var(--accent);padding-top:4px">—</div></div>'+
+      '</div></div>';
+  });
+  c.innerHTML=rhtml;
+  window._rxRows=rows;
+  rows.forEach(function(r){updateRxTotal(r.id);});
+  var m=document.getElementById('rx-modal'); if(m) m.classList.remove('hidden');
 }
-
+function updateRxTotal(id){
+  var r=(window._rxRows||[]).find(function(x){return x.id===id;}); if(!r)return;
+  var fe=document.getElementById('rx-freq-'+id), de=document.getElementById('rx-days-'+id), te=document.getElementById('rx-total-'+id);
+  if(!fe||!de||!te)return;
+  var fm={SID:1,BID:2,TID:3,QID:4,'q8h':3,'q12h':2,'q24h':1,'q6h':4};
+  te.textContent=((fm[fe.value]||1)*(parseInt(de.value)||7))+' '+r.unit;
+}
+function closePrescription(){ var m=document.getElementById('rx-modal'); if(m) m.classList.add('hidden'); }
+function sharePrescription(){
+  var n=(document.getElementById('patient-name')||{value:'Paciente'}).value.trim()||'Paciente';
+  var w=getWeightKg(), s=getSettings(), d=new Date().toLocaleDateString('es-US');
+  var nl=String.fromCharCode(10), rows=window._rxRows||[];
+  var lines=['PRESCRIPCION',d,s.doctorName||'',s.clinicName||'','','Paciente: '+n+' ('+w.toFixed(1)+' kg)',''];
+  rows.forEach(function(r){
+    var fe=document.getElementById('rx-freq-'+r.id), de=document.getElementById('rx-days-'+r.id);
+    var f=fe?fe.value:r.freq, dy=parseInt(de?de.value:7)||7;
+    var fm={SID:1,BID:2,TID:3,QID:4,'q8h':3,'q12h':2};
+    lines.push('- '+r.name+' ('+r.trade+')');
+    lines.push('  '+r.dosePerAdmin+' · '+f+' · '+dy+' dias');
+    lines.push('  Total: '+((fm[f]||1)*dy)+' '+r.unit);
+    lines.push('');
+  });
+  var t=lines.join(nl);
+  if(navigator.share) navigator.share({title:'Prescripcion',text:t}).catch(function(){});
+  else navigator.clipboard.writeText(t).then(function(){alert('Copiado al portapapeles');}).catch(function(){prompt('',t);});
+}
+function printPrescription(){
+  var n=(document.getElementById('patient-name')||{value:'Paciente'}).value.trim()||'Paciente';
+  var w=getWeightKg(), s=getSettings(), d=new Date().toLocaleDateString('es-US');
+  var rows=window._rxRows||[], ih='';
+  rows.forEach(function(r){
+    var fe=document.getElementById('rx-freq-'+r.id), de=document.getElementById('rx-days-'+r.id);
+    var f=fe?fe.value:r.freq, dy=parseInt(de?de.value:7)||7;
+    var fm={SID:1,BID:2,TID:3,QID:4,'q8h':3,'q12h':2};
+    ih+='<div style="border:1px solid #ccc;border-radius:6px;padding:10px;margin-bottom:8px">'+
+      '<div style="font-size:12pt;font-weight:700;color:#1a5c38">'+r.name+' <span style="font-weight:400;font-size:9pt;color:#555">('+r.trade+')</span></div>'+
+      '<div style="font-size:9pt;margin-top:4px">'+r.dosePerAdmin+' · '+f+' · '+dy+' dias</div>'+
+      '<div style="font-size:13pt;font-weight:800;color:#1a5c38;margin-top:4px">Total: '+((fm[f]||1)*dy)+' '+r.unit+'</div></div>';
+  });
+  var win=window.open('','_blank');
+  win.document.write('<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Prescripcion</title>'+
+    '<style>body{font-family:Arial;font-size:10pt;padding:20px}@page{margin:10mm;size:letter}</style></head><body>'+
+    '<div style="display:flex;justify-content:space-between;margin-bottom:12px">'+
+    '<div><h2 style="color:#1a5c38;margin:0">Prescripción Médica Veterinaria</h2><div style="font-size:9pt">'+d+'</div></div>'+
+    '<div style="text-align:right;font-size:9pt">'+(s.doctorName||'')+'<br>'+(s.clinicName||'')+'</div></div>'+
+    '<div style="background:#1a5c38;color:#fff;border-radius:6px;padding:8px 12px;margin-bottom:12px;font-size:11pt;font-weight:700">'+n+' ('+w.toFixed(1)+' kg)</div>'+
+    ih+'<div style="border-top:1px solid #ccc;padding-top:8px;margin-top:16px;font-size:8pt;color:#666;display:flex;justify-content:space-between">'+
+    '<span>VetDose 2.0</span><span>Firma: _____________________</span></div></body></html>');
+  win.document.close();
+  setTimeout(function(){win.print();},400);
+}
 
 // ─── EXPORT / IMPORT ─────────────────────────────────────────────────────────
 function exportDrugs() {
@@ -2349,4 +2649,4 @@ function importDrugs(event) {
 }
 
 // Fix scroll target id
-document.querySelector('.content').id = 'content-scroll';
+var _cs=document.querySelector('.content'); if(_cs) _cs.id='content-scroll';
