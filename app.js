@@ -1593,6 +1593,7 @@ function renderDrugsDB(filter = '') {
     : drugs);
 
   const container = document.getElementById('drugs-db-list');
+  if (!container) return;
   if (filtered.length === 0) {
     container.innerHTML = `<div class="empty-state"><div class="empty-icon">💊</div><p>No se encontraron drogas.</p></div>`;
     return;
@@ -1978,6 +1979,10 @@ function calcFluidos() {
   const vol2 = totalPhase2 * (hours - repHours);
   const volTotal = vol1 + Math.max(0, vol2);
 
+  // Fluid type detection
+  const isHypertonic = fluid === 'nacl72';
+  const isColloid = fluid === 'hetastarch';
+
   // Bolus emergency
   const bolusMin = cardiac ? 2 : (species === 'cat' ? 5 : 10);
   const bolusMax = cardiac ? 5 : (species === 'cat' ? 10 : 20);
@@ -1985,9 +1990,6 @@ function calcFluidos() {
   const showBolus = dehyd >= 8 || isHypertonic || isColloid;
 
   // NaCl 7.2% special
-  const isHypertonic = fluid === 'nacl72';
-  const isColloid = fluid === 'hetastarch';
-
   const fluidInfo = FLUID_DATA[fluid] || FLUID_DATA.lr;
   const speciesIcon = species === 'dog' ? '🐕' : '🐈';
 

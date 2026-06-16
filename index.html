@@ -219,6 +219,9 @@ input:focus{border-color:var(--accent-md);box-shadow:0 0 0 3px rgba(26,92,56,.1)
         <div class="species-btn active" id="sp-dog" onclick="setSpecies('dog')"><span class="species-icon">&#128021;</span> Canino</div>
         <div class="species-btn" id="sp-cat" onclick="setSpecies('cat')"><span class="species-icon">&#128008;</span> Felino</div>
       </div>
+      <div style="background:#f0fdf4;border-left:3px solid var(--accent);border-radius:6px;padding:9px 12px;margin-bottom:14px;font-size:12px;color:#374151;line-height:1.6">
+        💊 Selecciona especie, ingresa nombre y peso. Toca los medicamentos que necesitas y presiona <b>Calcular dosis</b>. Los resultados muestran dosis en mg/kg, volumen a administrar y opciones de tabletas dentro del rango terapéutico. El botón <b>Prescripción</b> genera la hoja de dispensación.
+      </div>
       <div class="section-label">Paciente</div>
       <div class="card">
         <div style="display:flex;gap:8px;align-items:flex-end">
@@ -323,6 +326,9 @@ input:focus{border-color:var(--accent-md);box-shadow:0 0 0 3px rgba(26,92,56,.1)
 
     <!-- FLUIDOS -->
     <div class="screen" id="screen-fluidos">
+      <div style="background:#f0fdf4;border-left:3px solid var(--accent);border-radius:6px;padding:9px 12px;margin-bottom:14px;font-size:12px;color:#374151;line-height:1.6">
+        💧 Plan completo según las <b>Guías AAHA 2024 de Fluidoterapia</b>. Calcula déficit, reposición, mantenimiento y bolos de emergencia con ajuste automático por cardiopatía y especie. Hetastarch: solo bolo (coloide). Toggle °C/°F activa corrección por fiebre.
+      </div>
       <div class="section-label">Datos del paciente</div>
       <div class="card">
         <div style="display:flex;gap:8px;align-items:flex-end">
@@ -387,7 +393,7 @@ input:focus{border-color:var(--accent-md);box-shadow:0 0 0 3px rgba(26,92,56,.1)
         <div style="display:flex;gap:8px">
           <div style="flex:1">
             <div class="field-label">Temperatura (°C) — opcional</div>
-            <input type="number" id="fl-fever" oninput="calcFluidos && calcFluidos()" placeholder="Ej: 40.5" step="0.1" min="37" max="43" style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-sm);padding:10px 12px;font-size:16px;font-family:var(--mono);outline:none">
+            <input type="number" id="fl-fever" placeholder="Ej: 40.5" step="0.1" min="37" max="43" style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-sm);padding:10px 12px;font-size:16px;font-family:var(--mono);outline:none">
           
           <div style="display:flex;gap:6px;margin-top:6px">
             <button id="fl-fever-c" onclick="setFeverUnit('C')" style="flex:1;padding:6px;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer;border:1.5px solid var(--accent);background:var(--accent);color:#fff;font-family:var(--sans)">°C</button>
@@ -406,12 +412,16 @@ input:focus{border-color:var(--accent-md);box-shadow:0 0 0 3px rgba(26,92,56,.1)
     </div>
 
     <!-- NUTRICIÓN -->
+    
     <div class="screen" id="screen-nutricion">
     <div style="display:flex;gap:8px;margin-bottom:14px">
       <button id="nut-mode-rer" onclick="setNutMode('rer')" style="flex:1;padding:9px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;border:1.5px solid var(--accent);background:var(--accent);color:#fff;font-family:var(--sans)">🔢 Requerimiento Calórico</button>
       <button id="nut-mode-bcs" onclick="setNutMode('bcs')" style="flex:1;padding:9px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;border:1.5px solid var(--border);background:var(--surface);color:var(--muted);font-family:var(--sans)">⚖️ Plan de Reducción de Peso</button>
     </div>
     <div id="nut-rer-mode">
+      <div style="background:#f0fdf4;border-left:3px solid var(--accent);border-radius:6px;padding:9px 12px;margin-bottom:14px;font-size:12px;color:#374151;line-height:1.6">
+        🔢 Calcula el Requerimiento Energético en Reposo (RER) y Mantenimiento (MER) según el estado fisiológico. Ingresa el peso y selecciona el factor adecuado. Puedes ingresar las kcal del alimento para calcular la cantidad diaria.
+      </div>
       <div class="section-label">Paciente</div>
       <div class="card">
         <div style="display:flex;gap:8px;align-items:flex-end;margin-bottom:10px">
@@ -471,19 +481,14 @@ input:focus{border-color:var(--accent-md);box-shadow:0 0 0 3px rgba(26,92,56,.1)
       <div class="sticky-btn"><button class="btn btn-primary" onclick="calcNutricion()">Calcular energía</button></div>
       <div id="nut-result" style="display:none;padding-bottom:16px"></div>
     </div>
-
-    <!-- PROTOCOLOS -->
     </div>
     <div id="nut-bcs-mode" style="display:none">
-      <div style="background:#f0fdf4;border-left:3px solid var(--accent);border-radius:6px;padding:9px 12px;margin-bottom:12px;font-size:12px;color:#374151;line-height:1.6">
-        ℹ Estima el peso ideal según la Condición Corporal (BCS 1–9), calcula las calorías para pérdida de peso segura y convierte el resultado en cantidad de alimento. Incluye proyección de semanas para alcanzar el peso meta a un ritmo de 0.5–1% por semana.
+      <div style="background:#f0fdf4;border-left:3px solid var(--accent);border-radius:6px;padding:9px 12px;margin-bottom:14px;font-size:12px;color:#374151;line-height:1.6">
+        ⚖️ Estima el peso ideal según la Condición Corporal (BCS 1–9), calcula las calorías para pérdida de peso segura y proyecta las semanas para alcanzar el peso meta a un ritmo de 0.5–1% por semana. En gatos: nunca restricción severa (riesgo de lipidosis hepática).
       </div>
       <div class="card">
         <div class="section-label">Especie</div>
-        <select id="bcs-species" style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-sm);padding:10px 12px;font-size:14px;font-family:var(--sans);outline:none;margin-bottom:12px">
-          <option value="dog">🐕 Canino</option>
-          <option value="cat">🐈 Felino</option>
-        </select>
+        <select id="bcs-species" style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-sm);padding:10px 12px;font-size:14px;font-family:var(--sans);outline:none;margin-bottom:12px"><option value="dog">🐕 Canino</option><option value="cat">🐈 Felino</option></select>
         <div class="section-label">Peso actual (kg)</div>
         <input type="number" id="bcs-weight" placeholder="Ej: 15.5" step="0.1" style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-sm);padding:10px 12px;font-size:16px;font-family:var(--mono);outline:none;box-sizing:border-box;margin-bottom:12px">
         <div class="section-label">Condición Corporal (BCS 1–9)</div>
@@ -491,16 +496,17 @@ input:focus{border-color:var(--accent-md);box-shadow:0 0 0 3px rgba(26,92,56,.1)
         <div id="bcs-desc" style="font-size:11px;color:var(--muted);margin-bottom:12px;min-height:16px;font-style:italic"></div>
         <div class="section-label">Meta calórica (% del RER)</div>
         <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
-          <input type="number" id="bcs-loss-pct" value="80" min="60" max="100" step="5"
-            style="width:80px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-sm);padding:8px 12px;font-size:16px;font-family:var(--mono);outline:none">
-          <span style="font-size:12px;color:var(--muted)">% del RER (80% = pérdida segura; 60% = obesos severos)</span>
+          <input type="number" id="bcs-loss-pct" value="80" min="60" max="100" step="5" style="width:80px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-sm);padding:8px 12px;font-size:16px;font-family:var(--mono);outline:none">
+          <span style="font-size:12px;color:var(--muted)">% del RER (80% = pérdida segura; 60% = obesidad severa)</span>
         </div>
         <button class="btn btn-primary" onclick="calcBCS()">Calcular Plan de Peso</button>
       </div>
       <div id="bcs-result" style="display:none;margin-top:12px"></div>
     </div>
-<div class="screen" id="screen-protocolos">
+
+    <div class="screen" id="screen-protocolos">
       <div class="section-label">Mis protocolos clínicos</div>
+      <div style="background:#f0fdf4;border-left:3px solid var(--accent);border-radius:6px;padding:9px 12px;margin-bottom:12px;font-size:12px;color:#374151;line-height:1.6">📋 <b>Protocolos clínicos ajustables.</b> Toca un protocolo para ver sus medicamentos. Selecciona los que necesitas según el paciente y presiona <b>Calcular dosis</b>. Puedes crear y personalizar tus propios protocolos con el botón ＋.</div>
       <div id="protocols-list" style="padding-bottom:80px"></div>
     </div>
 
