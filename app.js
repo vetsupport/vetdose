@@ -609,12 +609,13 @@ document.addEventListener('DOMContentLoaded', () => {
 function showTab(tab) {
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-  const tabs = ['calc','cri','fluidos','nutricion','protocolos'];
+  const tabs = ['calc','cri','fluidos','nutricion','potasio','protocolos'];
   const tabIdx = tabs.indexOf(tab);
   if (tabIdx >= 0) document.querySelectorAll('.tab')[tabIdx].classList.add('active');
   const screen = document.getElementById('screen-' + tab);
   if (screen) screen.classList.add('active');
   if (tab === 'protocolos') renderProtocols();
+  if (tab === 'potasio') { var _kw=getWeightKg(); var _kwEl=document.getElementById('k-weight'); if(_kwEl&&!parseFloat(_kwEl.value)&&_kw>0)_kwEl.value=_kw; }
   if (tab === 'cri') populateCRISelect();
   if (tab === 'nutricion') populateNutFactors();
 }
@@ -1441,6 +1442,13 @@ function onCRIDrugChange() {
   if (!ref) return;
   var d = (state.species==='cat'&&ref.defCat) ? ref.defCat : ref.def;
   document.getElementById('cri-rate').value = d;
+  // MOD-045: auto-suggest pump rate by weight
+  var wkg = getWeightKg();
+  if (wkg > 0) {
+    var suggested = wkg < 5 ? 3 : wkg < 15 ? 5 : wkg < 30 ? 10 : 15;
+    var pumpEl = document.getElementById('cri-pump-rate');
+    if (pumpEl) pumpEl.value = suggested;
+  }
   var us = document.getElementById('cri-rate-unit');
   if (us) for(var i=0;i<us.options.length;i++){if(us.options[i].value===ref.unit){us.selectedIndex=i;break;}}
   showCRIRef(id, ref);
@@ -1529,61 +1537,121 @@ function populateCRISelect() {
 }
 
 function updateCRI() {
-  const drugId = document.getElementById('cri-drug-select').value;
-  const rateInput = parseFloat(document.getElementById('cri-rate').value) || 0;
-  const rateUnit = document.getElementById('cri-rate-unit').value; // mcg/kg/min or mg/kg/h or mg/kg/min
-  const weightKg = getWeightKg();
-  const dilVol = parseFloat(document.getElementById('cri-dil-vol').value) || 50;
-  const stockVol = parseFloat(document.getElementById('cri-stock-vol').value) || 0;
+  var drugId   = document.getElementById('cri-drug-select').value;
+  var rateInput = parseFloat(document.getElementById('cri-rate').value) || 0;
+  var rateUnit = document.getElementById('cri-rate-unit').value;
+  var weightKg = getWeightKg();
+  var dilVol   = parseFloat(document.getElementById('cri-dil-vol').value) || 50;
+  var pumpRate = parseFloat(document.getElementById('cri-pump-rate').value) || 10;
+  var resDiv   = document.getElementById('cri-result');
 
-  if (!drugId || rateInput <= 0 || weightKg <= 0) {
-    document.getElementById('cri-result').style.display = 'none'; return;
-  }
+  if (!drugId || rateInput <= 0) { if(resDiv) resDiv.style.display='none'; return; }
 
-  const drugs = getDrugs();
-  const drug = drugs.find(d => d.id === drugId);
+  var drugs = getDrugs();
+  var drug  = drugs.find(function(d){ return d.id === drugId; });
   if (!drug) return;
 
-  const concMgPerMl = drug.conc; // mg/mL of stock
+  var concStock = drug.conc; // mg/mL stock
+  var ref = CRI_DOSE_REF[drugId] || {};
 
-  // Concentration of prepared syringe
-  let concPrep = 0; // mg/mL of prepared solution
-  if (stockVol > 0) {
-    concPrep = (concMgPerMl * stockVol) / dilVol;
+  // Convert rate to mg/kg/h (common base unit)
+  var rateMgKgH = 0;
+  if      (rateUnit === 'mcg/kg/h')   rateMgKgH = rateInput / 1000;
+  else if (rateUnit === 'mg/kg/h')    rateMgKgH = rateInput;
+  else if (rateUnit === 'mg/kg/min')  rateMgKgH = rateInput * 60;
+  else if (rateUnit === 'mcg/kg/min') rateMgKgH = rateInput * 60 / 1000;
+  else if (rateUnit === 'U/kg/h')     rateMgKgH = rateInput;       // insulin units
+  else if (rateUnit === 'mU/kg/min')  rateMgKgH = rateInput * 60 / 1000;
+
+  // Drug needed per hour (total, mg)
+  var drugPerHour = rateMgKgH * (weightKg > 0 ? weightKg : 10);
+
+  // Stock to add: to achieve pumpRate mL/h with dilVol mL bag
+  // concPrep = drugPerHour / pumpRate (mg/mL)
+  // stockVol = concPrep * dilVol / concStock (mL)
+  var concPrep = drugPerHour / pumpRate;           // mg/mL in bag
+  var stockVol = (concPrep * dilVol) / concStock;  // mL of stock to take
+
+  // Verify: mL/h check
+  var mlPerHour = (drugPerHour / concPrep); // should equal pumpRate
+
+  // Duration of bag
+  var duration = dilVol / pumpRate;
+
+  // Unit display helpers
+  var unitDisplay = rateUnit;
+  var rateDisplay = rateInput + ' ' + rateUnit;
+
+  // Concentration display (use mcg if very small mg values)
+  var concDisplay, stockDisplay;
+  if (concPrep < 0.1) {
+    concDisplay = (concPrep * 1000).toFixed(2) + ' mcg/mL';
   } else {
-    concPrep = concMgPerMl; // no dilution, use stock
+    concDisplay = concPrep.toFixed(3) + ' mg/mL';
   }
 
-  // Rate desired: convert to mg/kg/min
-  let rateMgKgMin = 0;
-  if (rateUnit === 'mcg/kg/min') rateMgKgMin = rateInput / 1000;
-  else if (rateUnit === 'mg/kg/min') rateMgKgMin = rateInput;
-  else if (rateUnit === 'mg/kg/h') rateMgKgMin = rateInput / 60;
-
-  // mL/h = (rate mg/kg/min × weight × 60) / conc mg/mL
-  const mlPerHour = (rateMgKgMin * weightKg * 60) / concPrep;
-
-  document.getElementById('cri-conc-prep').textContent = concPrep.toFixed(3) + ' mg/mL';
-  document.getElementById('cri-ml-per-hour').textContent = mlPerHour.toFixed(2) + ' mL/h';
-  document.getElementById('cri-drug-name').textContent = drug.generic;
-
-  // Duration estimate if stock vol entered
-  if (stockVol > 0 && mlPerHour > 0) {
-    const hours = dilVol / mlPerHour;
-    document.getElementById('cri-duration').textContent = hours.toFixed(1) + ' horas';
-    document.getElementById('cri-duration-row').style.display = '';
+  // Stock display
+  if (stockVol < 0.1) {
+    stockDisplay = stockVol.toFixed(3) + ' mL';
   } else {
-    document.getElementById('cri-duration-row').style.display = 'none';
+    stockDisplay = stockVol.toFixed(2) + ' mL';
   }
 
-  const instrText = stockVol > 0
-    ? `Tomar ${stockVol} cc de ${drug.generic} (${drug.conc} mg/mL) → llevar a ${dilVol} cc → concentración ${concPrep.toFixed(3)} mg/mL → pasar a ${mlPerHour.toFixed(2)} mL/h`
-    : `Usar ${drug.generic} sin diluir (${drug.conc} mg/mL) → pasar a ${mlPerHour.toFixed(2)} mL/h`;
-  document.getElementById('cri-instruction').textContent = instrText;
-  document.getElementById('cri-result').style.display = 'block';
+  // Loading dose
+  var loadHTML = '';
+  if (ref.loading && ref.loading.length > 0 && weightKg > 0) {
+    var loads = ref.loading.map(function(l) {
+      var loadMg = l.dose * weightKg;
+      var loadMl = loadMg / concStock;
+      var doseDisp = rateUnit.includes('mcg') ? (loadMg*1000).toFixed(1)+' mcg' : loadMg.toFixed(3)+' mg';
+      return '<div class="result-row" style="background:#fff7ed;border-radius:6px;padding:6px 10px;margin-top:4px">' +
+        '<div class="result-lbl" style="color:#ea580c">⚡ Loading dose</div>' +
+        '<div class="result-val" style="color:#ea580c;font-weight:800">' + loadMl.toFixed(2) + ' mL IV</div></div>' +
+        '<div style="font-size:11px;color:#ea580c;padding:0 10px 6px;margin-top:-2px">' +
+        l.label + ' (' + doseDisp + ')</div>';
+    });
+    loadHTML = loads.join('');
+  }
+
+  // Build result HTML
+  var noWeight = weightKg <= 0;
+  var warnWeight = noWeight ? '<div class="warn-note" style="margin-bottom:8px"><span>⚠</span><span>Ingresa el peso del paciente en la pantalla <b>Calcular</b> para ver los mL exactos.</span></div>' : '';
+
+  var instrText = noWeight
+    ? 'Ingresa el peso del paciente en Calcular para ver la preparación completa.'
+    : 'Tomar <b>' + stockDisplay + '</b> de ' + drug.generic + ' (' + (rateUnit.includes('mcg') ? (concStock*1000).toFixed(0)+' mcg/mL' : concStock+' mg/mL') + ')' +
+      ' → llevar a <b>' + dilVol + ' mL</b> con NaCl 0.9% o LR' +
+      ' → infundir a <b>' + pumpRate.toFixed(1) + ' mL/h</b> (= ' + rateDisplay + ')';
+
+  if (!resDiv) return;
+  resDiv.innerHTML =
+    '<div style="background:#1a5c38;border-radius:12px;padding:13px 16px;margin-bottom:12px;color:#fff">' +
+    '<div style="font-size:17px;font-weight:800">💉 CRI — ' + drug.generic + '</div>' +
+    '<div style="font-size:12px;color:#a7f3d0">' + rateDisplay + (weightKg>0?' · '+weightKg.toFixed(1)+' kg':'') + '</div>' +
+    '</div>' +
+    warnWeight +
+    '<div class="result-card"><div class="result-body">' +
+    '<div class="result-row"><div class="result-lbl">Velocidad de bomba</div>' +
+    '<div class="result-val" style="font-size:22px;font-weight:900;color:var(--accent)">' + pumpRate.toFixed(1) + ' mL/h</div></div>' +
+    (noWeight ? '' :
+    '<div class="result-row"><div class="result-lbl">Stock a tomar</div>' +
+    '<div class="result-val" style="font-size:18px;font-weight:800;color:var(--accent)">' + stockDisplay + '</div></div>' +
+    '<div class="result-row"><div class="result-lbl">Volumen de dilución</div>' +
+    '<div class="result-val">' + dilVol + ' mL (llevar a este volumen)</div></div>' +
+    '<div class="result-row"><div class="result-lbl">Concentración preparada</div>' +
+    '<div class="result-val">' + concDisplay + '</div></div>' +
+    '<div class="result-row"><div class="result-lbl">Duración de la bolsa</div>' +
+    '<div class="result-val">' + duration.toFixed(1) + ' h</div></div>') +
+    loadHTML +
+    '</div></div>' +
+    '<div style="background:#f0fdf4;border-left:3px solid var(--accent);border-radius:6px;padding:10px 12px;margin-top:8px;font-size:12px;line-height:1.7">' +
+    '<b>Preparación:</b> ' + instrText +
+    (ref.note ? '<br><span style="color:var(--muted)">ℹ ' + ref.note + '</span>' : '') +
+    '</div>';
+  resDiv.style.display = 'block';
 }
 
-// ─── DRUGS DB ─────────────────────────────────────────────────────────────────
+
 function renderDrugsDB(filter = '') {
   const drugs = getDrugs();
   const filtered = sortedDrugs(filter
@@ -1878,6 +1946,41 @@ function renderBCSSelector() {
 
 function selectBCS(n) { selectedBCS = n; renderBCSSelector(); calcBCS(); }
 
+
+function onBCSFoodChange() {
+  var val = (document.getElementById('bcs-food')||{value:''}).value;
+  var customDiv = document.getElementById('bcs-food-custom');
+  if (customDiv) customDiv.style.display = val === 'custom|taza' ? 'flex' : 'none';
+  calcBCS();
+}
+
+function getFoodKcalAndUnit() {
+  var sel = document.getElementById('bcs-food');
+  if (!sel || !sel.value) return null;
+  var val = sel.value;
+  if (val === 'custom|taza') {
+    var kcal = parseFloat((document.getElementById('bcs-food-kcal')||{value:0}).value)||0;
+    var unit = (document.getElementById('bcs-food-unit')||{value:'taza'}).value;
+    return kcal > 0 ? {kcal:kcal, unit:unit, name:'Alimento personalizado'} : null;
+  }
+  var parts = val.split('|');
+  var kcal = parseFloat(parts[0]);
+  var unit = parts[1] || 'taza';
+  var name = sel.options[sel.selectedIndex] ? sel.options[sel.selectedIndex].text.split(' — ')[0].trim() : '';
+  return {kcal:kcal, unit:unit, name:name};
+}
+
+function formatFraction(n) {
+  // Round to nearest 0.25
+  var rounded = Math.round(n * 4) / 4;
+  var whole = Math.floor(rounded);
+  var frac = rounded - whole;
+  var fracStr = frac === 0.25 ? '¼' : frac === 0.5 ? '½' : frac === 0.75 ? '¾' : '';
+  if (whole === 0 && fracStr) return fracStr;
+  if (whole > 0 && fracStr) return whole + ' ' + fracStr;
+  return whole.toString();
+}
+
 function calcBCS() {
   var wA = parseFloat((document.getElementById('bcs-weight')||{value:0}).value)||0;
   var sp = (document.getElementById('bcs-species')||{value:'dog'}).value;
@@ -1913,6 +2016,22 @@ function calcBCS() {
   h += '</div></div>';
   if (sp==='cat'&&!isI) h += '<div class="warn-note"><span>ℹ</span><span>Gatos: NUNCA restricción calórica severa — alto riesgo de lipidosis hepática. Pérdida máxima 0.5%/semana.</span></div>';
   h += '<div class="warn-note"><span>ℹ</span><span>Resultado es punto de partida clínico. Ajustar según respuesta individual, BCS y masa muscular.</span></div>';
+  // MOD-047: Add food quantity if aliment selected
+  var foodInfo = getFoodKcalAndUnit();
+  if (foodInfo && foodInfo.kcal > 0 && !isU) {
+    var qty = wlc / foodInfo.kcal;
+    var qtyFmt = formatFraction(qty);
+    h += '<div class="result-card" style="border-color:#6ee7b7">' +
+      '<div class="result-header" style="background:#1a5c38">' +
+      '<div class="result-names"><div class="result-generic" style="color:#fff">Cantidad de alimento</div>' +
+      '<div class="result-trade" style="color:#a7f3d0">' + foodInfo.name + '</div></div>' +
+      '<div class="result-dose" style="color:#a7f3d0;font-size:22px">' + qtyFmt + ' ' + foodInfo.unit + '/día</div>' +
+      '</div><div class="result-body">' +
+      '<div class="result-row"><div class="result-lbl">Cantidad exacta</div><div class="result-val">' + qty.toFixed(2) + ' ' + foodInfo.unit + '/día</div></div>' +
+      '<div class="result-row"><div class="result-lbl">kcal por ' + foodInfo.unit + '</div><div class="result-val">' + foodInfo.kcal + ' kcal</div></div>' +
+      '<div class="result-row"><div class="result-lbl">Total diario</div><div class="result-val">' + (qty*foodInfo.kcal).toFixed(0) + ' kcal (meta: ' + wlc.toFixed(0) + ' kcal)</div></div>' +
+      '</div></div>';
+  }
   res.innerHTML = h;
   res.style.display = 'block';
 }
@@ -2091,6 +2210,71 @@ function calcFluidos() {
   `;
   document.getElementById('fl-result').style.display = 'block';
 }
+
+
+// --- CORRECCIÓN DE POTASIO K+ (MOD-046) ------------------------------------
+var K_TABLE = [
+  {max:2.0, mEqPerL:80,  label:'< 2.0 mEq/L — Hipocalemia severa'},
+  {max:2.5, mEqPerL:60,  label:'2.0–2.5 mEq/L — Hipocalemia moderada-severa'},
+  {max:3.0, mEqPerL:40,  label:'2.5–3.0 mEq/L — Hipocalemia moderada'},
+  {max:3.5, mEqPerL:28,  label:'3.0–3.5 mEq/L — Hipocalemia leve'},
+  {max:5.0, mEqPerL:20,  label:'3.5–5.0 mEq/L — Normal (mantenimiento)'},
+];
+
+function calcPotasio() {
+  var kSerum    = parseFloat((document.getElementById('k-serum')||{value:0}).value)||0;
+  var wkg       = parseFloat((document.getElementById('k-weight')||{value:0}).value)||getWeightKg();
+  var bagVol    = parseFloat((document.getElementById('k-bag-vol')||{value:500}).value)||500;
+  var fluidRate = parseFloat((document.getElementById('k-fluid-rate')||{value:0}).value)||0;
+  var resDiv    = document.getElementById('k-result');
+  if (!resDiv) return;
+  if (kSerum <= 0) { resDiv.style.display='none'; return; }
+
+  if (kSerum >= 5.5) {
+    resDiv.innerHTML = '<div class="warn-note" style="background:#fef2f2;border-color:#dc2626"><span style="color:#dc2626">HIPERKALEMIA (K+ ' + kSerum + ' mEq/L)</span><span style="color:#dc2626"> — Contraindicado suplementar potasio.</span></div>';
+    resDiv.style.display='block'; return;
+  }
+
+  var rec = K_TABLE[K_TABLE.length-1];
+  for (var i=0; i<K_TABLE.length; i++) { if (kSerum < K_TABLE[i].max) { rec=K_TABLE[i]; break; } }
+
+  var mEqPerL  = rec.mEqPerL;
+  var mEqTotal = mEqPerL * (bagVol/1000);
+  var kclMl    = mEqTotal / 2; // KCl 2 mEq/mL
+  var maxH     = wkg>0 ? 0.5*wkg : null;
+  var actH     = fluidRate>0 ? mEqTotal/(bagVol/fluidRate) : null;
+  var safe     = (actH!==null&&maxH!==null) ? actH<=maxH : null;
+  var hdrColor = safe===false ? '#dc2626' : '#1a5c38';
+
+  var h = '<div style="background:'+hdrColor+';border-radius:12px;padding:13px 16px;margin-bottom:12px;color:#fff">'+
+    '<div style="font-size:17px;font-weight:800">K+ Corrección de Potasio</div>'+
+    '<div style="font-size:12px;color:#a7f3d0">'+rec.label+'</div></div>'+
+    '<div class="result-card"><div class="result-body">'+
+    '<div class="result-row"><div class="result-lbl">Suplementación</div><div class="result-val" style="font-weight:800;color:var(--accent)">'+mEqPerL+' mEq/L</div></div>'+
+    '<div class="result-row"><div class="result-lbl">mEq totales</div><div class="result-val" style="font-weight:800">'+mEqTotal.toFixed(1)+' mEq</div></div>'+
+    '<div class="result-row"><div class="result-lbl">KCl 2 mEq/mL a agregar</div><div class="result-val" style="font-size:22px;font-weight:900;color:var(--accent)">'+kclMl.toFixed(1)+' mL</div></div>'+
+    '<div class="result-row"><div class="result-lbl">Bolsa</div><div class="result-val">'+bagVol+' mL</div></div>';
+
+  if (actH!==null) {
+    h+='<div class="result-row"><div class="result-lbl">Tasa K+ resultante</div>'+
+       '<div class="result-val" style="font-weight:700;color:'+(safe===false?'#dc2626':'inherit')+'">'+actH.toFixed(3)+' mEq/kg/h</div></div>';
+    if (maxH!==null) h+='<div class="result-row"><div class="result-lbl">Tasa máxima segura</div><div class="result-val">0.5 mEq/kg/h = '+maxH.toFixed(2)+' mEq/h</div></div>';
+  }
+  h+='</div></div>';
+
+  if (safe===false) {
+    var maxFR = maxH ? (maxH/mEqTotal*bagVol).toFixed(0) : '?';
+    h+='<div class="warn-note" style="background:#fef2f2;border-color:#dc2626"><span style="color:#dc2626">TASA EXCEDE MAXIMO</span><span style="color:#dc2626"> — Reducir fluido a max '+maxFR+' mL/h o usar bolsa mas grande.</span></div>';
+  } else if (safe===true) {
+    h+='<div class="warn-note"><span>OK</span><span>Tasa dentro del limite seguro. Monitorear K serico cada 4-6 h.</span></div>';
+  }
+  h+='<div style="background:#f0fdf4;border-left:3px solid var(--accent);border-radius:6px;padding:10px 12px;margin-top:8px;font-size:12px;line-height:1.7">'+
+     '<b>Preparacion:</b> Agregar <b>'+kclMl.toFixed(1)+' mL de KCl (2 mEq/mL)</b> a '+bagVol+' mL de fluido isotónico. Mezclar bien.<br>'+
+     '<span style="color:var(--muted)">Nunca administrar KCl IV puro (push). Monitorear ECG si K &lt; 2.5 mEq/L.</span></div>';
+
+  resDiv.innerHTML=h; resDiv.style.display='block';
+}
+
 
 // ─── MÓDULO NUTRICIÓN ─────────────────────────────────────────────────────────
 
