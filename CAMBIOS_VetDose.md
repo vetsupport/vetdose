@@ -1,10 +1,40 @@
 # VetDose — Registro de Cambios y Modificaciones Pendientes
-# Actualizado: Mayo 2026
+# Actualizado: Junio 2026
 # Formato: [ESTADO] = ✅ Implementado | ⏳ Pendiente | 🔄 En progreso
 
 ═══════════════════════════════════════════════════════════════
 ## VERSIONES IMPLEMENTADAS
 ═══════════════════════════════════════════════════════════════
+
+### v7 — Auditoría de tablas de dosificación (Junio 2026)
+✅ BUG CRÍTICO corregido: redondeo de conversión kg→lb causaba falsos
+   "fuera de rango" en límites exactos de tabla (ej. 10 kg = 22.0462 lb
+   caía fuera de un límite de 22.0). Ahora se redondea a 1 decimal antes
+   de comparar contra los rangos. Afectaba calculate() y shareResults().
+✅ Apoquel — CORREGIDO: tabla daba 16mg a perros de 20-89 lb que en
+   realidad necesitaban 5.4mg (sobredosis ~3x). Reconstruida con la
+   tabla oficial completa de Zoetis (9 filas, 6.6-175.9 lb).
+✅ Zenrelia — CORREGIDO: tabletas inventadas de 4/8/16 mg reemplazadas
+   por las reales (4.8/6.4/8.5/15 mg). Tabla completa reconstruida con
+   15 filas según label oficial de Elanco (DailyMed NADA 141-585).
+✅ Solensia — CORREGIDO: viales inventados de 1/2/3/4 mg reemplazados.
+   El vial real es SIEMPRE 7 mg/mL. Simplificado a 2 filas reales:
+   5.5-15.4 lb = 1 vial, ≥15.5 lb = 2 viales.
+✅ Cerenia tabs — CORREGIDO: prácticamente todos los rangos de peso
+   estaban mal alineados con las cantidades de tabletas. Reconstruida
+   con breakpoints oficiales en kg convertidos a lb (6 filas).
+✅ Librela — agregada categoría faltante <11 lb (dosis 0.1 mL/kg, no
+   vial completo) y precisión de límites corregida (22.1 en vez de 22.0).
+✅ Verificadas SIN cambios (ya correctas): Cytopoint, Simparica,
+   Simparica Trio, Trifexis, Cardalis, Interceptor Plus.
+Fuentes: DailyMed FDA, labels oficiales Zoetis/Elanco/Ceva (PDFs de
+   dosing chart descargados y verificados línea por línea).
+Archivo modificado: app.js únicamente (TABLE_DRUGS + calculate() +
+   shareResults()). index.html, sw.js, manifest.json e ícones sin cambios.
+NOTA: revisar manualmente los pesos límite de Apoquel y Zenrelia
+   (cambios más profundos) contra el label físico antes de uso clínico.
+
+---
 
 ### v1 — Versión inicial
 ✅ PWA instalable en iPhone

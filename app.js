@@ -265,20 +265,21 @@ var SEED_DRUGS = [
 ];
 
 var TABLE_DRUGS = [
-  // ── APOQUEL (Oclacitinib) ── Zoetis label verified ──────────────────────────
+  // ── APOQUEL (Oclacitinib) ── Zoetis label OFICIAL verificado (apoquel-dosing-guide-one-pager.pdf) ──
   {
     id: 'apoquel_table', generic: 'Oclacitinib (tabla)', trade: 'Apoquel',
     species: ['dog'], category: 'dermatology/JAK inhibitor',
     notes: 'Solo perros ≥ 12 meses y ≥ 6.6 lb. Fase aguda: c/12h x 14 días, luego c/24h. Con o sin comida.',
     rows: [
-      { minLb: 6.6,  maxLb: 9.9,  result: '3.6 mg — 1 tab. 3.6 mg' },
-      { minLb: 10.0, maxLb: 14.9, result: '5.4 mg — 1 tab. 5.4 mg' },
-      { minLb: 15.0, maxLb: 19.9, result: '5.4 mg — 1 tab. 5.4 mg' },
-      { minLb: 20.0, maxLb: 29.9, result: '16 mg — 1 tab. 16 mg' },
-      { minLb: 30.0, maxLb: 44.9, result: '16 mg — 1 tab. 16 mg' },
-      { minLb: 45.0, maxLb: 59.9, result: '16 mg — 1.5 comprimidos 16 mg' },
-      { minLb: 60.0, maxLb: 89.9, result: '16 mg — 2 tab. 16 mg' },
-      { minLb: 90.0, maxLb: 130,  result: '16 mg — 3 tab. 16 mg' },
+      { minLb: 6.6,  maxLb: 9.9,   result: '0.5 tab. 3.6 mg (1.8 mg)' },
+      { minLb: 10.0, maxLb: 14.9,  result: '0.5 tab. 5.4 mg (2.7 mg)' },
+      { minLb: 15.0, maxLb: 19.9,  result: '1 tab. 3.6 mg' },
+      { minLb: 20.0, maxLb: 29.9,  result: '1 tab. 5.4 mg' },
+      { minLb: 30.0, maxLb: 44.9,  result: '0.5 tab. 16 mg (8 mg)' },
+      { minLb: 45.0, maxLb: 59.9,  result: '2 tab. 5.4 mg (10.8 mg)' },
+      { minLb: 60.0, maxLb: 89.9,  result: '1 tab. 16 mg' },
+      { minLb: 90.0, maxLb: 129.9, result: '1.5 tab. 16 mg (24 mg)' },
+      { minLb: 130.0,maxLb: 175.9, result: '2 tab. 16 mg' },
     ]
   },
 
@@ -348,60 +349,74 @@ var TABLE_DRUGS = [
     ]
   },
 
-  // ── CERENIA TABS (Maropitant) ── Zoetis label ───────────────────────────────
+  // ── CERENIA TABS (Maropitant) ── Zoetis label OFICIAL (vómito agudo 2mg/kg) ──
   {
     id: 'cerenia_tab_table', generic: 'Maropitant tabletas (tabla)', trade: 'Cerenia tabs',
     species: ['dog', 'cat'], category: 'antiemetic',
-    notes: 'Perros y gatos ≥ 16 semanas. DAR CON COMIDA para reducir hipersalivación. Vómito agudo: 1 dosis/día x 5 días. Cinetosis: dar 2h antes del viaje.',
+    notes: 'Perros: aprobado FDA. Gatos: uso off-label (misma dosis 2 mg/kg, ampliamente aceptado en práctica clínica). ≥16 semanas. DAR CON COMIDA para reducir hipersalivación. Vómito agudo: SID x hasta 14 días (perros) o 5 días (gatos, extra-label).',
     rows: [
-      { minLb: 4.4,  maxLb: 8.8,  result: '4.4–8.8 lb → 1 tab. 16 mg' },
-      { minLb: 8.9,  maxLb: 17.6, result: '8.9–17.6 lb → 1 tab. 24 mg' },
-      { minLb: 17.7, maxLb: 33.0, result: '17.7–33 lb → 1 tab. 60 mg' },
-      { minLb: 33.1, maxLb: 66.0, result: '33.1–66 lb → 1 tab. 60 mg' },
-      { minLb: 66.1, maxLb: 110,  result: '66.1–110 lb → 2 tab. 60 mg' },
+      { minLb: 6.6,  maxLb: 8.8,   result: '6.6–8.8 lb (3.0–4.0 kg) → 0.5 tab. 16 mg' },
+      { minLb: 8.9,  maxLb: 17.6,  result: '8.9–17.6 lb (4.1–8.0 kg) → 1 tab. 16 mg' },
+      { minLb: 17.7, maxLb: 26.5,  result: '17.7–26.5 lb (8.1–12.0 kg) → 1 tab. 24 mg' },
+      { minLb: 26.6, maxLb: 52.9,  result: '26.6–52.9 lb (12.1–24.0 kg) → 2 tab. 24 mg' },
+      { minLb: 53.0, maxLb: 66.1,  result: '53.0–66.1 lb (24.1–30.0 kg) → 1 tab. 60 mg' },
+      { minLb: 66.2, maxLb: 132.3, result: '66.2–132.3 lb (30.1–60.0 kg) → 2 tab. 60 mg' },
     ]
   },
 
-  // ── LIBRELA (Bedinvetmab) ── Zoetis US label: 0.5 mg/kg SQ mensual ──────────
-  // Viales: 5, 10, 15, 20, 30 mg/mL (1 mL c/u). Para 5–60 kg: 1 mL del vial correspondiente
+  // ── LIBRELA (Bedinvetmab) ── Zoetis label OFICIAL: Librela-dosing-chart.pdf ──
+  // 0.5 mg/kg SQ mensual. <5kg: 0.1 mL/kg de vial 5mg/mL. ≥5kg: vial completo (1mL) según tabla.
   {
     id: 'librela_table', generic: 'Bedinvetmab (tabla)', trade: 'Librela',
     species: ['dog'], category: 'analgesic',
-    notes: 'Solo perros. Anti-NGF. Dolor osteoarticular. Dosis: 0.5 mg/kg (0.23 mg/lb) SQ mensual. Administrar contenido completo (1 mL) del vial. Para >60 kg combinar viales. No usar con AINEs a largo plazo. No usar en gestantes/lactantes/reproductores.',
+    notes: 'Solo perros. Anti-NGF. Dolor osteoarticular. Dosis: 0.5 mg/kg (0.23 mg/lb) SQ mensual. Administrar contenido completo (1 mL) del vial para ≥5kg. No usar con AINEs a largo plazo. No usar en gestantes/lactantes/reproductores.',
     rows: [
-      { minLb: 11.0, maxLb: 22.0, result: '11–22 lb (5–10 kg → 1 mL vial 5 mg SQ' },
-      { minLb: 22.1, maxLb: 44.0, result: '22.1–44 lb (10–20 kg → 1 mL vial 10 mg SQ' },
-      { minLb: 44.1, maxLb: 66.0, result: '44.1–66 lb (20–30 kg → 1 mL vial 15 mg SQ' },
-      { minLb: 66.1, maxLb: 88.0, result: '66.1–88 lb (30–40 kg → 1 mL vial 20 mg SQ' },
-      { minLb: 88.1, maxLb: 132,  result: '88.1–132 lb (40–60 kg → 1 mL vial 30 mg SQ' },
-      { minLb: 132.1,maxLb: 176,  result: '>132 lb (>60 kg → combinar viales según peso. Consultar tabla Zoetis.' },
+      { minLb: 0,    maxLb: 10.9,  result: '<11 lb (<5 kg) → 0.1 mL/kg del vial 5 mg/mL (NO vial completo)' },
+      { minLb: 11.0, maxLb: 22.1,  result: '11–22.1 lb (5–10 kg) → 1 mL vial 5 mg SQ' },
+      { minLb: 22.2, maxLb: 44.1,  result: '22.2–44.1 lb (10.1–20 kg) → 1 mL vial 10 mg SQ' },
+      { minLb: 44.2, maxLb: 66.1,  result: '44.2–66.1 lb (20.1–30 kg) → 1 mL vial 15 mg SQ' },
+      { minLb: 66.2, maxLb: 88.2,  result: '66.2–88.2 lb (30.1–40 kg) → 1 mL vial 20 mg SQ' },
+      { minLb: 88.3, maxLb: 132.3, result: '88.3–132.3 lb (40.1–60 kg) → 1 mL vial 30 mg SQ' },
+      { minLb: 132.4,maxLb: 176.4, result: '132.4–176.4 lb (60.1–80 kg) → 2 mL (2 viales 30 mg) SQ' },
+      { minLb: 176.5,maxLb: 220.5, result: '176.5–220.5 lb (80.1–100 kg) → 1 vial 20mg + 1 vial 30mg SQ' },
+      { minLb: 220.6,maxLb: 264.6, result: '220.6–264.6 lb (100.1–120 kg) → 2 viales 30 mg SQ' },
     ]
   },
 
-  // ── SOLENSIA (Frunevetmab) ── Zoetis label: 1 mg/kg SQ mensual gatos ────────
+  // ── SOLENSIA (Frunevetmab) ── Zoetis label OFICIAL: vial SIEMPRE 7 mg/mL ────
+  // Dosis nominal 1 mg/kg (rango eficacia 1-2.8 mg/kg) SQ mensual. Administrar vial(es) completo(s).
   {
     id: 'solensia_table', generic: 'Frunevetmab (tabla)', trade: 'Solensia',
     species: ['cat'], category: 'analgesic',
-    notes: 'Solo gatos. Anti-NGF felino. Dolor osteoarticular. Dosis: 1 mg/kg SQ mensual. Administrar contenido completo del vial. No usar en gestantes/lactantes/reproductores.',
+    notes: 'Solo gatos. Anti-NGF felino. Dolor osteoarticular. Vial SIEMPRE 7 mg/mL (NO existen viales de 1/2/3/4mg). Dosis nominal 1 mg/kg SQ mensual. Administrar contenido completo de cada vial. No usar en gestantes/lactantes/reproductores.',
     rows: [
-      { minLb: 4.4,  maxLb: 8.8,  result: '4.4–8.8 lb (2–4 kg → 1 vial 1 mg SQ' },
-      { minLb: 8.9,  maxLb: 13.2, result: '8.9–13.2 lb (4–6 kg → 1 vial 2 mg SQ' },
-      { minLb: 13.3, maxLb: 17.6, result: '13.3–17.6 lb (6–8 kg → 1 vial 3 mg SQ' },
-      { minLb: 17.7, maxLb: 22.0, result: '17.7–22 lb (8–10 kg → 1 vial 4 mg SQ' },
+      { minLb: 5.5,  maxLb: 15.4,  result: '5.5–15.4 lb (2.5–7 kg) → 1 vial 7 mg SQ (1 mL)' },
+      { minLb: 15.5, maxLb: 35,    result: '≥15.5 lb (>7 kg) → 2 viales 7 mg SQ (2 mL, mismo jeringa)' },
     ]
   },
 
-  // ── ZENRELIA (Ilunocitinib) ── Zoetis label 2024 ────────────────────────────
+  // ── ZENRELIA (Ilunocitinib) ── Elanco label OFICIAL (DailyMed NADA 141-585) ──
+  // CORRECCIÓN MAYOR: tabletas reales son 4.8/6.4/8.5/15 mg (NO 4/8/16mg como antes).
   {
     id: 'zenrelia_table', generic: 'Ilunocitinib (tabla)', trade: 'Zenrelia',
     species: ['dog'], category: 'dermatology/JAK inhibitor',
-    notes: 'Solo perros ≥ 12 meses. JAK1 inhibidor. Dermatitis atópica. Una vez al día. Comprimidos de 4, 8 y 16 mg.',
+    notes: 'Solo perros ≥ 12 meses. JAK inhibidor. Dermatitis atópica. Una vez al día, con o sin comida. Comprimidos ranurados de 4.8, 6.4, 8.5 y 15 mg (NO existen tabletas de 4/8/16mg).',
     rows: [
-      { minLb: 6.6,  maxLb: 11.0, result: '6.6–11 lb → 1 tab. 4 mg SID' },
-      { minLb: 11.1, maxLb: 22.0, result: '11.1–22 lb → 1 tab. 8 mg SID' },
-      { minLb: 22.1, maxLb: 44.0, result: '22.1–44 lb → 1 tab. 16 mg SID' },
-      { minLb: 44.1, maxLb: 88.0, result: '44.1–88 lb → 2 tab. 16 mg SID' },
-      { minLb: 88.1, maxLb: 132,  result: '88.1–132 lb → 3 tab. 16 mg SID' },
+      { minLb: 6.6,   maxLb: 8.8,   result: '6.6–8.8 lb → 0.5 tab. 4.8 mg' },
+      { minLb: 8.9,   maxLb: 11.8,  result: '8.9–11.8 lb → 0.5 tab. 6.4 mg' },
+      { minLb: 11.9,  maxLb: 14.3,  result: '11.9–14.3 lb → 0.5 tab. 8.5 mg' },
+      { minLb: 14.4,  maxLb: 17.7,  result: '14.4–17.7 lb → 1 tab. 4.8 mg' },
+      { minLb: 17.8,  maxLb: 23.6,  result: '17.8–23.6 lb → 1 tab. 6.4 mg' },
+      { minLb: 23.7,  maxLb: 31.1,  result: '23.7–31.1 lb → 1 tab. 8.5 mg' },
+      { minLb: 31.2,  maxLb: 35.4,  result: '31.2–35.4 lb → 1.5 tab. 6.4 mg' },
+      { minLb: 35.5,  maxLb: 43.1,  result: '35.5–43.1 lb → 1.5 tab. 8.5 mg' },
+      { minLb: 43.2,  maxLb: 55.0,  result: '43.2–55.0 lb → 1 tab. 15 mg' },
+      { minLb: 55.1,  maxLb: 62.5,  result: '55.1–62.5 lb → 2 tab. 8.5 mg' },
+      { minLb: 62.6,  maxLb: 83.3,  result: '62.6–83.3 lb → 1.5 tab. 15 mg' },
+      { minLb: 83.4,  maxLb: 110.0, result: '83.4–110.0 lb → 2 tab. 15 mg' },
+      { minLb: 110.1, maxLb: 137.5, result: '110.1–137.5 lb → 2.5 tab. 15 mg' },
+      { minLb: 137.6, maxLb: 166.0, result: '137.6–166.0 lb → 3 tab. 15 mg' },
+      { minLb: 166.1, maxLb: 250,   result: '≥166.1 lb → combinación de tabletas. Consultar tabla Elanco completa.' },
     ]
   },
 
@@ -1118,10 +1133,16 @@ function calculate() {
   });
 
   // Calculate table drugs
+  // NOTA: redondeamos a 1 decimal antes de comparar contra los límites de tabla.
+  // Conversiones kg->lb pueden caer en micro-huecos entre filas (ej. 10kg = 22.0462lb,
+  // mayor que un límite de 22.0), causando falsos "fuera de rango". Las tablas de los
+  // fabricantes están definidas con precisión de 1 decimal, así que este redondeo es
+  // clínicamente correcto y no introduce error.
+  const weightLbRounded = Math.round(weightLb * 10) / 10;
   const tableResults = TABLE_DRUGS
     .filter(td => state.selectedTableDrugs.has(td.id))
     .map(td => {
-      const row = td.rows.find(r => weightLb >= r.minLb && weightLb <= r.maxLb);
+      const row = td.rows.find(r => weightLbRounded >= r.minLb && weightLbRounded <= r.maxLb);
       return { ...td, tableResult: row ? row.result : `Peso ${weightLb.toFixed(1)} lb fuera de rango de tabla`, isTable: true };
     });
 
@@ -1390,7 +1411,7 @@ function shareResults() {
   });
 
   TABLE_DRUGS.filter(td => state.selectedTableDrugs.has(td.id)).forEach(td => {
-    const weightLb = getWeightLb();
+    const weightLb = Math.round(getWeightLb() * 10) / 10;
     const row = td.rows.find(r => weightLb >= r.minLb && weightLb <= r.maxLb);
     const dose = row ? row.result.replace(/^[^\u2192]*\u2192\s*/,'') : 'fuera de rango';
     text += `[TAB] ${td.trade.toUpperCase()}\n`;
