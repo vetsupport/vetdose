@@ -600,6 +600,7 @@ document.addEventListener('DOMContentLoaded', () => {
   renderDrugList();
   renderDrugsDB();
   populateCRISelect();
+  populateNutFactors(); // Poblar selectores de alimentos al iniciar
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('sw.js').catch(() => {});
   }
@@ -1610,6 +1611,13 @@ function updateCRI() {
         '<div style="font-size:11px;color:#ea580c;padding:0 10px 6px;margin-top:-2px">' +
         l.label + ' (' + doseDisp + ')</div>';
     });
+    loads.push(
+      '<div style="background:#fff7ed;border-left:3px solid #ea580c;border-radius:6px;padding:8px 10px;margin-top:4px;font-size:11px;color:#7c2d12;line-height:1.6">' +
+      '<b>Cómo administrar:</b> Extraer del <b>vial stock original</b> (no de la bolsa diluida). ' +
+      'Administrar IV lento en 1–5 min <b>antes de iniciar la CRI</b>. ' +
+      'Si aparece hipotensión o efecto adverso durante la loading dose, pausar y reevaluar antes de iniciar la infusión.' +
+      '</div>'
+    );
     loadHTML = loads.join('');
   }
 
@@ -1948,51 +1956,50 @@ function selectBCS(n) { selectedBCS = n; renderBCSSelector(); calcBCS(); }
 
 
 // ─── BASE DE DATOS DE ALIMENTOS POR ESPECIE ──────────────────────────────────
+// Valores verificados contra sitios oficiales de cada fabricante (Junio 2026):
+// hillspet.com, royalcanin.com, purina.com / shop.purina.com, chewy.com, petco.com
 var FOODS_DB = {
   dog: [
     { group: "🐕 Hill's — Seco (taza)", items: [
-      { val: "364|taza", label: "Hill's Science Diet Adult Canino — 364 kcal/taza" },
-      { val: "243|taza", label: "Hill's Prescription r/d Canino — 243 kcal/taza" },
-      { val: "286|taza", label: "Hill's Prescription w/d Canino — 286 kcal/taza" },
-      { val: "330|taza", label: "Hill's Science Diet Large Breed Canino — 330 kcal/taza" },
-      { val: "260|taza", label: "Hill's Metabolic Canino — 260 kcal/taza" },
+      { val: "365|taza", label: "Hill's Science Diet Adult Canino — 365 kcal/taza" },
+      { val: "245|taza", label: "Hill's Prescription r/d Canino — 245 kcal/taza" },
+      { val: "255|taza", label: "Hill's Prescription w/d Canino — 255 kcal/taza" },
+      { val: "291|taza", label: "Hill's Prescription Metabolic Canino — 291 kcal/taza" },
     ]},
     { group: "🐕 Royal Canin — Seco (taza)", items: [
-      { val: "265|taza", label: "RC Satiety Support Canino — 265 kcal/taza" },
-      { val: "316|taza", label: "RC Weight Control Canino — 316 kcal/taza" },
+      { val: "224|taza", label: "RC Satiety Support Canino (Rx) — 224 kcal/taza" },
+      { val: "256|taza", label: "RC Medium Weight Care Canino — 256 kcal/taza" },
       { val: "354|taza", label: "RC Medium Adult Canino — 354 kcal/taza" },
     ]},
     { group: "🐕 Purina — Seco (taza)", items: [
-      { val: "340|taza", label: "Pro Plan Weight Management Canino — 340 kcal/taza" },
-      { val: "352|taza", label: "Purina ONE Healthy Weight Canino — 352 kcal/taza" },
-      { val: "388|taza", label: "Pro Plan Adult Chicken & Rice Canino — 388 kcal/taza" },
+      { val: "330|taza", label: "Pro Plan Weight Management Canino — 330 kcal/taza" },
+      { val: "325|taza", label: "Purina ONE Healthy Weight Canino — 325 kcal/taza" },
+      { val: "369|taza", label: "Pro Plan Adult Chicken & Rice Canino — 369 kcal/taza" },
     ]},
     { group: "🥫 Húmedo Canino — Latas", items: [
-      { val: "159|lata", label: "Hill's Science Diet Adult Canino (lata 156g) — 159 kcal/lata" },
       { val: "120|lata", label: "Hill's Prescription r/d Canino (lata 156g) — 120 kcal/lata" },
-      { val: "157|lata", label: "RC Satiety Support Canino (lata 195g) — 157 kcal/lata" },
+      { val: "225|lata", label: "RC Satiety Support Canino (lata) — 225 kcal/lata" },
       { val: "185|lata", label: "Purina Pro Plan Adult Canino (lata 368g) — 185 kcal/lata" },
     ]},
   ],
   cat: [
     { group: "🐈 Hill's — Seco (taza)", items: [
-      { val: "378|taza", label: "Hill's Science Diet Adult Felino — 378 kcal/taza" },
-      { val: "273|taza", label: "Hill's Prescription r/d Felino — 273 kcal/taza" },
-      { val: "267|taza", label: "Hill's Prescription w/d Felino — 267 kcal/taza" },
-      { val: "291|taza", label: "Hill's Metabolic Felino — 291 kcal/taza" },
+      { val: "265|taza", label: "Hill's Prescription r/d Felino — 265 kcal/taza" },
+      { val: "280|taza", label: "Hill's Prescription w/d Felino — 280 kcal/taza" },
+      { val: "288|taza", label: "Hill's Science Diet Light Felino — 288 kcal/taza" },
+      { val: "300|taza", label: "Hill's Science Diet Perfect Weight Felino — 300 kcal/taza" },
     ]},
     { group: "🐈 Royal Canin — Seco (taza)", items: [
-      { val: "287|taza", label: "RC Satiety Support Felino — 287 kcal/taza" },
-      { val: "310|taza", label: "RC Indoor Adult Felino — 310 kcal/taza" },
+      { val: "234|taza", label: "RC Satiety Support Felino (Rx) — 234 kcal/taza" },
+      { val: "325|taza", label: "RC Indoor Adult Felino — 325 kcal/taza" },
+      { val: "254|taza", label: "RC Weight Care Felino — 254 kcal/taza" },
     ]},
     { group: "🐈 Purina — Seco (taza)", items: [
-      { val: "346|taza", label: "Pro Plan Weight Management Felino — 346 kcal/taza" },
-      { val: "373|taza", label: "Pro Plan Adult Salmon Felino — 373 kcal/taza" },
+      { val: "353|taza", label: "Pro Plan Weight Management Felino — 353 kcal/taza" },
+      { val: "427|taza", label: "Purina ONE Ideal Weight Felino — 427 kcal/taza" },
     ]},
     { group: "🥫 Húmedo Felino — Latas", items: [
-      { val: "120|lata", label: "Hill's Prescription r/d Felino (lata 156g) — 120 kcal/lata" },
-      { val: "157|lata", label: "RC Satiety Support Felino (lata 195g) — 157 kcal/lata" },
-      { val: "73|lata",  label: "Hill's Science Diet Adult Felino (lata 82g) — 73 kcal/lata" },
+      { val: "82|lata",  label: "RC Satiety Support Felino (lata 5.8oz) — 82 kcal/lata" },
       { val: "185|lata", label: "Purina Pro Plan Adult Felino (lata 156g) — 185 kcal/lata" },
     ]},
   ]
@@ -2231,17 +2238,20 @@ function calcFluidos() {
   if (isColloid) {
     const colloidMax = species === 'cat' ? 10 : 20;
     const colloidMl  = colloidMax * wkg;
-    const colloidMin = 5 * wkg;
+    const colloidMin = 3 * wkg;
+    const colloidMid = 5 * wkg;
     document.getElementById('fl-result').innerHTML =
       '<div style="background:#1a5c38;border-radius:12px;padding:13px 16px;margin-bottom:12px;color:#fff">' +
       '<div style="font-size:17px;font-weight:800">🩸 ' + fluidInfo.name + ' — Coloide</div>' +
       '<div style="font-size:12px;color:#a7f3d0">' + speciesIcon + ' ' + wkg.toFixed(1) + ' kg</div></div>' +
       '<div class="result-card"><div class="result-body">' +
-      '<div class="result-row"><div class="result-lbl">Bolo mínimo (5 mL/kg)</div><div class="result-val">' + colloidMin.toFixed(1) + ' mL IV</div></div>' +
-      '<div class="result-row"><div class="result-lbl">Dosis máxima (' + colloidMax + ' mL/kg/día)</div><div class="result-val" style="font-weight:800;color:#7c3aed">' + colloidMl.toFixed(1) + ' mL</div></div>' +
-      '<div class="result-row"><div class="result-lbl">Tasa</div><div class="result-val">10–20 mL/kg/h (bolus lento)</div></div>' +
+      '<div class="result-row"><div class="result-lbl">Bolus inicial (3–5 mL/kg × 15 min)</div><div class="result-val">' + colloidMin.toFixed(1) + '–' + colloidMid.toFixed(1) + ' mL IV</div></div>' +
+      '<div class="result-row"><div class="result-lbl">→ Reevaluar tras cada bolus</div><div class="result-val">PA, TRC, FC, lactato</div></div>' +
+      '<div class="result-row"><div class="result-lbl">Dosis máxima/día (' + colloidMax + ' mL/kg)</div><div class="result-val" style="font-weight:800;color:#7c3aed">' + colloidMl.toFixed(1) + ' mL total</div></div>' +
+      '<div class="result-row"><div class="result-lbl">Velocidad de infusión</div><div class="result-val">10–20 mL/kg/h (bolo lento 15 min)</div></div>' +
       '<div class="result-row"><div class="result-lbl">Combinar con cristaloide</div><div class="result-val">✅ LR o NaCl 0.9%</div></div>' +
       '</div></div>' +
+      '<div style="background:#fef3c7;border-left:3px solid #d97706;border-radius:6px;padding:9px 12px;margin-top:8px;font-size:12px;color:#78350f;line-height:1.6">⚠ <b>Precaución:</b> Riesgo de coagulopatía y lesión renal aguda. Usar solo en shock refractario a cristaloides. Reevaluar antes de repetir cada bolus.</div>' +
       warnings.map(function(w){return '<div class="warn-note"><span>⚠</span><span>' + w.replace('⚠ ','') + '</span></div>';}).join('');
     document.getElementById('fl-result').style.display = 'block';
     return;
